@@ -1,0 +1,12 @@
+title: GrokitLabs
+description: GrokitLabs — an independent software lab building market-data and trading tools.
+url: https://grokitlabs.io
+
+# Custom layouts + styles; no gem-based theme.
+# Files that should never be published to the site:
+exclude:
+  - CLAUDE.md
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor

@@ -1,0 +1,143 @@
+:root {
+  --bg: #0a1526;
+  --bg-accent: #12233d;
+  --fg: #eef2f9;
+  --muted: #8fa0bd;
+  --red: #e1001a;
+  --border: #1e3a5f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(1100px 600px at 50% -8%, var(--bg-accent), transparent 70%),
+    var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* background rocket-launch scene */
+.scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2.25rem;
+  text-align: center;
+  padding: clamp(2.5rem, 8vh, 5rem) 1.5rem 2rem;
+}
+
+/* logo on a white panel so the navy wordmark reads on dark */
+.site-header {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #ffffff;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+}
+.logo-img {
+  height: 58px;
+  width: auto;
+  display: block;
+}
+/* preview-only placeholder shown until the real logo file is dropped in */
+.logo-ph {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.3rem, 5vw, 1.9rem);
+  letter-spacing: 0.02em;
+  color: #b4c0d2;
+}
+
+/* definition block */
+.def {
+  max-width: 32rem;
+  text-align: center;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.55);
+}
+.word {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 0.4rem;
+}
+.word .src {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--muted);
+  letter-spacing: 0;
+  margin-top: 0.35rem;
+}
+.pron {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.pos {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.98rem;
+  margin-bottom: 1.1rem;
+}
+.pos span { opacity: 0.85; }
+.def ol {
+  list-style-position: inside;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.def li {
+  font-size: 1.08rem;
+  line-height: 1.55;
+  color: var(--fg);
+}
+.def li::marker { color: var(--red); font-weight: 700; }
+
+/* footer */
+.foot {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 1.75rem 1.5rem 2.25rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+.foot a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.foot a:hover { color: var(--fg); border-color: var(--red); }
