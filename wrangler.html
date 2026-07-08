@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wrangler — One simple home for your business documents</title>
+<meta name="description" content="Wrangler keeps your business documents in sync across Word, Google Docs, Notion, and Excel — automatically, with your approval, in plain files you own forever.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF6EE; --cream-2:#F3ECDE; --ink:#26211B; --ink-soft:#5B5344;
+    --denim:#33527E; --denim-deep:#27405F; --rust:#B4552D; --gold:#D9A441;
+    --green:#2E7D4F; --green-bg:#E4F2E8; --red:#B23A3A; --red-bg:#F7E4E1;
+    --card:#FFFFFF; --line:#E5DCC9; --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --radius:14px; --shadow:0 10px 30px rgba(38,33,27,.09);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,.brand{font-family:'Fraunces',Georgia,serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{color:var(--denim)}
+
+  /* NAV */
+  nav{position:sticky;top:0;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:50}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:76px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:1.45rem;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+  .brand img{height:54px;width:54px;object-fit:cover;object-position:top;border-radius:50%;border:2px solid var(--line);background:#fff}
+  .brand .rope{color:var(--rust)}
+  .btn{display:inline-block;padding:12px 22px;border-radius:999px;font-weight:600;text-decoration:none;font-size:.95rem;transition:transform .15s ease, box-shadow .15s ease;border:0;cursor:pointer}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(38,33,27,.18)}
+  .btn-primary{background:var(--denim);color:#fff}
+  .btn-rust{background:var(--rust);color:#fff}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+  .btn-sm{padding:9px 18px;font-size:.88rem}
+
+  /* HERO */
+  header{padding:72px 0 40px}
+  .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);margin-bottom:18px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--rust)}
+  h1{font-size:clamp(2rem,4.4vw,3.1rem);line-height:1.12;font-weight:750;letter-spacing:-.015em;margin-bottom:20px}
+  h1 em{font-style:normal;color:var(--denim)}
+  .sub{font-size:1.13rem;color:var(--ink-soft);max-width:34em;margin-bottom:30px}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .micro{font-size:.82rem;color:var(--ink-soft);margin-top:14px}
+
+  /* DEMO PANEL */
+  .demo{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;font-size:.85rem}
+  .demo-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--cream-2);border-bottom:1px solid var(--line)}
+  .dot{width:10px;height:10px;border-radius:50%;background:#D8CDB8}
+  .demo-title{margin-left:6px;font-weight:600;color:var(--ink-soft);font-size:.78rem}
+  .demo-body{padding:16px 18px;min-height:330px;display:flex;flex-direction:column;gap:12px}
+  .chat{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.88rem}
+  .chat b{color:var(--denim)}
+  .chat .caret{display:inline-block;width:8px;height:1em;background:var(--ink);vertical-align:text-bottom;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .filediff{border:1px solid var(--line);border-radius:10px;overflow:hidden;opacity:0;transform:translateY(6px);transition:opacity .4s ease, transform .4s ease}
+  .filediff.show{opacity:1;transform:none}
+  .filehead{display:flex;justify-content:space-between;padding:7px 12px;background:var(--cream-2);font-family:var(--mono);font-size:.75rem;color:var(--ink-soft)}
+  .filehead .chg{color:var(--green);font-weight:600}
+  .dline{font-family:var(--mono);font-size:.76rem;padding:3px 12px;white-space:pre-wrap}
+  .del{background:var(--red-bg);color:var(--red)}
+  .add{background:var(--green-bg);color:var(--green)}
+  .demo-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;opacity:0;transition:opacity .4s ease}
+  .demo-foot.show{opacity:1}
+  .summary{font-weight:600;font-size:.82rem;color:var(--ink-soft)}
+  .approve{background:var(--green);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600;font-size:.82rem;cursor:pointer;animation:pulse 1.8s ease infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,125,79,.35)}50%{box-shadow:0 0 0 8px rgba(46,125,79,0)}}
+  .approved-note{font-weight:700;color:var(--green);font-size:.9rem}
+
+  /* SECTIONS */
+  section{padding:72px 0}
+  .kicker{font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);margin-bottom:10px}
+  h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:750;letter-spacing:-.01em;margin-bottom:14px;line-height:1.2}
+  .lede{color:var(--ink-soft);max-width:44em;font-size:1.05rem}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:42px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:0 4px 14px rgba(38,33,27,.05)}
+  .card .ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--cream-2)}
+  .card h3{font-size:1.15rem;font-weight:650;margin-bottom:8px}
+  .card p{font-size:.93rem;color:var(--ink-soft)}
+
+  /* AUDIT */
+  .audit{background:var(--denim-deep);color:#F4F0E6;border-radius:20px;padding:56px 48px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+  .audit h2{color:#fff}
+  .audit p{color:#CBD6E6;font-size:1rem}
+  .audit ul{margin:18px 0 26px 18px;color:#CBD6E6;font-size:.95rem}
+  .audit li{margin-bottom:8px}
+  .audit-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:26px;text-align:center}
+  .audit-card .big{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:650;color:#fff;margin-bottom:8px}
+  .audit-card p{font-size:.88rem;margin-bottom:20px}
+
+  /* FOUNDER */
+  .founder{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center}
+  .founder img.photo{width:100%;border-radius:18px;box-shadow:var(--shadow)}
+  .founder .caption{font-size:.8rem;color:var(--ink-soft);margin-top:10px;text-align:center}
+  .founder-note{font-size:1.02rem;color:var(--ink)}
+  .founder-note p{margin-bottom:16px}
+  .sig{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:650}
+
+  /* WAITLIST */
+  .waitlist{background:var(--cream-2);border:1px solid var(--line);border-radius:20px;padding:52px 48px;text-align:center}
+  form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+  input,select{padding:13px 16px;border:1.5px solid var(--line);border-radius:10px;font-size:.95rem;font-family:inherit;background:#fff;min-width:230px}
+  input:focus,select:focus{outline:2px solid var(--denim);border-color:var(--denim)}
+  .form-note{font-size:.8rem;color:var(--ink-soft);margin-top:14px}
+  .success{display:none;margin-top:22px;font-weight:600;color:var(--green)}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;font-size:.85rem;color:var(--ink-soft)}
+  .foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media(max-width:860px){
+    .hero,.audit,.founder{grid-template-columns:1fr}
+    .cards{grid-template-columns:1fr}
+    .audit{padding:40px 28px}
+    .waitlist{padding:40px 24px}
+    header{padding:48px 0 24px}
+    section{padding:56px 0}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#">
+      <!-- Drop your cartoon at assets/tj-cartoon.png and TJ appears here -->
+      <img src="assets/tj-cartoon.png" alt="TJ, the Wrangler mascot" onerror="this.style.display='none'">
+      Wrangler<span class="rope">.</span>
+    </a>
+    <a class="btn btn-rust btn-sm" href="#audit">Free Drift Audit</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap hero">
+    <div>
+      <div class="eyebrow">For agencies &amp; small teams</div>
+      <h1>One simple home for your business documents. In sync, automatically. <em>Yours, forever.</em></h1>
+      <p class="sub">Your truth is scattered across Word, Google Docs, Notion, and spreadsheets — and no suite will keep the others honest. Wrangler is the neutral home where it all stays in agreement: no admin consoles, no governance policies to configure. An agent does the tending; nothing changes without your say-so; and every file stays yours to walk away with.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-rust" href="#audit">Get a free Drift Audit</a>
+        <a class="btn btn-ghost" href="#waitlist">Join the waitlist</a>
+      </div>
+      <p class="micro">Works with the files you already have — Word, Excel, PowerPoint, Notion, Google Docs. No migration, no conversion.</p>
+    </div>
+
+    <div class="demo" id="demo" aria-label="Product demo animation">
+      <div class="demo-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="demo-title">Wrangler — workspace-wide change</span>
+      </div>
+      <div class="demo-body">
+        <div class="chat"><b>You:</b> <span id="typed"></span><span class="caret" id="caret"></span></div>
+
+        <div class="filediff" id="f1">
+          <div class="filehead"><span>proposal-template.docx</span><span class="chg">3 edits</span></div>
+          <div class="dline del">- Our standard engagement begins at $4,500 per month</div>
+          <div class="dline add">+ Our standard engagement begins at $5,200 per month</div>
+        </div>
+        <div class="filediff" id="f2">
+          <div class="filehead"><span>pricing-sheet.xlsx</span><span class="chg">1 cell</span></div>
+          <div class="dline del">- Services!B4 · Monthly retainer · $4,500</div>
+          <div class="dline add">+ Services!B4 · Monthly retainer · $5,200</div>
+        </div>
+        <div class="filediff" id="f3">
+          <div class="filehead"><span>onboarding-sop.md</span><span class="chg">1 edit</span></div>
+          <div class="dline del">- confirm the $4,500 retainer is countersigned</div>
+          <div class="dline add">+ confirm the $5,200 retainer is countersigned</div>
+        </div>
+
+        <div class="demo-foot" id="foot">
+          <span class="summary" id="sumline">3 files changed · 5 edits · nothing published yet</span>
+          <button class="approve" id="approveBtn">Approve all</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Why teams switch</div>
+    <h2>Simpler than a suite. More honest than five of them.</h2>
+    <p class="lede">Every agency has the same problem: the truth lives in five tools, and four of them are out of date. Each suite promises to govern itself — with retention policies, versioning settings, and admin consoles you'll never touch. Wrangler takes the opposite approach: one simple place, tended by an agent, that works across everything you already use.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="ico">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#33527E" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h13"/><path d="M18 15l2 2 4-4" transform="translate(-3 1) scale(.85)"/></svg>
+        </div>
+        <h3>Change everything, review once</h3>
+        <p>Tell Wrangler what changed — a price, a policy, a process. It updates every affected document and hands you one review, like a bank statement. Approve it or roll it all back.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B4552D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h3>One truth across every tool</h3>
+        <p>Word, Google Docs, Notion, Excel — Wrangler audits across all of them, sniffing out contradictions and stale references no single suite can see, and flags them before a client does. Then it can produce what you need next — the proposal, the deck, the one-pager — from the same source of truth.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E7D4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9z"/><path d="M13 3v6h6"/><path d="M12 18v-5M9.5 15.5L12 13l2.5 2.5"/></svg>
+        </div>
+        <h3>Leave anytime — it's your stuff</h3>
+        <p>Everything in Wrangler is a plain file you own. Take the whole knowledge base to your laptop, your phone, or a competitor — no export hostage negotiations, ever. Word docs and Google links welcome too.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2>Gradual by design</h2>
+    <p class="lede">No big-bang migration. Wrangler meets your documents where they are — and quietly moves your business onto ground you own.</p>
+    <div class="cards">
+      <div class="card">
+        <h3>1 · Start as you are</h3>
+        <p>Connect your files exactly as they exist — Word, Excel, Notion, Drive. Wrangler audits and syncs them in place. Nothing to convert, nothing to learn.</p>
+      </div>
+      <div class="card">
+        <h3>2 · The truth consolidates</h3>
+        <p>The facts every document shares — pricing, policies, boilerplate, process — settle into plain text files: the one format readable by any tool, any AI, any decade, with no vendor and no subscription required. That's not a technical detail. That's your business's knowledge, finally on ground you own.</p>
+      </div>
+      <div class="card">
+        <h3>3 · Everything derives</h3>
+        <p>Proposals, decks, SOPs, and one-pagers are produced <em>from</em> that source of truth, in the formats your clients expect. Change the truth once — everything downstream follows, with your approval.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="workflow" style="padding-top:0">
+  <div class="wrap">
+    <div class="audit" style="background:var(--cream-2);border:1px solid var(--line)">
+      <div>
+        <div class="kicker">Where this goes</div>
+        <h2 style="color:var(--ink)">Status lives with the truth</h2>
+        <p style="color:var(--ink-soft)">Here's what happens when your documents live in one tended place: <strong style="color:var(--ink)">project management comes free.</strong> Status, owners, and deadlines are just details attached to the documents themselves — so "where does the rebrand stand?" is answered right next to the proposal it refers to. Boards and pipelines are simply views of your files.</p>
+        <p style="color:var(--ink-soft);margin-top:14px">No second tool. No per-seat workflow tax. No copying status between the doc and the tracker — they're the same thing. And like a good database, Wrangler enforces one copy of every fact: when truth tries to duplicate or drift, the agent catches it at the door.</p>
+      </div>
+      <div>
+        <div class="filediff show" style="background:#fff">
+          <div class="filehead"><span>Rebrand proposal</span><span style="color:var(--gold);font-weight:600">● In review</span></div>
+          <div class="dline" style="color:var(--ink-soft)">proposal-acme-rebrand.docx · owner: Dana · due Fri</div>
+        </div>
+        <div class="filediff show" style="background:#fff;margin-top:10px">
+          <div class="filehead"><span>New retainer pricing</span><span style="color:var(--green);font-weight:600">● Approved</span></div>
+          <div class="dline" style="color:var(--ink-soft)">pricing-sheet.xlsx · rolled out to 3 documents</div>
+        </div>
+        <div class="filediff show" style="background:#fff;margin-top:10px">
+          <div class="filehead"><span>Onboarding SOP refresh</span><span style="color:var(--rust);font-weight:600">● Blocked</span></div>
+          <div class="dline" style="color:var(--ink-soft)">onboarding-sop.md · waiting on legal review</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="audit">
+  <div class="wrap">
+    <div class="audit">
+      <div>
+        <h2>The audit no suite will run on itself</h2>
+        <p>Send us your docs <em>exactly as they are</em> — Word, PowerPoint, Excel, Notion and Drive exports, all of it together. No conversion, no cleanup, no migration. We'll run Wrangler across the whole pile — including the seams between tools where drift hides — and send you a <strong>Cross-Tool Drift Audit</strong>:</p>
+        <ul>
+          <li>Every price, name, and policy that contradicts itself across documents</li>
+          <li>Stale references your clients can see</li>
+          <li>A map of which documents secretly depend on which</li>
+        </ul>
+        <p>No pitch, no migration, no obligation. Most owners find at least one error that's client-visible <em>today</em>.</p>
+      </div>
+      <div class="audit-card">
+        <div class="big">Cross-Tool Drift Audit</div>
+        <p>Free · ~3 business days · your files are deleted after the report</p>
+        <!-- Replace href with your Calendly / booking link -->
+        <a class="btn btn-rust" href="#waitlist" id="auditCta">Book my audit</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap founder">
+    <div>
+      <img class="photo" src="assets/tj-photo.jpg" alt="TJ, an English cream golden retriever, sitting on a carpet of red maple leaves">
+      <div class="caption">TJ — Chief Wrangling Officer</div>
+    </div>
+    <div class="founder-note">
+      <div class="kicker">A note from the founder</div>
+      <h2>Why "Wrangler"</h2>
+      <p>I've driven the same 1999 Jeep Wrangler since 2003. When we got our golden retriever, there was only ever one name on the list. So when I built a tool whose whole job is rounding up scattered, drifting documents and keeping them in line — well, the name was waiting for me.</p>
+      <p>I built Wrangler because I was tired of the truth living in five places. Every business I've run or worked with kept a wiki that was wrong, proposals that quoted last year's prices, and SOPs nobody trusted. The fix was never "try harder" — it was making documents that maintain themselves, with a human holding the reins.</p>
+      <p>That's Wrangler. TJ supervises.</p>
+      <p class="sig">— Michael</p>
+    </div>
+  </div>
+</section>
+
+<section id="waitlist">
+  <div class="wrap">
+    <div class="waitlist">
+      <h2>Get early access</h2>
+      <p class="lede" style="margin:0 auto">We're onboarding a small group of design partners first. Tell us what kind of business you run and we'll be in touch.</p>
+      <!-- Wire this up: create a free form at formspree.io and replace YOUR_FORM_ID -->
+      <form id="wl" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <input type="email" name="email" placeholder="you@yourcompany.com" required>
+        <select name="business" required>
+          <option value="" disabled selected>What kind of business?</option>
+          <option>Agency / studio</option>
+          <option>Consultant / freelancer</option>
+          <option>Multi-location / franchise</option>
+          <option>Trades / services</option>
+          <option>Software company</option>
+          <option>Other</option>
+        </select>
+        <button class="btn btn-primary" type="submit">Join the waitlist</button>
+      </form>
+      <p class="success" id="wlSuccess">You're on the list — we'll be in touch soon. 🤠</p>
+      <p class="form-note">No spam, no "content." Just a note when it's your turn.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>© 2026 DocWrangler. Wrangler is a DocWrangler product.</span>
+    <span>Your documents are yours. Always exportable, always plain files.</span>
+  </div>
+</footer>
+
+<script>
+  // ---- Hero demo loop ----
+  const instruction = "We raised our retainer to $5,200 — update it everywhere.";
+  const typed = document.getElementById('typed');
+  const caret = document.getElementById('caret');
+  const files = ['f1','f2','f3'].map(id => document.getElementById(id));
+  const foot = document.getElementById('foot');
+  const sumline = document.getElementById('sumline');
+  const approveBtn = document.getElementById('approveBtn');
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  async function runDemo(){
+    typed.textContent = '';
+    caret.style.display = 'inline-block';
+    files.forEach(f => f.classList.remove('show'));
+    foot.classList.remove('show');
+    approveBtn.style.display = '';
+    sumline.textContent = '3 files changed · 6 edits · nothing published yet';
+    sumline.classList.remove('approved-note');
+    await sleep(800);
+    for (const ch of instruction){
+      typed.textContent += ch;
+      await sleep(34);
+    }
+    caret.style.display = 'none';
+    await sleep(500);
+    for (const f of files){
+      f.classList.add('show');
+      await sleep(550);
+    }
+    await sleep(300);
+    foot.classList.add('show');
+    await sleep(3200);
+    // auto-approve for the loop
+    sumline.textContent = '✓ Approved — every document now agrees';
+    sumline.classList.add('approved-note');
+    approveBtn.style.display = 'none';
+    await sleep(2600);
+    runDemo();
+  }
+  runDemo();
+
+  approveBtn.addEventListener('click', () => {
+    sumline.textContent = '✓ Approved — every document now agrees';
+    sumline.classList.add('approved-note');
+    approveBtn.style.display = 'none';
+  });
+
+  // ---- Waitlist form (graceful without backend) ----
+  document.getElementById('wl').addEventListener('submit', function(e){
+    if (this.action.includes('YOUR_FORM_ID')){
+      e.preventDefault();
+      document.getElementById('wlSuccess').style.display = 'block';
+      this.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
