@@ -3,113 +3,369 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Run Your Projects With Claude — a GrokitLabs how-to</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Run Your Projects With Claude — GrokitLabs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --paper:#E9EDF3; --grid:#D5DCE6; --ink:#18222E; --ink-soft:#4A5A6B;
-    --you:#3E9C4F; --claude:#5B5BD6; --stuff:#B8912A; --card:#FFFFFF; --radius:12px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:'IBM Plex Mono',monospace;
-    background-color:var(--paper);
-    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-    background-size:24px 24px;
-    color:var(--ink);padding:28px 16px 64px;line-height:1.55;
-  }
-  .wrap{max-width:640px;margin:0 auto}
-  header{margin-bottom:26px}
-  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
-  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,6vw,38px);line-height:1.12;margin-bottom:10px}
-  .sub{font-size:13.5px;color:var(--ink-soft)}
-  .sub b{color:var(--ink)}
-  .byline{font-size:11.5px;color:var(--ink-soft);margin-top:14px;padding-top:14px;border-top:1px solid var(--grid)}
-  .byline b{color:var(--ink)}
+:root {
+  --bg: #0a1526;
+  --bg-accent: #12233d;
+  --fg: #eef2f9;
+  --muted: #8fa0bd;
+  --red: #e1001a;
+  --navy: #213770;
+  --border: #1e3a5f;
+  --card: #101f38;
+  --accent-me: #f2a93c;     /* amber — human */
+  --accent-claude: #e1001a; /* brand red — the assistant */
+  --accent-stuff: #35b7d1;  /* cyan — data/files */
+}
 
-  h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin:34px 0 4px}
-  .h2sub{font-size:12px;color:var(--ink-soft);margin-bottom:14px}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
 
-  /* the three players */
-  .players{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-  .player{flex:1 1 170px;border-radius:var(--radius);padding:14px;color:#fff;
-    box-shadow:0 2px 0 rgba(0,0,0,.25), inset 0 -4px 0 rgba(0,0,0,.15)}
-  .player .who{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
-  .player .does{font-size:11px;opacity:.92;margin-top:4px;line-height:1.5}
-  .pl-you{background:var(--you)} .pl-claude{background:var(--claude)} .pl-stuff{background:var(--stuff)}
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+  /* radial glow (no-repeat, fixed) + subtle grid overlay (tiles on purpose) + solid base */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1200px 640px at 50% -8%, var(--bg-accent), transparent 65%),
+    linear-gradient(rgba(30,58,95,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,58,95,0.4) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: center top, center, center;
+  background-size: 100% 900px, 40px 40px, 40px 40px;
+  background-attachment: fixed, fixed, fixed;
+}
 
-  /* setup + flow steps */
-  .step{
-    background:var(--card);border:1px solid var(--grid);border-radius:var(--radius);
-    padding:16px;position:relative;
-  }
-  .step + .step-arrow + .step{margin-top:0}
-  .step-arrow{
-    display:flex;align-items:center;gap:8px;justify-content:center;
-    padding:6px 0;color:var(--ink-soft);font-size:11px;font-weight:600;
-  }
-  .step-arrow::before{content:"⭣";font-size:18px;color:var(--ink)}
-  .who-tag{
-    display:inline-block;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    color:#fff;padding:3px 9px;border-radius:99px;margin-bottom:8px;
-  }
-  .t-you{background:var(--you)} .t-claude{background:var(--claude)} .t-stuff{background:var(--stuff)}
-  .step h3{font-family:'Space Grotesk',sans-serif;font-size:14.5px;margin-bottom:4px}
-  .step p{font-size:12px;color:var(--ink-soft)}
-  .step p b{color:var(--ink)}
-  .step .say{
-    margin-top:10px;background:#F2F4F9;border-left:3px solid var(--claude);
-    padding:8px 12px;border-radius:0 8px 8px 0;font-size:11.5px;color:var(--ink);
-  }
+.site-header {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #ffffff;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+}
+.logo-img { height: 44px; width: auto; display: block; }
 
-  /* folder visual */
-  .folder{
-    background:#FBF5E4;border:1.5px dashed #E4D296;border-radius:var(--radius);
-    padding:16px;font-size:12px;margin-top:12px;
-  }
-  .folder .fl{padding:3px 0}
-  .folder .in1{padding-left:22px} .folder .in2{padding-left:44px}
-  .folder .note{color:var(--ink-soft);font-size:10.5px}
-  .folder b{font-weight:600}
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vh, 3.5rem) 1.5rem 3rem;
+}
 
-  /* promise cards */
-  .promises{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-  .promise{background:var(--card);border:1px solid var(--grid);border-radius:var(--radius);padding:14px;font-size:12px}
-  .promise b{font-family:'Space Grotesk',sans-serif;display:block;font-size:13px;margin-bottom:3px}
-  .promise span{color:var(--ink-soft)}
+.eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+  text-align: center;
+}
+h1 {
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5.5vw, 2.7rem);
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-align: center;
+  margin-bottom: 0.9rem;
+  text-shadow: 0 2px 22px rgba(0,0,0,0.4);
+}
+.sub {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  max-width: 58ch;
+  margin: 0 auto;
+}
+.sub b { color: var(--fg); font-weight: 600; }
+.byline {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  max-width: 50ch;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  .fine{font-size:10.5px;color:var(--ink-soft);margin-top:30px;line-height:1.6}
+h2 {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin: 2.6rem 0 0.3rem;
+}
+.h2sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+
+/* ---- the three players, now color-coded and distinct ---- */
+.players { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+.player {
+  flex: 1 1 170px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  border-top: 2px solid var(--role, var(--border));
+  position: relative;
+  overflow: hidden;
+}
+.player::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--role, transparent), transparent 55%);
+  opacity: 0.12;
+  pointer-events: none;
+}
+.player .who { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--role, var(--fg)); position: relative; }
+.player .does { font-size: 0.8rem; color: var(--muted); line-height: 1.5; position: relative; }
+.player-me { --role: var(--accent-me); }
+.player-claude { --role: var(--accent-claude); }
+.player-stuff { --role: var(--accent-stuff); }
+
+/* ---- setup + flow steps ---- */
+.step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.05rem 1.15rem;
+  position: relative;
+}
+.step-arrow {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.45rem 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem; font-weight: 500;
+  color: var(--muted);
+}
+.step-arrow::before { content: "↓"; font-size: 1.05rem; color: var(--muted); }
+
+.who-tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  border-radius: 99px;
+  margin-bottom: 0.6rem;
+  border: 1px solid;
+}
+.tag-me { color: var(--accent-me); border-color: var(--accent-me); }
+.tag-claude { color: var(--accent-claude); border-color: var(--accent-claude); }
+.tag-stuff { color: var(--accent-stuff); border-color: var(--accent-stuff); }
+.tag-both { color: var(--accent-me); border-color: var(--accent-me); box-shadow: inset 2px 0 0 var(--accent-claude); }
+
+.step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+.step p { font-size: 0.86rem; color: var(--muted); line-height: 1.55; }
+.step p b { color: var(--fg); font-weight: 600; }
+.step .say {
+  margin-top: 0.7rem;
+  background: var(--bg);
+  border-left: 3px solid var(--accent-claude);
+  padding: 0.6rem 0.85rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.83rem;
+  color: var(--fg);
+  line-height: 1.5;
+}
+.step .say.me { border-left-color: var(--accent-me); }
+
+/* ---- folder visual — tinted cyan for "my stuff" ---- */
+.folder {
+  background: var(--bg);
+  border: 1.5px dashed rgba(53,183,209,0.4);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  font-size: 0.83rem;
+  margin-top: 0.85rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+.folder .fl { padding: 0.2rem 0; color: var(--fg); }
+.folder .in1 { padding-left: 1.3rem; } .folder .in2 { padding-left: 2.5rem; }
+.folder .note { color: var(--muted); font-family: "Inter", sans-serif; font-size: 0.72rem; }
+.folder b { font-weight: 700; color: var(--accent-stuff); }
+
+/* ---- promise cards ---- */
+.promises { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.9rem; }
+.promise {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+  font-size: 0.85rem;
+  border-left: 3px solid var(--accent-claude);
+}
+.promise b { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--fg); }
+.promise span { color: var(--muted); line-height: 1.5; }
+
+/* ---- footer ---- */
+.foot {
+  text-align: center;
+  padding: 1.6rem 1.5rem 0.5rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.foot .divider { border-top: 1px solid var(--border); margin: 1.6rem 0 1.2rem; }
+
+/* ---- discreet corner scene, borrowed from the homepage ---- */
+.scene-corner {
+  position: fixed;
+  bottom: -140px;
+  right: -140px;
+  width: 640px;
+  height: 640px;
+  z-index: 0;
+  opacity: 0.42;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+.scene-corner.is-hidden { opacity: 0; }
+.scene-corner svg { width: 100%; height: 100%; display: block; }
+@media (max-width: 700px) {
+  .scene-corner { width: 440px; height: 440px; bottom: -100px; right: -100px; opacity: 0.3; }
+}
+
 </style>
 </head>
 <body>
+
+<div class="scene-corner">
+<svg class="scene" viewBox="0 0 1200 1200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <radialGradient id="smoke" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#d6dde8" stop-opacity="0.85"></stop>
+      <stop offset="55%" stop-color="#9aa9bf" stop-opacity="0.4"></stop>
+      <stop offset="100%" stop-color="#9aa9bf" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#315693"></stop>
+      <stop offset="50%" stop-color="#22406f"></stop>
+      <stop offset="100%" stop-color="#182f57"></stop>
+    </linearGradient>
+    <radialGradient id="vign" cx="50%" cy="40%" r="72%">
+      <stop offset="0%" stop-color="#0a1526" stop-opacity="0"></stop>
+      <stop offset="100%" stop-color="#0a1526" stop-opacity="0.9"></stop>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="16"></feGaussianBlur></filter>
+  </defs>
+
+  <g fill="#ffffff">
+    <circle cx="150" cy="180" r="2" opacity="0.22"></circle>
+    <circle cx="300" cy="120" r="1.6" opacity="0.16"></circle>
+    <circle cx="920" cy="150" r="2.2" opacity="0.2"></circle>
+    <circle cx="1050" cy="260" r="1.6" opacity="0.14"></circle>
+    <circle cx="220" cy="360" r="1.6" opacity="0.14"></circle>
+    <circle cx="1010" cy="470" r="2" opacity="0.16"></circle>
+  </g>
+
+  <g fill="#cdd8e8" fill-opacity="0.9" transform="translate(78,234.9) scale(0.87)">
+    <circle cx="420" cy="890" r="72"></circle>
+    <circle cx="505" cy="848" r="96"></circle>
+    <circle cx="600" cy="828" r="118"></circle>
+    <circle cx="695" cy="848" r="96"></circle>
+    <circle cx="780" cy="890" r="72"></circle>
+  </g>
+  <g fill="none" stroke="#9fb0c9" stroke-opacity="0.7" stroke-width="3.5" stroke-linecap="round" transform="translate(78,234.9) scale(0.87)">
+    <path d="M474,890 q42,-46 92,-2"></path>
+    <path d="M566,896 q48,-52 104,-2"></path>
+    <path d="M662,890 q40,-44 86,-2"></path>
+  </g>
+
+  <g transform="translate(-201.32,262.98) scale(5.1707)">
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z M 150.574219 86.914062 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z M 165.222656 86.972656 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z M 157.894531 86.941406 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 142.648438 75.535156 L 136.011719 75.507812 L 136.023438 72.210938 L 142.957031 67.167969 Z M 142.648438 75.535156 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 166.441406 75.628906 L 173.925781 75.660156 L 173.9375 72.363281 L 167.046875 67.265625 Z M 166.441406 75.628906 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 141.578125 70.046875 L 146.746094 70.066406 C 146.730469 74.554688 150.363281 78.214844 154.847656 78.234375 C 159.335938 78.253906 162.996094 74.617188 163.015625 70.132812 L 168.1875 70.152344 C 168.15625 77.488281 162.164062 83.433594 154.828125 83.402344 C 147.492188 83.375 141.546875 77.382812 141.578125 70.046875 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 146.820312 71.164062 L 141.652344 71.164062 L 141.652344 61.070312 L 146.832031 59.570312 Z M 146.820312 71.164062 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 163.019531 71.164062 L 168.1875 71.164062 L 168.257812 61.015625 L 163.089844 59.90625 Z M 163.019531 71.164062 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 150.253906 89.308594 L 148.8125 105.792969 L 146.066406 105.785156 L 144.757812 89.285156 Z M 150.253906 89.308594 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 157.324219 89.335938 L 155.898438 101.699219 L 153.152344 101.6875 L 151.824219 89.316406 Z M 157.324219 89.335938 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 164.78125 89.367188 L 163.375 97.410156 L 160.628906 97.398438 L 159.285156 89.347656 Z M 164.78125 89.367188 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 168.261719 61.015625 L 163.089844 61.066406 C 163.042969 56.582031 159.359375 52.96875 154.871094 53.015625 C 150.386719 53.058594 146.777344 56.746094 146.820312 61.230469 L 141.652344 61.28125 C 141.578125 53.945312 147.488281 47.917969 154.820312 47.847656 C 162.15625 47.773438 168.1875 53.679688 168.261719 61.015625 "></path>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 154.917969 56.34375 C 157.007812 56.324219 158.71875 58 158.742188 60.089844 C 158.761719 62.179688 157.082031 63.894531 154.992188 63.914062 C 152.902344 63.933594 151.191406 62.257812 151.171875 60.167969 C 151.148438 58.074219 152.828125 56.363281 154.917969 56.34375 "></path>
+  </g>
+
+  <g stroke="#ffffff" stroke-linecap="round" opacity="0.1">
+    <line x1="500" y1="220" x2="500" y2="290" stroke-width="4"></line>
+    <line x1="600" y1="180" x2="600" y2="255" stroke-width="4"></line>
+    <line x1="700" y1="225" x2="700" y2="295" stroke-width="4"></line>
+  </g>
+
+  <rect x="0" y="0" width="1200" height="1200" fill="url(#vign)"></rect>
+</svg>
+</div>
+
+<header class="site-header">
+  <svg class="logo-img" viewBox="72.28 45.77 282.60 62.02" xmlns="http://www.w3.org/2000/svg">
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 250.507812 59.722656 L 250.507812 87.898438 L 267.613281 87.898438 L 267.613281 90.113281 L 248.164062 90.113281 L 248.164062 59.722656 Z M 250.507812 59.722656 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 292.960938 80.472656 L 284.796875 61.980469 L 276.636719 80.472656 Z M 297.214844 90.113281 L 293.871094 82.644531 L 275.726562 82.644531 L 272.425781 90.113281 L 269.910156 90.113281 L 283.539062 59.722656 L 286.101562 59.722656 L 299.730469 90.113281 Z M 297.214844 90.113281 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 304.558594 87.851562 L 314.675781 87.851562 C 318.496094 87.851562 323.402344 86.941406 323.402344 82.125 C 323.359375 77.390625 319.058594 75.699219 314.976562 75.699219 L 304.558594 75.699219 Z M 304.558594 73.484375 L 314.976562 73.484375 C 318.625 73.484375 322.445312 72.355469 322.445312 68.015625 C 322.445312 63.585938 318.453125 61.71875 314.675781 61.71875 L 304.558594 61.71875 Z M 324.660156 68.015625 C 324.660156 71.140625 322.75 73.570312 319.710938 74.527344 C 323.53125 75.570312 325.703125 78.652344 325.703125 82.167969 C 325.703125 88.417969 319.882812 90.113281 314.675781 90.113281 L 302.214844 90.113281 L 302.214844 59.722656 L 314.675781 59.722656 C 319.796875 59.722656 324.660156 62.242188 324.660156 68.015625 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 350.058594 65.585938 C 347.84375 62.023438 344.285156 61.503906 340.855469 61.460938 C 337.292969 61.460938 331.652344 62.761719 331.652344 67.625 C 331.652344 71.488281 335.820312 72.398438 340.941406 73.355469 C 346.800781 74.484375 352.878906 75.523438 352.878906 82.078125 C 352.835938 88.9375 345.933594 90.589844 340.855469 90.589844 C 336.121094 90.589844 330.742188 88.636719 328.398438 83.988281 L 330.480469 82.949219 C 332.34375 86.640625 337.121094 88.460938 340.855469 88.460938 C 344.585938 88.460938 350.535156 87.421875 350.535156 82.035156 C 350.578125 77.480469 345.542969 76.480469 340.550781 75.523438 C 334.996094 74.4375 329.304688 73.3125 329.304688 67.710938 C 329.175781 61.285156 335.863281 59.289062 340.855469 59.289062 C 345.195312 59.289062 348.972656 59.984375 351.96875 64.453125 Z M 350.058594 65.585938 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 74.28125 75.757812 C 74.28125 67.203125 79.621094 59.304688 90.34375 59.304688 C 94.421875 59.304688 98.503906 60.867188 101.628906 63.949219 L 98.070312 67.597656 C 96.03125 65.640625 92.992188 64.558594 90.34375 64.558594 C 83.832031 64.558594 79.878906 69.503906 79.878906 75.757812 C 79.878906 80.75 82.789062 85.914062 90.34375 85.914062 C 92.730469 85.914062 94.8125 85.394531 97.203125 83.484375 L 97.203125 78.101562 L 89.429688 78.101562 L 89.429688 72.980469 L 102.453125 72.980469 L 102.453125 85.785156 C 99.457031 89.214844 95.683594 91.253906 90.34375 91.253906 C 78.925781 91.253906 74.28125 83.746094 74.28125 75.757812 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 112.371094 65.511719 L 112.371094 75.234375 L 121.097656 75.234375 C 124.742188 75.234375 126.304688 72.804688 126.304688 70.375 C 126.304688 67.941406 124.699219 65.511719 121.097656 65.511719 Z M 133.667969 90.558594 L 126.738281 90.558594 L 117.882812 80.402344 L 112.371094 80.402344 L 112.371094 90.558594 L 106.640625 90.558594 L 106.640625 60.128906 C 111.460938 60.128906 116.277344 60.171875 121.097656 60.171875 C 128.257812 60.214844 132.035156 64.992188 132.035156 70.242188 C 132.035156 74.410156 129.855469 78.621094 124.082031 79.792969 L 133.285156 90.167969 Z M 133.667969 90.558594 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 202.605469 60.34375 L 189.105469 74.890625 L 203.734375 90.210938 L 203.734375 90.558594 L 196.660156 90.558594 L 183.9375 77.101562 L 183.9375 90.558594 L 178.210938 90.558594 L 178.210938 60.171875 L 183.9375 60.171875 L 183.9375 73.023438 L 195.488281 60.171875 L 202.605469 60.171875 Z M 202.605469 60.34375 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 207.222656 60.171875 L 212.90625 60.171875 L 212.90625 90.558594 L 207.222656 90.558594 Z M 207.222656 60.171875 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 227.007812 65.382812 L 217.371094 65.382812 L 217.371094 60.171875 L 242.375 60.171875 L 242.375 65.382812 L 232.738281 65.382812 L 232.738281 90.558594 L 227.007812 90.558594 Z M 227.007812 65.382812 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z M 150.574219 86.914062 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z M 165.222656 86.972656 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z M 157.894531 86.941406 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 142.648438 75.535156 L 136.011719 75.507812 L 136.023438 72.210938 L 142.957031 67.167969 Z M 142.648438 75.535156 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 166.441406 75.628906 L 173.925781 75.660156 L 173.9375 72.363281 L 167.046875 67.265625 Z M 166.441406 75.628906 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 141.578125 70.046875 L 146.746094 70.066406 C 146.730469 74.554688 150.363281 78.214844 154.847656 78.234375 C 159.335938 78.253906 162.996094 74.617188 163.015625 70.132812 L 168.1875 70.152344 C 168.15625 77.488281 162.164062 83.433594 154.828125 83.402344 C 147.492188 83.375 141.546875 77.382812 141.578125 70.046875 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 146.820312 71.164062 L 141.652344 71.164062 L 141.652344 61.070312 L 146.832031 59.570312 Z M 146.820312 71.164062 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 163.019531 71.164062 L 168.1875 71.164062 L 168.257812 61.015625 L 163.089844 59.90625 Z M 163.019531 71.164062 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 150.253906 89.308594 L 148.8125 105.792969 L 146.066406 105.785156 L 144.757812 89.285156 Z M 150.253906 89.308594 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 157.324219 89.335938 L 155.898438 101.699219 L 153.152344 101.6875 L 151.824219 89.316406 Z M 157.324219 89.335938 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 164.78125 89.367188 L 163.375 97.410156 L 160.628906 97.398438 L 159.285156 89.347656 Z M 164.78125 89.367188 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 168.261719 61.015625 L 163.089844 61.066406 C 163.042969 56.582031 159.359375 52.96875 154.871094 53.015625 C 150.386719 53.058594 146.777344 56.746094 146.820312 61.230469 L 141.652344 61.28125 C 141.578125 53.945312 147.488281 47.917969 154.820312 47.847656 C 162.15625 47.773438 168.1875 53.679688 168.261719 61.015625 "/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(88.235474%,0%,10.195923%);fill-opacity:1;" d="M 154.917969 56.34375 C 157.007812 56.324219 158.71875 58 158.742188 60.089844 C 158.761719 62.179688 157.082031 63.894531 154.992188 63.914062 C 152.902344 63.933594 151.191406 62.257812 151.171875 60.167969 C 151.148438 58.074219 152.828125 56.363281 154.917969 56.34375 "/>
+  </svg>
+</header>
+
 <div class="wrap">
 
-<header>
-  <div class="eyebrow">GrokitLabs · a how-to, not a product · no code · ~30 minutes</div>
-  <h1>How I run my projects with Claude</h1>
-  <p class="sub">This is the exact setup I use: <b>one project folder, my email, and Claude doing the filing, the status updates, and the "what needs me today."</b> I never maintain it. Everything lives in plain files, in my own Drive, that I keep forever — and you can copy this in about half an hour.</p>
-  <p class="byline">Written up by <b>GrokitLabs</b> because a few friends asked how I set this up. There's no app to download and nothing to sign up for beyond Claude itself — just a way of using it.</p>
-</header>
+<div class="eyebrow">A how-to, not a product · no code · ~30 minutes</div>
+<h1>How I run my projects with Claude</h1>
+<p class="sub">This is the exact setup I use: <b>one project folder, my email, and Claude doing the filing, the status updates, and the "what needs me today."</b> I never maintain it. Everything lives in plain files, in my own Drive, that I keep forever — and you can copy this in about half an hour.</p>
+<p class="byline">A few friends asked how I set this up. There's no app to download and nothing to sign up for beyond Claude itself — just a way of using it.</p>
 
 <h2>The three things doing the work</h2>
 <p class="h2sub">Every step below is just these three passing work between them — nothing else involved.</p>
 <div class="players">
-  <div class="player pl-you"><div class="who">Me</div><div class="does">Make decisions. Press send. That's the whole job.</div></div>
-  <div class="player pl-claude"><div class="who">Claude</div><div class="does">Reads, files, updates, drafts, and reminds.</div></div>
-  <div class="player pl-stuff"><div class="who">My stuff</div><div class="does">My email + one Drive folder. Mine, always.</div></div>
+  <div class="player player-me"><div class="who">Me</div><div class="does">Make decisions. Press send. That's the whole job.</div></div>
+  <div class="player player-claude"><div class="who">Claude</div><div class="does">Reads, files, updates, drafts, and reminds.</div></div>
+  <div class="player player-stuff"><div class="who">My stuff</div><div class="does">My email + one Drive folder. Mine, always.</div></div>
 </div>
 
 <h2>Part 1 — The setup (once)</h2>
 <p class="h2sub">Three steps, one conversation with Claude. Here's exactly what I did.</p>
 
 <div class="step">
-  <span class="who-tag t-you">me</span>
+  <span class="who-tag tag-me">me</span>
   <h3>Connect email &amp; Drive to Claude</h3>
   <p>In Claude's settings, connect Gmail and Google Drive. This lets Claude read your mail and work in your Drive. <b>One honest heads-up:</b> connecting Drive gives Claude access to your whole Drive, not just one folder — that's how Google's connection works today. So if you keep private things in Drive, the clean fix is to make a <b>separate Google account just for this</b> and connect that one. Then "your whole Drive" is a Drive that holds only your projects. (This is the one fiddly step — worth doing once. It's what I did.)</p>
 </div>
 <div class="step-arrow">then</div>
 <div class="step">
-  <span class="who-tag t-you">me</span>
+  <span class="who-tag tag-me">me</span>
   <h3>Make one folder — I called mine "Projects"</h3>
   <p>One Drive folder is the whole system. Claude organizes inside it; you can open any file anytime — they're all plain, readable documents. Here's roughly what mine looks like:</p>
   <div class="folder">
@@ -123,49 +379,49 @@
 </div>
 <div class="step-arrow">then</div>
 <div class="step">
-  <span class="who-tag t-claude">me + claude · together</span>
+  <span class="who-tag tag-both">me + claude</span>
   <h3>Agree on the filing system — once, out loud</h3>
   <p>Tell Claude how you think about your work; Claude proposes how to organize it and writes the agreement into <b>how-we-file-things.md</b>. From then on Claude follows those rules — and asks before changing them. This is what I told it:</p>
-  <div class="say">"I run projects for clients, plus house stuff. Every project should have a status, its related documents linked on its page, and nothing should ever be filed loose."</div>
+  <div class="say me">"I run projects for clients, plus house stuff. Every project should have a status, its related documents linked on its page, and nothing should ever be filed loose."</div>
 </div>
 <div class="step-arrow">finally</div>
 <div class="step">
-  <span class="who-tag t-you">me</span>
+  <span class="who-tag tag-me">me</span>
   <h3>Ask Claude to check in twice a day</h3>
   <p>Set up two recurring check-ins in Claude: a <b>morning summary</b> and an <b>evening tidy-up</b>. Describe them in plain English once; they run on their own after that — even when your computer is off. Here's what I asked for:</p>
-  <div class="say">"Every morning at 7, read my new email and my Projects folder, update anything that changed, and write me a short summary with what needs me today."</div>
+  <div class="say me">"Every morning at 7, read my new email and my Projects folder, update anything that changed, and write me a short summary with what needs me today."</div>
 </div>
 
 <h2>Part 2 — Then this happens every day</h2>
 <p class="h2sub">A real example from my own folder — the proposal email, start to finish, and I never touched it.</p>
 
 <div class="step">
-  <span class="who-tag t-stuff">my email</span>
+  <span class="who-tag tag-stuff">my email</span>
   <h3>An email arrives</h3>
   <p>A contractor sends a proposal for my kitchen renovation. It needs my review. I'm busy — I don't even open it.</p>
 </div>
 <div class="step-arrow">morning check-in</div>
 <div class="step">
-  <span class="who-tag t-claude">claude</span>
+  <span class="who-tag tag-claude">claude</span>
   <h3>Claude reads it and does the secretary work</h3>
   <p>Following the filing rules we agreed on, Claude: saves the proposal into <b>Documents</b> → links it on the <b>kitchen-renovation</b> project page → changes the project's status to <b>"Proposal — needs your review."</b></p>
 </div>
 <div class="step-arrow">same run</div>
 <div class="step">
-  <span class="who-tag t-claude">claude</span>
+  <span class="who-tag tag-claude">claude</span>
   <h3>It shows up in my daily summary</h3>
   <div class="say">☀️ <b>Today — 1 thing needs you</b><br>1. Kitchen renovation: proposal in from the contractor — $18,400, 6 weeks. It's linked on the project page. Want me to draft questions or a reply?</div>
 </div>
 <div class="step-arrow">my move</div>
 <div class="step">
-  <span class="who-tag t-you">me</span>
+  <span class="who-tag tag-me">me</span>
   <h3>I decide — in one sentence</h3>
-  <div class="say">"Looks high. Draft a reply asking for a cost breakdown and whether the timeline includes permits."</div>
-  <p style="margin-top:8px">Claude writes the reply <b>into my drafts</b> — I read it and press send. Claude never sends anything itself.</p>
+  <div class="say me">"Looks high. Draft a reply asking for a cost breakdown and whether the timeline includes permits."</div>
+  <p style="margin-top:0.6rem">Claude writes the reply <b>into my drafts</b> — I read it and press send. Claude never sends anything itself.</p>
 </div>
 <div class="step-arrow">evening tidy-up</div>
 <div class="step">
-  <span class="who-tag t-claude">claude</span>
+  <span class="who-tag tag-claude">claude</span>
   <h3>Everything gets updated — everywhere</h3>
   <p>Project status → <b>"Waiting on contractor."</b> The question I asked → noted on the project page. Tomorrow's summary will chase it if he goes quiet. The folder is current, and I never touched it.</p>
 </div>
@@ -177,8 +433,64 @@
   <div class="promise"><b>The filing rules are written down — by both of you.</b><span>The system is only as tidy as its rules. They live in one file you agreed on, and Claude asks before changing them.</span></div>
 </div>
 
-<p class="fine">Where I'd take it next, once the daily loop feels boring (that's success): the same three players can handle more — a weekly "what's stuck?" review, watching for late invoices, prepping before meetings. Same folder, same rules, just more check-ins. That's it — that's the whole setup. If you copy it and find a better way to do a piece of it, I'd genuinely like to hear about it.</p>
+<div class="foot">
+  <div class="divider"></div>
+  Where I'd take it next, once the daily loop feels boring (that's success): the same three players can handle more — a weekly "what's stuck?" review, watching for late invoices, prepping before meetings. Same folder, same rules, just more check-ins. That's the whole setup. If you copy it and find a better way to do a piece of it, I'd genuinely like to hear about it.
+  <br><br>
+  One honest note: this isn't Claude-exclusive. ChatGPT and other assistants have similar Gmail/Drive connectors and scheduled tasks now, so this same pattern works there too. I use Claude — but the idea is the pattern, not the brand.
+</div>
 
 </div>
 </body>
+<script>
+(function() {
+  var scene = document.querySelector('.scene-corner');
+  var selectors = '.step, .promise, .player, .folder, .say, h1, h2, .sub, .byline, .foot';
+  var ticking = false;
+
+  function overlaps(a, b) {
+    return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+  }
+
+  function shrink(rect, insetPct) {
+    var dx = rect.width * insetPct;
+    var dy = rect.height * insetPct;
+    return {
+      left: rect.left + dx,
+      right: rect.right - dx,
+      top: rect.top + dy,
+      bottom: rect.bottom - dy
+    };
+  }
+
+  function check() {
+    ticking = false;
+    // most of the 640px box is transparent padding around the art; only test
+    // the inner ~55% where the rocket/cloud/glow actually render, so we hide
+    // ONLY on genuine visual overlap, not whenever a card's empty corner is near.
+    var sceneRect = shrink(scene.getBoundingClientRect(), 0.22);
+    var els = document.querySelectorAll(selectors);
+    var collide = false;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) continue; // offscreen, skip
+      if (overlaps(sceneRect, r)) { collide = true; break; }
+    }
+    scene.classList.toggle('is-hidden', collide);
+  }
+
+  function requestCheck() {
+    if (!ticking) {
+      window.requestAnimationFrame(check);
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', requestCheck, { passive: true });
+  window.addEventListener('resize', requestCheck);
+  document.addEventListener('DOMContentLoaded', check);
+  check();
+})();
+</script>
+
 </html>
