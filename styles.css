@@ -157,3 +157,15 @@ body {
 .cb-again { background: #e1001a; border: none; color: #ffffff; font: 700 16px/1 "Helvetica Neue", Arial, sans-serif; border-radius: 8px; padding: 14px 26px; cursor: pointer; }
 .cb-again:hover, .cb-again:focus-visible { background: #b80016; }
 .cb-end-link a { color: #9aa9bf; }
+
+/* --- hero rocket: game entry hint --- */
+.hero-rocket { cursor: pointer; }
+.hero-rocket:focus-visible { outline: 2px solid #e1001a; outline-offset: 6px; }
+.hero-rocket:hover, .hero-rocket:focus-visible { animation: cb-wiggle 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.hero-rocket:hover .hero-flame, .hero-rocket:focus-visible .hero-flame { animation: cb-flicker 0.32s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0%; }
+@keyframes cb-wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-1.4deg); } 75% { transform: rotate(1.4deg); } }
+@keyframes cb-flicker { from { transform: scaleY(0.82); } to { transform: scaleY(1.12); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-rocket:hover, .hero-rocket:focus-visible,
+  .hero-rocket:hover .hero-flame, .hero-rocket:focus-visible .hero-flame { animation: none; }
+}
