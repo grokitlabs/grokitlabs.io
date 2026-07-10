@@ -8,7 +8,8 @@ layout: writing
 <p class="sub">How-tos, write-ups, and guides — the exact setup, no product pitch.</p>
 
 <div class="post-list">
-{% for post in site.writing | sort: 'date' | reverse %}
+{% assign sorted_writing = site.writing | sort: 'date' | reverse %}
+{% for post in sorted_writing %}
   <a class="post-card" href="{{ post.url | relative_url }}">
     <div class="post-date">{{ post.date | date: "%B %-d, %Y" }}</div>
     <div class="post-title">{{ post.title }}</div>
