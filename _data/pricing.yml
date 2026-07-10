@@ -68,4 +68,6 @@ retainer:
   steward: "1,200"
   partner: "2,800"
 
-founding_discount_pct: "20"
+# Founding-client offer (scoped to Door 2 engagements — see studio master).
+founding_discount_pct: "10"
+founding_cohort_size: "3"
