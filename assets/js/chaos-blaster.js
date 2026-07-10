@@ -298,7 +298,7 @@
     });
 
     canvas.addEventListener('pointerdown', function (e) {
-      canvas.setPointerCapture(e.pointerId);
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer may already be gone */ }
       input.touch = e.pointerType !== 'mouse';
       input.pointerX = e.clientX;
       input.down = true;
@@ -373,6 +373,7 @@
     var btn = overlay.querySelector('.cb-mute');
     btn.setAttribute('aria-pressed', audio.isMuted() ? 'true' : 'false');
     btn.textContent = audio.isMuted() ? 'SOUND OFF' : 'SOUND ON';
+    resize(); // viewport may have changed while the overlay was closed
     paused = false;
     lastT = 0;
     cancelAnimationFrame(raf);
