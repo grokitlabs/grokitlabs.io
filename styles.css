@@ -9,7 +9,20 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; }
+:root { color-scheme: dark; }
+
+/* The dark base lives on the ROOT (<html>) so it fills the entire
+   viewport, the overscroll/rubber-band area, and the iOS safe-area
+   regions in every toolbar state. Everything else — the translucent
+   .scene (opacity 0.4) and the body's gradient — layers on top of a
+   guaranteed-dark root. Without this, <html> is transparent, so any
+   area the body doesn't cover falls through to the browser's default
+   backdrop (white on iOS Safari, which has no dark color-scheme hint),
+   and the 40%-opacity scene composites over it into a lighter-blue
+   seam below the footer. This makes correctness independent of the
+   body/scene viewport-height juggling below. */
+html { height: 100%; background: var(--bg); }
+body { height: 100%; }
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -17,11 +30,10 @@ body {
     radial-gradient(1100px 600px at 50% -8%, var(--bg-accent), transparent 70%),
     var(--bg);
   color: var(--fg);
-  /* min-height: 100vh alone renders taller than the visible area on iOS
-     Safari (100vh assumes the toolbar collapsed); the fixed-position
-     .scene background tracks the real visible viewport instead, so the
-     mismatch left a gap of plain body background below the footer.
-     100dvh tracks the same real viewport .scene already gets. */
+  /* Sizes the flex column to the visible viewport. No longer load-bearing
+     for the background — the dark base is on <html> above, so any area
+     this doesn't cover stays dark. dvh tracks the real viewport on iOS,
+     where vh over-reports height (assumes the toolbar collapsed). */
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
