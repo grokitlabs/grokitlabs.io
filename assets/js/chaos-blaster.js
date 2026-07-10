@@ -306,9 +306,13 @@
 
   function update(dt) {
     state.shake = Math.max(0, state.shake - dt * 2);
-    if (state.mode === 'playing' || state.mode === 'title') updatePlayer(dt);
+    if (state.mode === 'playing' || state.mode === 'title' || state.mode === 'banner') updatePlayer(dt);
     updateBullets(dt);
     updateParticles(dt);
+    if (state.mode === 'banner') {
+      state.bannerT -= dt;
+      if (state.bannerT <= 0) state.mode = 'playing';
+    }
     if (state.mode === 'playing') {
       updateEnemies(dt);
       collide();
@@ -336,6 +340,7 @@
 
     if (state.mode === 'title') drawTitle();
     drawWorld();
+    if (state.mode === 'banner') drawBanner();
     drawHud();
     ctx.restore();
   }
@@ -357,7 +362,17 @@
     drawBullets();
     drawPlayer(state.player);
   }
-  function drawHud() { /* lands with game flow */ }
+  function drawHud() {
+    if (state.mode === 'title') return;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#cdd8e8';
+    ctx.font = 'bold 20px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('SCORE ' + state.score, 20, 34);
+    ctx.textAlign = 'center';
+    ctx.fillText('HIGH ' + Math.max(state.highScore, state.score), CONFIG.logical.w / 2, 34);
+    for (var i = 0; i < state.lives; i++) drawMiniRocket(CONFIG.logical.w - 30 - i * 26, 26);
+    drawLegend();
+  }
 
   // ---------------------------------------------------- player + projectiles
   var ROCKET = {
@@ -563,7 +578,10 @@
     state.formation = { x: 0, y: 0, dir: 1 };
     state.timeSinceKill = 0;
     state.diveT = 2.5;
-    state.mode = 'playing';
+    state.mode = 'banner';
+    state.bannerT = 2.2;
+    audio.play('wave');
+    audio.setRate(1 + i * 0.02); // tension creeps up the ladder
   }
 
   function formationBounds() {
@@ -710,13 +728,82 @@
   }
 
   function endGame(won) {
-    state.mode = won ? 'victory' : 'gameover'; // end screens land in the next task
+    state.mode = won ? 'victory' : 'gameover';
+    var best = Math.max(state.highScore, state.score);
+    try { localStorage.setItem(CONFIG.storage.highScore, String(best)); } catch (e) {}
+    audio.stopMusic();
+    audio.play(won ? 'victory' : 'gameover');
+    var panel = overlay.querySelector('.cb-end');
+    panel.querySelector('.cb-end-line').textContent = won ? CONFIG.copy.victoryLine : CONFIG.copy.gameoverLine;
+    panel.querySelector('.cb-end-score').textContent = 'Score ' + state.score + '  ·  Best ' + best;
+    panel.querySelector('.cb-again').textContent = won ? CONFIG.copy.playAgain : CONFIG.copy.retry;
+    panel.querySelector('.cb-end-cameo').hidden = !won;
+    panel.querySelector('.cb-end-link').hidden = !won;
+    panel.hidden = false;
+    panel.querySelector('.cb-again').focus();
+  }
+
+  function onAgainClick() {
+    overlay.querySelector('.cb-end').hidden = true;
+    newGame();
+    audio.startMusic();
+    startGame();
   }
 
   function waveCleared() {
     state.score += CONFIG.score.waveClearBonus;
     if (state.waveIndex + 1 >= CONFIG.waves.length) endGame(true);
     else startWave(state.waveIndex + 1);
+  }
+
+  // ------------------------------------------------------------- game flow UI
+  function drawBanner() {
+    var wave = CONFIG.waves[state.waveIndex];
+    var a = Math.min(1, state.bannerT);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = 'rgba(10, 21, 38, 0.7)';
+    ctx.fillRect(0, 380, CONFIG.logical.w, 120);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 40px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('WAVE ' + (state.waveIndex + 1) + ' — ' + wave.name, CONFIG.logical.w / 2, 452);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawMiniRocket(x, y) {
+    if (!rocketPaths) buildRocketPaths();
+    var s = 22 / ROCKET.bounds.h;
+    ctx.save();
+    ctx.translate(x - (ROCKET.bounds.x + ROCKET.bounds.w / 2) * s, y - (ROCKET.bounds.y + ROCKET.bounds.h / 2) * s);
+    ctx.scale(s, s);
+    ctx.fillStyle = '#cdd8e8';
+    rocketPaths.body.forEach(function (p2) { ctx.fill(p2); });
+    ctx.fillStyle = '#e1001a';
+    rocketPaths.flames.forEach(function (p2) { ctx.fill(p2); });
+    ctx.restore();
+  }
+
+  function drawLegend() {
+    if (state.waveIndex < 0) return;
+    var narrow = typeof window !== 'undefined' && window.innerWidth < 640;
+    var from = narrow ? state.waveIndex : 0;
+    var baseY = CONFIG.logical.h - 24;
+    ctx.textAlign = 'left';
+    ctx.font = '14px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = '#9aa9bf';
+    ctx.fillText(CONFIG.copy.legendTitle, 20, baseY - (state.waveIndex - from + 1) * 30);
+    for (var i = from; i <= state.waveIndex; i++) {
+      var w = CONFIG.waves[i];
+      var ly = baseY + (i - state.waveIndex) * 30;
+      ctx.save();
+      ctx.translate(30, ly - 5);
+      ctx.strokeStyle = w.color;
+      ctx.lineWidth = 2;
+      GLYPHS[w.glyph](16);
+      ctx.restore();
+      ctx.fillStyle = '#9aa9bf';
+      ctx.fillText(w.name, 50, ly);
+    }
   }
 
   // --- exports ---
