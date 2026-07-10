@@ -18,7 +18,7 @@
     audio: {
       basePath: '/assets/audio/chaos-blaster/',
       formats: ['ogg', 'mp3'],
-      files: ['fire', 'hit', 'split', 'wave', 'playerhit', 'gameover', 'victory', 'soundtrack'],
+      files: ['fire', 'hit', 'split', 'wave', 'dive', 'playerhit', 'gameover', 'victory', 'soundtrack'],
       sfxGain: 0.5,
       musicGain: 0.32
     },
@@ -36,10 +36,14 @@
     },
     waves: [
       { name: 'INBOX OVERLOAD',   glyph: 'envelope', color: '#6f9bd8', cols: 6, rows: 2, size: 34,  hp: 1,  points: 50,   speed: 42, behavior: 'drift' },
-      { name: 'RECEIPT BLIZZARD', glyph: 'receipt',  color: '#cdd8e8', cols: 7, rows: 3, size: 30,  hp: 1,  points: 60,   speed: 58, behavior: 'flutter' },
-      { name: 'MISSED LEADS',     glyph: 'lead',     color: '#e4b54a', cols: 6, rows: 2, size: 34,  hp: 1,  points: 80,   speed: 64, behavior: 'dive' },
-      { name: 'FOLLOW-UP DRIFT',  glyph: 'clock',    color: '#a07bd8', cols: 6, rows: 2, size: 34,  hp: 2,  points: 90,   speed: 66, behavior: 'regroup' },
+      { name: 'RECEIPT BLIZZARD', glyph: 'receipt',  color: '#cdd8e8', cols: 7, rows: 3, size: 30,  hp: 1,  points: 60,   speed: 58, behavior: 'flutter',
+        dive: { interval: 3.0 } },
+      { name: 'MISSED LEADS',     glyph: 'lead',     color: '#e4b54a', cols: 6, rows: 2, size: 34,  hp: 1,  points: 80,   speed: 64, behavior: 'drift',
+        dive: { interval: 2.0 } },
+      { name: 'FOLLOW-UP DRIFT',  glyph: 'clock',    color: '#a07bd8', cols: 6, rows: 2, size: 34,  hp: 2,  points: 90,   speed: 66, behavior: 'regroup',
+        dive: { interval: 2.6 } },
       { name: 'TOOL SPRAWL',      glyph: 'sprawl',   color: '#e1001a', cols: 4, rows: 1, size: 52,  hp: 3,  points: 120,  speed: 52, behavior: 'drift',
+        dive: { interval: 2.8 },
         split: { glyph: 'chaos', color: '#ff5a4e', count: 3, size: 22, hp: 1, points: 40, speed: 130 } },
       { name: 'LOCK-IN',          glyph: 'boss',     color: '#e1001a', cols: 1, rows: 1, size: 120, hp: 24, points: 1000, speed: 90, behavior: 'boss',
         split: { glyph: 'chaos', color: '#ff5a4e', count: 3, size: 22, hp: 1, points: 40, speed: 130, everyHp: 6 } }
@@ -48,7 +52,7 @@
 
   // ------------------------------------------------------------ pure logic
   var GLYPH_NAMES = ['envelope', 'receipt', 'lead', 'clock', 'sprawl', 'chaos', 'boss'];
-  var BEHAVIORS = ['drift', 'flutter', 'dive', 'regroup', 'boss'];
+  var BEHAVIORS = ['drift', 'flutter', 'regroup', 'boss'];
 
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
@@ -79,6 +83,7 @@
           errs.push(at + 'split: size/hp/points/speed invalid');
         }
       }
+      if (w.dive && !(w.dive.interval > 0)) errs.push(at + 'dive: interval must be > 0');
     });
     return errs;
   }
@@ -727,16 +732,17 @@
         if (state.formation.y < 0) state.formation.y = 0;
       }
     }
-    if (wave.behavior === 'dive') {
+    if (wave.dive) {
       state.diveT -= dt;
       if (state.diveT <= 0) {
-        state.diveT = 2.2;
+        state.diveT = wave.dive.interval;
         var slotted = state.enemies.filter(function (e) { return !e.free; });
         if (slotted.length) {
           var d = slotted[Math.floor(Math.random() * slotted.length)];
           d.free = true;
           d.vx = (state.player.x - d.x) * 0.6;
           d.vy = wave.speed * 3.2;
+          audio.play('dive');
         }
       }
     }

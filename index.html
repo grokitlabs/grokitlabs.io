@@ -84,12 +84,15 @@ description: GrokitLabs — grok it.
   // vertical extent on tall/narrow viewports (nothing to crop) while
   // cropping vertically on wide ones. That makes the composition — tuned
   // by eye against a landscape crop — read as a sparse, isolated sticker
-  // on phones. Pin the same 750-unit-tall "camera window" desktop gets on
-  // every viewport instead, letting only the horizontal slice narrow.
+  // on phones. Pin a fixed "camera window" on every viewport instead,
+  // letting only the horizontal slice narrow. The window is centered
+  // lower than the viewBox's own center (600) and tall enough to include
+  // the launch cloud's full silhouette (bottom edge ~y:1072) instead of
+  // slicing through its rounded bumps.
   (function () {
     var scene = document.querySelector('svg.scene');
     if (!scene) return;
-    var CX = 600, CY = 600, HALF_H = 375;
+    var CX = 600, CY = 720, HALF_H = 400;
     function fit() {
       var halfW = HALF_H * (window.innerWidth / window.innerHeight);
       scene.setAttribute('viewBox', (CX - halfW) + ' ' + (CY - HALF_H) + ' ' + (halfW * 2) + ' ' + (HALF_H * 2));

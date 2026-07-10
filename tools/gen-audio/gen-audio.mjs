@@ -111,6 +111,7 @@ const SOUNDS = {
     return shaped(decay(b, 4));
   },
   wave: () => seq([[220, 0.12], [261.63, 0.12], [329.63, 0.12], [440, 0.3]], 'square', 0.5),
+  dive: () => shaped(decay(tone(0.42, 1150, 260, 'saw', 0.55), 1.6), 0.008, 0.1),
   playerhit: () => {
     const b = tone(0.4, 380, 55, 'saw', 0.7);
     mix(b, tone(0.25, 0, 0, 'noise', 0.5));

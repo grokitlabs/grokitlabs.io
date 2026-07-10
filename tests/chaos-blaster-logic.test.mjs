@@ -66,3 +66,14 @@ test('splitEnemy: no splitDef -> no bits', () => {
   const e = spawnWave(CONFIG.waves[0], { w: 720, h: 960 })[0];
   assert.deepEqual(splitEnemy(e), []);
 });
+
+test('validateConfig flags a non-positive dive.interval', () => {
+  const bad = JSON.parse(JSON.stringify(CONFIG));
+  bad.waves[2].dive = { interval: 0 };
+  const errs = validateConfig(bad);
+  assert.ok(errs.some((e) => e.includes('dive')));
+});
+
+test('every wave but the tutorial and the boss has diving enemies', () => {
+  assert.deepEqual(CONFIG.waves.map((w) => !!w.dive), [false, true, true, true, true, false]);
+});
