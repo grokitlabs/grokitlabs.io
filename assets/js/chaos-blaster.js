@@ -264,7 +264,7 @@
 
   function onAgainClick() { /* wired up when end screens land */ }
 
-  function startGame() { state.mode = 'playing'; } // replaced when waves land
+  function startGame() { startWave(0); }
 
   function mount() {
     if (!overlay) build();
@@ -309,6 +309,11 @@
     if (state.mode === 'playing' || state.mode === 'title') updatePlayer(dt);
     updateBullets(dt);
     updateParticles(dt);
+    if (state.mode === 'playing') {
+      updateEnemies(dt);
+      collide();
+      if (state.enemies.length === 0) waveCleared();
+    }
   }
 
   function render() {
@@ -347,6 +352,7 @@
   }
 
   function drawWorld() {
+    drawEnemies();
     drawParticles();
     drawBullets();
     drawPlayer(state.player);
@@ -480,12 +486,246 @@
     ctx.globalAlpha = 1;
   }
 
+  // ------------------------------------------------------------- enemies
+  // Each glyph draws centered on the origin at size s using current stroke.
+  var GLYPHS = {
+    envelope: function (s) {
+      var w = s, h = s * 0.72;
+      ctx.strokeRect(-w / 2, -h / 2, w, h);
+      ctx.beginPath();
+      ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(0, h * 0.08); ctx.lineTo(w / 2, -h / 2);
+      ctx.stroke();
+    },
+    receipt: function (s) {
+      var w = s * 0.72, h = s;
+      ctx.beginPath();
+      ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(w / 2, -h / 2); ctx.lineTo(w / 2, h / 2);
+      ctx.lineTo(w / 4, h / 2 - 5); ctx.lineTo(0, h / 2); ctx.lineTo(-w / 4, h / 2 - 5); ctx.lineTo(-w / 2, h / 2);
+      ctx.closePath(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.3, -h * 0.22); ctx.lineTo(w * 0.3, -h * 0.22);
+      ctx.moveTo(-w * 0.3, 0.02 * h); ctx.lineTo(w * 0.3, 0.02 * h);
+      ctx.stroke();
+    },
+    lead: function (s) {
+      ctx.beginPath();
+      ctx.moveTo(0, s / 2); ctx.lineTo(-s * 0.38, -s / 2); ctx.lineTo(0, -s * 0.2); ctx.lineTo(s * 0.38, -s / 2);
+      ctx.closePath(); ctx.stroke();
+    },
+    clock: function (s) {
+      ctx.beginPath(); ctx.arc(0, 0, s * 0.45, 0, TAU); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, 0); ctx.lineTo(0, -s * 0.3);
+      ctx.moveTo(0, 0); ctx.lineTo(s * 0.2, s * 0.08);
+      ctx.stroke();
+    },
+    sprawl: function (s) {
+      var r = s * 0.18;
+      var pts = [[-s * 0.3, s * 0.18], [s * 0.3, s * 0.18], [0, -s * 0.32]];
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[2][0], pts[2][1]);
+      ctx.closePath(); ctx.stroke();
+      pts.forEach(function (p) { ctx.strokeRect(p[0] - r, p[1] - r, r * 2, r * 2); });
+    },
+    chaos: function (s) {
+      ctx.beginPath();
+      for (var i = 0; i < 10; i++) {
+        var ang = (i / 10) * TAU;
+        var rad = i % 2 ? s * 0.22 : s * 0.5;
+        ctx[i ? 'lineTo' : 'moveTo'](Math.cos(ang) * rad, Math.sin(ang) * rad);
+      }
+      ctx.closePath(); ctx.stroke();
+    },
+    boss: function (s) {
+      var w = s * 0.7, h = s * 0.5;
+      ctx.strokeRect(-w / 2, -h * 0.1, w, h);
+      ctx.beginPath(); ctx.arc(0, -h * 0.1, w * 0.32, Math.PI, 0); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, h * 0.12, s * 0.06, 0, TAU); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, h * 0.16); ctx.lineTo(0, h * 0.3); ctx.stroke();
+    }
+  };
+
+  function drawEnemies() {
+    state.enemies.forEach(function (e) {
+      ctx.save();
+      ctx.translate(e.x, e.y);
+      ctx.strokeStyle = e.color;
+      ctx.lineWidth = 3;
+      if (e.maxHp > 1 && e.hp < e.maxHp) ctx.globalAlpha = 0.55 + 0.45 * (e.hp / e.maxHp);
+      GLYPHS[e.glyph](e.w);
+      ctx.restore();
+    });
+  }
+
+  function startWave(i) {
+    state.waveIndex = i;
+    state.enemies = spawnWave(CONFIG.waves[i], CONFIG.logical);
+    state.formation = { x: 0, y: 0, dir: 1 };
+    state.timeSinceKill = 0;
+    state.diveT = 2.5;
+    state.mode = 'playing';
+  }
+
+  function formationBounds() {
+    var min = Infinity, max = -Infinity, found = false;
+    state.enemies.forEach(function (e) {
+      if (e.free) return;
+      found = true;
+      min = Math.min(min, e.homeX - e.w / 2);
+      max = Math.max(max, e.homeX + e.w / 2);
+    });
+    return found ? { min: min, max: max } : null;
+  }
+
+  function updateEnemies(dt) {
+    var wave = CONFIG.waves[state.waveIndex];
+    if (!wave) return;
+    state.timeSinceKill += dt;
+    var b = formationBounds();
+    if (b) {
+      state.formation.x += state.formation.dir * wave.speed * dt;
+      if (b.min + state.formation.x < 24 || b.max + state.formation.x > CONFIG.logical.w - 24) {
+        state.formation.dir *= -1;
+        state.formation.y += 14;
+      }
+      if (wave.behavior === 'regroup') {
+        // left alone, the wave slides back up and regains ground
+        state.formation.y += (state.timeSinceKill > 3.5 ? -22 : 7) * dt;
+        if (state.formation.y < 0) state.formation.y = 0;
+      }
+    }
+    if (wave.behavior === 'dive') {
+      state.diveT -= dt;
+      if (state.diveT <= 0) {
+        state.diveT = 2.2;
+        var slotted = state.enemies.filter(function (e) { return !e.free; });
+        if (slotted.length) {
+          var d = slotted[Math.floor(Math.random() * slotted.length)];
+          d.free = true;
+          d.vx = (state.player.x - d.x) * 0.6;
+          d.vy = wave.speed * 3.2;
+        }
+      }
+    }
+    state.enemies.forEach(function (e) {
+      if (e.glyph === 'boss') {
+        e.free = true;
+        e.phase += dt;
+        e.x = CONFIG.logical.w / 2 + Math.sin(e.phase * 0.8) * (CONFIG.logical.w / 2 - 120);
+        e.y = 190 + Math.sin(e.phase * 2.3) * 46;
+        return;
+      }
+      if (e.free) {
+        if (e.glyph === 'chaos') {
+          e.turnT -= dt;
+          if (e.turnT <= 0) {
+            e.turnT = 0.5 + Math.random() * 0.5;
+            var ang = Math.random() * TAU;
+            var sp = Math.sqrt(e.vx * e.vx + e.vy * e.vy) || 120;
+            e.vx = Math.cos(ang) * sp;
+            e.vy = Math.abs(Math.sin(ang)) * sp * 0.7 + 40;
+          }
+          if ((e.x < e.w && e.vx < 0) || (e.x > CONFIG.logical.w - e.w && e.vx > 0)) e.vx *= -1;
+        }
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+        if (e.y > CONFIG.logical.h + e.h) {
+          if (e.glyph === 'chaos') {
+            e.y = -e.h; // wraps back in — pressure stays until it's dealt with
+          } else {
+            e.free = false;
+            e.vx = e.vy = 0;
+          }
+        }
+      } else {
+        var jx = 0, jy = 0;
+        if (wave.behavior === 'flutter') {
+          jx = Math.sin(state.t * 2.1 + e.phase) * 10;
+          jy = Math.sin(state.t * 3.3 + e.phase) * 7;
+        }
+        e.x = e.homeX + state.formation.x + jx;
+        e.y = e.homeY + state.formation.y + jy;
+      }
+    });
+  }
+
+  function killEnemy(e) {
+    state.score += e.points;
+    state.timeSinceKill = 0;
+    spark(e.x, e.y, e.color, 8);
+    state.enemies = state.enemies.filter(function (x) { return x !== e; });
+    var bits = splitEnemy(e);
+    if (bits.length) {
+      audio.play('split');
+      state.enemies = state.enemies.concat(bits);
+    } else {
+      audio.play('hit');
+    }
+  }
+
+  function collide() {
+    var p = state.player;
+    state.bullets = state.bullets.filter(function (bl) {
+      var hitE = null;
+      for (var i = 0; i < state.enemies.length; i++) {
+        if (hits(bl, state.enemies[i])) { hitE = state.enemies[i]; break; }
+      }
+      if (!hitE) return true;
+      hitE.hp -= 1;
+      spark(bl.x, bl.y, '#ffffff', 2);
+      if (hitE.splitDef && hitE.splitDef.everyHp && hitE.hp > 0) {
+        // the boss sheds chaos as it fractures
+        hitE.splitCredit += 1;
+        if (hitE.splitCredit >= hitE.splitDef.everyHp) {
+          hitE.splitCredit = 0;
+          audio.play('split');
+          state.enemies = state.enemies.concat(splitEnemy(hitE));
+        }
+      }
+      if (hitE.hp <= 0) killEnemy(hitE); else audio.play('hit');
+      return false;
+    });
+    if (p.invuln <= 0) {
+      for (var j = 0; j < state.enemies.length; j++) {
+        if (hits(p, state.enemies[j])) { playerHit(); break; }
+      }
+    }
+    for (var k = 0; k < state.enemies.length; k++) {
+      var e = state.enemies[k];
+      if (!e.free && e.y > CONFIG.logical.h - 190) {
+        playerHit();
+        state.formation.y -= 240; // breach pushes the wave back up
+        break;
+      }
+    }
+  }
+
+  function playerHit() {
+    state.player.invuln = CONFIG.player.invulnSec;
+    state.shake = 1;
+    audio.play('playerhit');
+    spark(state.player.x, state.player.y, '#e1001a', 14);
+    state.lives -= 1;
+    if (state.lives <= 0) endGame(false);
+  }
+
+  function endGame(won) {
+    state.mode = won ? 'victory' : 'gameover'; // end screens land in the next task
+  }
+
+  function waveCleared() {
+    state.score += CONFIG.score.waveClearBonus;
+    if (state.waveIndex + 1 >= CONFIG.waves.length) endGame(true);
+    else startWave(state.waveIndex + 1);
+  }
+
   // --- exports ---
   var api = {
     mount: mount,
     unmount: unmount,
     CONFIG: CONFIG,
-    _internals: { validateConfig: validateConfig, hits: hits, spawnWave: spawnWave, splitEnemy: splitEnemy }
+    _internals: { validateConfig: validateConfig, hits: hits, spawnWave: spawnWave, splitEnemy: splitEnemy },
+    _debug: { getState: function () { return state; }, startWave: startWave }
   };
   if (typeof window !== 'undefined') window.ChaosBlaster = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
