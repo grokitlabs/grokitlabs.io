@@ -11,6 +11,8 @@ exclude:
   - Gemfile.lock
   - vendor
   - docs
+  - tools
+  - tests
 
 collections:
   writing:
