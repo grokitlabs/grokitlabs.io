@@ -250,3 +250,26 @@ h2 {
 @media (max-width: 700px) {
   .scene-corner { width: 440px; height: 440px; bottom: -100px; right: -100px; opacity: 0.3; }
 }
+
+/* ---- writing index — post list ---- */
+.post-list { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 2.5rem; }
+.post-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.post-card:hover { border-color: var(--accent-b); }
+.post-card .post-date {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.post-card .post-title { font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.3rem; }
+.post-card .post-desc { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
