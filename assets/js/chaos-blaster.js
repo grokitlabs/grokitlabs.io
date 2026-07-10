@@ -124,8 +124,233 @@
     return bits;
   }
 
+  // ------------------------------------------------------------ game shell
+  var overlay = null, canvas = null, ctx = null, raf = 0, lastT = 0, paused = false;
+  var state = null;
+  var input = { left: false, right: false, fire: false, touch: false, down: false, pointerX: 0, dragDx: 0 };
+  var reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Stub — replaced by the real WebAudio manager in a later task.
+  var audio = {
+    init: function () {}, play: function () {}, startMusic: function () {},
+    stopMusic: function () {}, setRate: function () {}, suspend: function () {},
+    resume: function () {}, toggleMuted: function () { return true; },
+    isMuted: function () { return true; }
+  };
+
+  function readHighScore() {
+    try { return Number(localStorage.getItem(CONFIG.storage.highScore)) || 0; } catch (e) { return 0; }
+  }
+
+  function newGame() {
+    var stars = [];
+    for (var i = 0; i < 70; i++) {
+      stars.push({
+        x: Math.random() * CONFIG.logical.w, y: Math.random() * CONFIG.logical.h,
+        r: Math.random() * 1.8 + 0.4, a: Math.random() * 0.25 + 0.05
+      });
+    }
+    state = {
+      mode: 'title', t: 0, score: 0, lives: CONFIG.player.lives,
+      highScore: readHighScore(),
+      waveIndex: -1, bannerT: 0, timeSinceKill: 0, diveT: 2.5, shake: 0,
+      player: {
+        x: CONFIG.logical.w / 2, y: CONFIG.logical.h - 90,
+        w: CONFIG.player.w, h: CONFIG.player.h, cooldown: 0, invuln: 0
+      },
+      bullets: [], enemies: [], particles: [], stars: stars,
+      formation: { x: 0, y: 0, dir: 1 }
+    };
+  }
+
+  function build() {
+    overlay = document.createElement('div');
+    overlay.className = 'cb-overlay';
+    overlay.hidden = true;
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', 'Chaos Blaster game');
+    overlay.innerHTML =
+      '<canvas class="cb-canvas"></canvas>' +
+      '<div class="cb-chrome">' +
+        '<button type="button" class="cb-mute" aria-pressed="false">SOUND ON</button>' +
+        '<button type="button" class="cb-close" aria-label="Close game">&#10005;</button>' +
+      '</div>' +
+      '<div class="cb-end" hidden>' +
+        // TJ cameo slot — swap this burst for mascot art when it exists.
+        '<div class="cb-end-cameo" aria-hidden="true">&#10038;</div>' +
+        '<h2 class="cb-end-line"></h2>' +
+        '<p class="cb-end-score"></p>' +
+        '<button type="button" class="cb-again"></button>' +
+        '<p class="cb-end-link"><a href="#"></a></p>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    canvas = overlay.querySelector('.cb-canvas');
+    ctx = canvas.getContext('2d');
+    overlay.querySelector('.cb-close').addEventListener('click', unmount);
+    overlay.querySelector('.cb-mute').addEventListener('click', onMuteClick);
+    overlay.querySelector('.cb-again').addEventListener('click', onAgainClick);
+    var link = overlay.querySelector('.cb-end-link a');
+    link.href = CONFIG.copy.linkHref;
+    link.textContent = CONFIG.copy.linkText;
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', function () {
+      paused = document.hidden;
+      if (paused) audio.suspend(); else { audio.resume(); lastT = 0; }
+    });
+
+    canvas.addEventListener('pointerdown', function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      input.touch = e.pointerType !== 'mouse';
+      input.pointerX = e.clientX;
+      input.down = true;
+      if (state && state.mode === 'title') startGame();
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      if (!input.down) return;
+      var scale = canvas.clientWidth / CONFIG.logical.w;
+      input.dragDx += (e.clientX - input.pointerX) / scale;
+      input.pointerX = e.clientX;
+    });
+    canvas.addEventListener('pointerup', function () { input.down = false; });
+    resize();
+  }
+
+  function resize() {
+    if (!canvas) return;
+    var dpr = window.devicePixelRatio || 1;
+    var scale = Math.min(window.innerWidth / CONFIG.logical.w, window.innerHeight / CONFIG.logical.h);
+    canvas.style.width = CONFIG.logical.w * scale + 'px';
+    canvas.style.height = CONFIG.logical.h * scale + 'px';
+    canvas.width = Math.round(CONFIG.logical.w * scale * dpr);
+    canvas.height = Math.round(CONFIG.logical.h * scale * dpr);
+    ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  }
+
+  function onKeyDown(e) {
+    if (!overlay || overlay.hidden) return;
+    if (e.key === 'Escape') { unmount(); return; }
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = true;
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = true;
+    else if (e.key === ' ') {
+      e.preventDefault();
+      if (state.mode === 'title') startGame(); else input.fire = true;
+    } else if (e.key === 'Tab') trapFocus(e);
+  }
+
+  function onKeyUp(e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') input.left = false;
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = false;
+    else if (e.key === ' ') input.fire = false;
+  }
+
+  function trapFocus(e) {
+    var focusables = overlay.querySelectorAll('button, a[href]');
+    var list = Array.prototype.filter.call(focusables, function (el) { return el.offsetParent !== null; });
+    if (!list.length) return;
+    var first = list[0], last = list[list.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  function onMuteClick() {
+    var muted = audio.toggleMuted();
+    var btn = overlay.querySelector('.cb-mute');
+    btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    btn.textContent = muted ? 'SOUND OFF' : 'SOUND ON';
+  }
+
+  function onAgainClick() { /* wired up when end screens land */ }
+
+  function startGame() { state.mode = 'playing'; } // replaced when waves land
+
+  function mount() {
+    if (!overlay) build();
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    overlay.querySelector('.cb-end').hidden = true;
+    newGame();
+    audio.init();
+    audio.startMusic();
+    var btn = overlay.querySelector('.cb-mute');
+    btn.setAttribute('aria-pressed', audio.isMuted() ? 'true' : 'false');
+    btn.textContent = audio.isMuted() ? 'SOUND OFF' : 'SOUND ON';
+    paused = false;
+    lastT = 0;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
+    overlay.querySelector('.cb-close').focus();
+  }
+
+  function unmount() {
+    cancelAnimationFrame(raf);
+    audio.stopMusic();
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+    var rocket = document.getElementById('hero-rocket');
+    if (rocket) rocket.focus();
+  }
+
+  function frame(t) {
+    raf = requestAnimationFrame(frame);
+    if (paused) { lastT = 0; return; }
+    if (!lastT) { lastT = t; return; }
+    var dt = clamp((t - lastT) / 1000, 0, 1 / 30);
+    lastT = t;
+    state.t += dt;
+    update(dt);
+    render();
+  }
+
+  function update(dt) {
+    state.shake = Math.max(0, state.shake - dt * 2);
+    // gameplay systems land in later tasks
+  }
+
+  function render() {
+    var w = CONFIG.logical.w, h = CONFIG.logical.h;
+    ctx.save();
+    if (!reducedMotion && state.shake > 0) {
+      ctx.translate((Math.random() - 0.5) * state.shake * 14, (Math.random() - 0.5) * state.shake * 14);
+    }
+    var g = ctx.createRadialGradient(w / 2, h * 0.35, 80, w / 2, h * 0.55, h * 0.8);
+    g.addColorStop(0, '#12203a');
+    g.addColorStop(1, '#0a1526');
+    ctx.fillStyle = g;
+    ctx.fillRect(-20, -20, w + 40, h + 40);
+    ctx.fillStyle = '#ffffff';
+    state.stars.forEach(function (s) {
+      ctx.globalAlpha = s.a;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    if (state.mode === 'title') drawTitle();
+    drawWorld();
+    drawHud();
+    ctx.restore();
+  }
+
+  function drawTitle() {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e1001a';
+    ctx.font = 'bold 56px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText(CONFIG.copy.title, CONFIG.logical.w / 2, 330);
+    ctx.fillStyle = '#cdd8e8';
+    ctx.font = '24px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText(CONFIG.copy.subtitle, CONFIG.logical.w / 2, 380);
+    ctx.fillText(CONFIG.copy.pressStart, CONFIG.logical.w / 2, 560);
+  }
+
+  function drawWorld() { /* player/enemies land in later tasks */ }
+  function drawHud() { /* lands with game flow */ }
+
   // --- exports ---
   var api = {
+    mount: mount,
+    unmount: unmount,
     CONFIG: CONFIG,
     _internals: { validateConfig: validateConfig, hits: hits, spawnWave: spawnWave, splitEnemy: splitEnemy }
   };
