@@ -10,3 +10,16 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - vendor
+  - docs
+
+collections:
+  writing:
+    output: true
+    permalink: /writing/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: "writing"
+    values:
+      layout: "writing"
