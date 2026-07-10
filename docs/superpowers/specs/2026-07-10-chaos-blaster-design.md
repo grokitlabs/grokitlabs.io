@@ -88,7 +88,7 @@ wave's entry only.
 - The game auto-pauses on visibility loss (tab switch) — no time passes
   while hidden. Closing the overlay (✕ or Esc) abandons the run.
 
-## Visuals and audio
+## Visuals
 
 - Everything is canvas-drawn vector art in the existing site palette: navy
   `#213770`, brand red (the logo's `rgb(88.2%,0%,10.2%)` ≈ `#E1001A`), and
@@ -97,40 +97,81 @@ wave's entry only.
 - Enemy glyphs are simple 2–4 path shapes sized ≥ 24 px so they stay
   readable; color + silhouette carry the type identity, the legend carries
   the words.
+- **Animated exhaust:** the player rocket's three red flame paths (the same
+  shapes as the logo) animate as live fire — per-frame flicker via small
+  independent vertical-scale and opacity oscillations on each flame, plus a
+  soft additive glow beneath them. The silhouette stays recognizably the
+  logo's flames; only length/intensity breathes. The homepage hero rocket
+  gets the same idea as a CSS/SMIL flicker on hover, folded into the
+  discovery hint alongside the wiggle.
 - Juice: muzzle flash, hit flash, split "pop", and a brief screen shake on
   player damage. All motion effects are disabled when
   `prefers-reduced-motion: reduce` is set (game remains fully playable).
-- Sound: a handful of synthesized WebAudio bleeps (fire, hit, split, wave
-  banner, game over). **Muted by default**, toggle button in the overlay
-  chrome. No audio files.
 - TJ (mascot) has a **cameo slot only**: the victory screen reserves a
   celebratory spot for him, stubbed with a simple drawn star/burst until
   final mascot art exists. No dependency on `assets/tj-cartoon.png` in v1.
 
+## Audio
+
+Sound is a first-class part of the game, not an afterthought — a silent
+game feels cheap. Design:
+
+- **Audio files, not runtime synthesis.** All sounds live as small OGG
+  files (MP3 fallback) in `assets/audio/chaos-blaster/`, loaded by an
+  audio-manager module keyed by name:
+  `fire`, `hit`, `split`, `wave` (banner sting), `playerhit`, `gameover`,
+  `victory`, and `soundtrack` (a ~45–60 s seamless loop). Upgrading any
+  sound later means replacing the file — same name, zero code changes.
+- **Style:** chip/arcade sounds *evocative of* Galaga's vocabulary — a
+  descending zap for fire, warble for enemy hits — but original work; no
+  sampled Namco audio. The soundtrack is a minor-key arpeggiated loop that
+  sets an "impending doom" mood, tension rising subtly with wave number
+  (implementation may layer intensity or just pitch/tempo-shift the loop).
+- **v1 asset production:** the files are procedurally rendered offline by a
+  small committed generator script (`tools/gen-audio/`), so they are
+  reproducible, tweakable, and license-clean. Better hand-made or licensed
+  replacements can land later under the same filenames.
+- **Playback:** WebAudio (`AudioContext` + decoded buffers) for
+  latency-free SFX layering; the soundtrack loops via a buffer source.
+  Entering the game is a user gesture, so the context starts cleanly.
+- **Default ON**, with a mute toggle in the overlay chrome; the choice
+  persists in `localStorage`. Audio files load with the game (lazily, on
+  first rocket click), never with the base page. Total budget ≤ ~1 MB, SFX
+  are a few KB each; the soundtrack dominates and targets ≤ 700 KB.
+
 ## Architecture
 
-Two touchpoints in the repo, both additive:
+Four touchpoints in the repo, all additive:
 
 1. **`assets/js/chaos-blaster.js`** — the entire game. Vanilla ES module
    pattern (an IIFE exposing `window.ChaosBlaster.mount()`), zero
    dependencies. Internal structure:
    - `CONFIG` object at the top of the file: wave table (names, enemy
      types, counts, speeds, split rules), all user-facing copy (banners,
-     end-state lines, legend labels), scoring values, and tuning constants.
-     Renaming a wave or retuning difficulty is a one-line edit with no
-     logic changes.
+     end-state lines, legend labels), scoring values, audio file manifest,
+     and tuning constants. Renaming a wave or retuning difficulty is a
+     one-line edit with no logic changes.
    - Below it: sprite path table, entity classes (player, enemy, bullet,
      particle), wave director, input (keyboard + pointer), render loop
      (`requestAnimationFrame`, delta-time based), overlay/DOM chrome, and
-     the WebAudio synth.
-2. **`index.html`** — the rocket group gets the button semantics/hover
+     the audio manager (fetches/decodes the manifest's files into WebAudio
+     buffers, exposes `play(name)` and soundtrack loop/stop, owns the
+     persisted mute state; SFX play fire-and-forget so failed/missing audio
+     never breaks gameplay).
+2. **`assets/audio/chaos-blaster/`** — the OGG (+ MP3 fallback) files named
+   in the manifest.
+3. **`index.html`** — the rocket group gets the button semantics/hover
    class, plus a small inline script (≤ 20 lines) that lazily injects the
    game script and calls `mount()`.
-3. **`styles.css`** — hover wiggle keyframes and overlay chrome styles
-   (scoped under a `.cb-` prefix).
+4. **`styles.css`** — hover wiggle/flame-flicker keyframes and overlay
+   chrome styles (scoped under a `.cb-` prefix).
 
-Jekyll implications: none beyond a new static asset; `assets/js/` already
-exists and is published as-is.
+Supporting (not shipped to the site): **`tools/gen-audio/`**, the committed
+generator script that renders the v1 audio files; added to `_config.yml`'s
+`exclude` list alongside `docs`.
+
+Jekyll implications: none beyond new static assets; `assets/` is published
+as-is.
 
 ## Accessibility
 
@@ -158,11 +199,15 @@ Manual, via local Jekyll preview:
 5. `prefers-reduced-motion` emulation: no shake/wiggle, game playable.
 6. Keyboard-only session: open with Enter on the rocket, play, close with
    Esc.
+7. Audio: soundtrack starts on entry and loops seamlessly, SFX fire on
+   shoot/hit/split/banner/game-over, mute toggle silences everything and
+   persists across sessions, and gameplay works normally with audio files
+   blocked (network-failure simulation).
 
 ## Out of scope (v1)
 
 Possible later itches, deliberately not built now: online leaderboards,
 power-ups, multiple playable ships, a dedicated `/play` URL for sharing,
-TJ as a playable character, sound-on-by-default polish, and play analytics.
-Nothing in the architecture blocks any of these; the wave `CONFIG` table is
-the extension point for new content.
+TJ as a playable character, hand-made or licensed replacement audio, and
+play analytics. Nothing in the architecture blocks any of these; the wave
+`CONFIG` table and the audio file manifest are the extension points.
