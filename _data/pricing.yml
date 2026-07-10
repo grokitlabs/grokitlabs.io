@@ -1,0 +1,65 @@
+# Public pricing for grokitlabs.io/work/ — the DISPLAYED subset only.
+#
+# Private reasoning (margins, effort-days, day-rate math) lives in
+# grokitlabs-studio/offer/pricing.md and never appears here.
+#
+# This is the single source of truth for every number on the /work/ page:
+# change a value here and `jekyll` re-renders every on-page occurrence — no
+# hand-retyping, no drift. (Tier 1 of studio issue GL-001. Currently
+# hand-maintained; Tier 2 will generate this file from the studio master.)
+#
+# Prices are display strings (with thousands separators) so the template can
+# print them directly as `${{ ... }}`.
+
+course:
+  workshop: "149"
+  workshop_founding: "99"
+  full: "749"
+
+audit:
+  full: "4,500"
+  slim: "2,500"
+
+# Order here is the order shown in the build menu table (insertion order is
+# preserved by the template's loop).
+builds:
+  foundation_setup:
+    name: "Foundation Setup"
+    price: "3,500"
+    timeline: "1–2 wks"
+    done: "A full week with zero manual filing, and your daily summary is accurate"
+  client_knowledge_base:
+    name: "Client Knowledge Base"
+    price: "2,000"
+    timeline: "1 wk"
+    done: "Any client's full state readable in under a minute, kept current without you"
+    kit: true
+  money_admin:
+    name: "Money Admin"
+    price: "2,000"
+    timeline: "1 wk"
+    done: "Your bookkeeper gets a clean monthly folder with zero effort from you"
+    kit: true
+  inbound_agent:
+    name: "Inbound Agent"
+    price: "4,500"
+    timeline: "2 wks"
+    done: "Every inquiry triaged within the hour; drafts waiting for your approve/send"
+  outbound_followup:
+    name: "Outbound & Follow-up"
+    price: "4,500"
+    timeline: "2 wks"
+    done: "No warm lead sits past your threshold; drafts only, nothing auto-sends"
+  marketing_automation:
+    name: "Marketing Automation"
+    price: "5,500"
+    timeline: "2–3 wks"
+    done: "One full campaign runs end-to-end with you only approving"
+
+bundle_first_engagement: "7,500"
+
+retainer:
+  steward: "1,200"
+  partner: "2,800"
+
+founding_discount_pct: "20"
