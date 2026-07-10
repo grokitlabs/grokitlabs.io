@@ -51,8 +51,9 @@ description: GrokitLabs — grok it.
   <!-- rocket: exact vector from the logo, scaled; click it. -->
   <g transform="translate(-201.32,262.98) scale(5.1707)">
     <g id="hero-rocket" class="hero-rocket" tabindex="0" role="button" aria-label="Launch a hidden game">
-    <!-- invisible hit target so clicks between the rocket's paths still land -->
-    <rect x="134" y="45" width="42" height="63" fill="transparent"/>
+    <!-- invisible hit target, padded past the visual rocket so real touch
+         taps against the faded backdrop land reliably -->
+    <rect x="130" y="39" width="50" height="76" fill="transparent"/>
     <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z M 150.574219 86.914062 "/>
     <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z M 165.222656 86.972656 "/>
     <path style=" stroke:none;fill-rule:nonzero;fill:#213770;fill-opacity:1;" d="M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z M 157.894531 86.941406 "/>
@@ -78,6 +79,25 @@ description: GrokitLabs — grok it.
 
   <rect x="0" y="0" width="1200" height="1200" fill="url(#vign)" />
 </svg>
+<script>
+  // The scene's viewBox is square, but "slice" scaling reveals the full
+  // vertical extent on tall/narrow viewports (nothing to crop) while
+  // cropping vertically on wide ones. That makes the composition — tuned
+  // by eye against a landscape crop — read as a sparse, isolated sticker
+  // on phones. Pin the same 750-unit-tall "camera window" desktop gets on
+  // every viewport instead, letting only the horizontal slice narrow.
+  (function () {
+    var scene = document.querySelector('svg.scene');
+    if (!scene) return;
+    var CX = 600, CY = 600, HALF_H = 375;
+    function fit() {
+      var halfW = HALF_H * (window.innerWidth / window.innerHeight);
+      scene.setAttribute('viewBox', (CX - halfW) + ' ' + (CY - HALF_H) + ' ' + (halfW * 2) + ' ' + (HALF_H * 2));
+    }
+    fit();
+    window.addEventListener('resize', fit);
+  })();
+</script>
 
 <header class="site-header">
   <img class="logo-img" src="{{ '/assets/logo.svg' | relative_url }}" alt="GrokitLabs" />
