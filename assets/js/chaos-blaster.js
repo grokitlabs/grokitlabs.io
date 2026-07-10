@@ -26,8 +26,8 @@
       title: 'CHAOS BLASTER',
       subtitle: 'The everyday problems are coming. Clear them.',
       pressStart: 'Tap, click, or press Space to start',
-      victoryLine: 'Chaos cleared. That’s what we do.',
-      gameoverLine: 'Chaos is fractal — it keeps coming.',
+      victoryLine: "Chaos cleared. That's what we do.",
+      gameoverLine: 'Chaos is fractal - it keeps coming.',
       playAgain: 'Play again',
       retry: 'Retry',
       legendTitle: 'KNOW YOUR CHAOS',
@@ -150,6 +150,10 @@
   var state = null;
   var bgGradient = null;
   var launchedViaKeyboard = false;
+  // 8-bit arcade lettering, loaded on demand when the game opens (keeps the
+  // storefront request-free). Press Start 2P covers ASCII only, so display
+  // text uses hyphens, not em-dashes.
+  var FONT = '"Press Start 2P", ui-monospace, monospace';
   var input = { left: false, right: false, fire: false, touch: false, down: false, pointerX: 0, dragDx: 0 };
   var reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -317,6 +321,16 @@
         '<p class="cb-end-link"><a href="#"></a></p>' +
       '</div>';
     document.body.appendChild(overlay);
+    if (!document.getElementById('cb-font')) {
+      var fl = document.createElement('link');
+      fl.id = 'cb-font';
+      fl.rel = 'stylesheet';
+      fl.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+      document.head.appendChild(fl);
+    }
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.load) {
+      try { document.fonts.load('16px "Press Start 2P"'); } catch (e) {}
+    }
     canvas = overlay.querySelector('.cb-canvas');
     ctx = canvas.getContext('2d');
     overlay.querySelector('.cb-close').addEventListener('click', unmount);
@@ -490,15 +504,37 @@
     ctx.restore();
   }
 
+  // Centered word-wrap for the pixel font (which is wide); returns the y of
+  // the last line drawn.
+  function wrapText(text, cx, y, maxWidth, lineH) {
+    var words = text.split(' ');
+    var line = '', yy = y;
+    for (var i = 0; i < words.length; i++) {
+      var test = line ? line + ' ' + words[i] : words[i];
+      if (line && ctx.measureText(test).width > maxWidth) {
+        ctx.fillText(line, cx, yy);
+        line = words[i];
+        yy += lineH;
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, cx, yy);
+    return yy;
+  }
+
   function drawTitle() {
+    var cx = CONFIG.logical.w / 2;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#e1001a';
-    ctx.font = 'bold 56px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText(CONFIG.copy.title, CONFIG.logical.w / 2, 330);
+    ctx.font = '48px ' + FONT;
+    ctx.fillText('CHAOS', cx, 292);
+    ctx.fillText('BLASTER', cx, 356);
     ctx.fillStyle = '#cdd8e8';
-    ctx.font = '24px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText(CONFIG.copy.subtitle, CONFIG.logical.w / 2, 380);
-    ctx.fillText(CONFIG.copy.pressStart, CONFIG.logical.w / 2, 560);
+    ctx.font = '13px ' + FONT;
+    wrapText(CONFIG.copy.subtitle, cx, 440, 600, 26);
+    ctx.fillStyle = '#9aa9bf';
+    wrapText(CONFIG.copy.pressStart, cx, 574, 600, 26);
   }
 
   function drawWorld() {
@@ -511,10 +547,10 @@
     if (state.mode === 'title') return;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#cdd8e8';
-    ctx.font = 'bold 20px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText('SCORE ' + state.score, 20, 34);
+    ctx.font = '13px ' + FONT;
+    ctx.fillText('SCORE ' + state.score, 20, 30);
     ctx.textAlign = 'center';
-    ctx.fillText('HIGH ' + Math.max(state.highScore, state.score), CONFIG.logical.w / 2, 34);
+    ctx.fillText('HIGH ' + Math.max(state.highScore, state.score), CONFIG.logical.w / 2, 30);
     for (var i = 0; i < state.lives; i++) drawMiniRocket(CONFIG.logical.w - 30 - i * 26, 26);
     drawLegend();
   }
@@ -936,8 +972,8 @@
     ctx.fillRect(0, 380, CONFIG.logical.w, 120);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 40px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillText('WAVE ' + (state.waveIndex + 1) + ' — ' + wave.name, CONFIG.logical.w / 2, 452);
+    ctx.font = '19px ' + FONT;
+    wrapText('WAVE ' + (state.waveIndex + 1) + ' - ' + wave.name, CONFIG.logical.w / 2, 432, 660, 30);
     ctx.globalAlpha = 1;
   }
 
@@ -960,7 +996,7 @@
     var from = narrow ? state.waveIndex : 0;
     var baseY = CONFIG.logical.h - 24;
     ctx.textAlign = 'left';
-    ctx.font = '14px "Helvetica Neue", Arial, sans-serif';
+    ctx.font = '10px ' + FONT;
     ctx.fillStyle = '#9aa9bf';
     ctx.fillText(CONFIG.copy.legendTitle, 20, baseY - (state.waveIndex - from + 1) * 30);
     for (var i = from; i <= state.waveIndex; i++) {
