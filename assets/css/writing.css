@@ -1,0 +1,252 @@
+/* =========================================================================
+   GrokitLabs writing system — writing.css
+   Shared design tokens + components for /writing/ content pages.
+
+   USAGE: linked by _layouts/writing.html. Every page under /writing/ gets:
+   dark navy scene, grid overlay, header w/ logo, typography, and the
+   content components below (steps, players, tags, folder visual, promise
+   cards). See README.md for the color system and design rules.
+   ========================================================================= */
+
+:root {
+  /* --- brand core (from grokitlabs.io homepage — do not drift these) --- */
+  --bg: #0a1526;
+  --bg-accent: #12233d;
+  --fg: #eef2f9;
+  --muted: #8fa0bd;
+  --red: #e1001a;
+  --navy: #213770;
+  --border: #1e3a5f;
+  --card: #101f38;
+
+  /* --- content-role palette ---
+     Use these to color-code "who/what" in a piece: a human role, the
+     assistant/AI role, and a data/tool/external role. Pick whichever
+     semantic names fit the piece; all three map to the same 3 hues so
+     nothing you publish will clash with another. */
+  --accent-a: #f2a93c; /* amber — human / you / the reader */
+  --accent-b: #e1001a; /* red   — Claude / the assistant / brand red */
+  --accent-c: #35b7d1; /* cyan  — data / files / tools / external systems */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1200px 640px at 50% -8%, var(--bg-accent), transparent 65%),
+    linear-gradient(rgba(30,58,95,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,58,95,0.4) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: center top, center, center;
+  background-size: 100% 900px, 40px 40px, 40px 40px;
+  background-attachment: fixed, fixed, fixed;
+}
+
+/* ---- header: white panel with the real logo ---- */
+.site-header {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #ffffff;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+}
+.logo-img { height: 44px; width: auto; display: block; }
+
+/* ---- page content wrap ---- */
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vh, 3.5rem) 1.5rem 3rem;
+}
+
+/* ---- masthead / typography ---- */
+.eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+  text-align: center;
+}
+h1 {
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5.5vw, 2.7rem);
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-align: center;
+  margin-bottom: 0.9rem;
+  text-shadow: 0 2px 22px rgba(0,0,0,0.4);
+}
+.sub {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  max-width: 58ch;
+  margin: 0 auto;
+}
+.sub b { color: var(--fg); font-weight: 600; }
+.byline {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  max-width: 50ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+h2 {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin: 2.6rem 0 0.3rem;
+}
+.h2sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+
+/* ---- "players" — up to 3 color-coded role cards ---- */
+.players { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+.player {
+  flex: 1 1 170px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  border-top: 2px solid var(--role, var(--border));
+  position: relative;
+  overflow: hidden;
+}
+.player::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--role, transparent), transparent 55%);
+  opacity: 0.12;
+  pointer-events: none;
+}
+.player .who { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--role, var(--fg)); position: relative; }
+.player .does { font-size: 0.8rem; color: var(--muted); line-height: 1.5; position: relative; }
+.player-a { --role: var(--accent-a); }
+.player-b { --role: var(--accent-b); }
+.player-c { --role: var(--accent-c); }
+
+/* ---- step cards (sequential walkthroughs) ---- */
+.step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.05rem 1.15rem;
+  position: relative;
+}
+.step-arrow {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.45rem 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.72rem; font-weight: 500;
+  color: var(--muted);
+}
+.step-arrow::before { content: "↓"; font-size: 1.05rem; color: var(--muted); }
+
+.who-tag {
+  display: inline-block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  border-radius: 99px;
+  margin-bottom: 0.6rem;
+  border: 1px solid;
+}
+.tag-a { color: var(--accent-a); border-color: var(--accent-a); }
+.tag-b { color: var(--accent-b); border-color: var(--accent-b); }
+.tag-c { color: var(--accent-c); border-color: var(--accent-c); }
+.tag-ab { color: var(--accent-a); border-color: var(--accent-a); box-shadow: inset 2px 0 0 var(--accent-b); }
+
+.step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+.step p { font-size: 0.86rem; color: var(--muted); line-height: 1.55; }
+.step p b { color: var(--fg); font-weight: 600; }
+.step .say {
+  margin-top: 0.7rem;
+  background: var(--bg);
+  border-left: 3px solid var(--accent-b);
+  padding: 0.6rem 0.85rem;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.83rem;
+  color: var(--fg);
+  line-height: 1.5;
+}
+.step .say.a { border-left-color: var(--accent-a); }
+.step .say.c { border-left-color: var(--accent-c); }
+
+/* ---- folder / file-tree visual ---- */
+.folder {
+  background: var(--bg);
+  border: 1.5px dashed rgba(53,183,209,0.4);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  font-size: 0.83rem;
+  margin-top: 0.85rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+.folder .fl { padding: 0.2rem 0; color: var(--fg); }
+.folder .in1 { padding-left: 1.3rem; } .folder .in2 { padding-left: 2.5rem; }
+.folder .note { color: var(--muted); font-family: "Inter", sans-serif; font-size: 0.72rem; }
+.folder b { font-weight: 700; color: var(--accent-c); }
+
+/* ---- promise / callout cards ---- */
+.promises { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.9rem; }
+.promise {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+  font-size: 0.85rem;
+  border-left: 3px solid var(--accent-b);
+}
+.promise b { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--fg); }
+.promise span { color: var(--muted); line-height: 1.5; }
+
+/* ---- footer ---- */
+.foot {
+  text-align: center;
+  padding: 1.6rem 1.5rem 0.5rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.foot .divider { border-top: 1px solid var(--border); margin: 1.6rem 0 1.2rem; }
+
+/* ---- discreet corner scene (visual only — behavior lives in writing-scene-fade.js) ---- */
+.scene-corner {
+  position: fixed;
+  bottom: -140px;
+  right: -140px;
+  width: 640px;
+  height: 640px;
+  z-index: 0;
+  opacity: 0.42;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+.scene-corner.is-hidden { opacity: 0; }
+.scene-corner svg { width: 100%; height: 100%; display: block; }
+@media (max-width: 700px) {
+  .scene-corner { width: 440px; height: 440px; bottom: -100px; right: -100px; opacity: 0.3; }
+}
