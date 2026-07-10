@@ -127,6 +127,7 @@
   // ------------------------------------------------------------ game shell
   var overlay = null, canvas = null, ctx = null, raf = 0, lastT = 0, paused = false;
   var state = null;
+  var bgGradient = null;
   var input = { left: false, right: false, fire: false, touch: false, down: false, pointerX: 0, dragDx: 0 };
   var reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -138,6 +139,7 @@
     var actx = null, master = null, musicGainNode = null, musicSrc = null;
     var buffers = {};
     var wantMusic = false;
+    var unlockHooked = false;
     var rate = 1;
     var muted = false;
     try { muted = localStorage.getItem(CONFIG.storage.muted) === '1'; } catch (e) {}
@@ -156,6 +158,19 @@
         CONFIG.audio.files.forEach(load);
       }
       resume();
+      // A context created outside a user gesture (the game script loads
+      // async on first click) can sit suspended on iOS until the next real
+      // interaction — unlock on the first one inside the game.
+      if (actx && actx.state === 'suspended' && !unlockHooked) {
+        unlockHooked = true;
+        var unlock = function () {
+          resume();
+          document.removeEventListener('pointerdown', unlock, true);
+          document.removeEventListener('keydown', unlock, true);
+        };
+        document.addEventListener('pointerdown', unlock, true);
+        document.addEventListener('keydown', unlock, true);
+      }
     }
 
     function load(name) {
@@ -358,8 +373,6 @@
     btn.textContent = muted ? 'SOUND OFF' : 'SOUND ON';
   }
 
-  function onAgainClick() { /* wired up when end screens land */ }
-
   function startGame() { startWave(0); }
 
   function mount() {
@@ -373,6 +386,9 @@
     var btn = overlay.querySelector('.cb-mute');
     btn.setAttribute('aria-pressed', audio.isMuted() ? 'true' : 'false');
     btn.textContent = audio.isMuted() ? 'SOUND OFF' : 'SOUND ON';
+    input.left = input.right = input.fire = false;
+    input.down = false;
+    input.dragDx = 0;
     resize(); // viewport may have changed while the overlay was closed
     paused = false;
     lastT = 0;
@@ -423,10 +439,12 @@
     if (!reducedMotion && state.shake > 0) {
       ctx.translate((Math.random() - 0.5) * state.shake * 14, (Math.random() - 0.5) * state.shake * 14);
     }
-    var g = ctx.createRadialGradient(w / 2, h * 0.35, 80, w / 2, h * 0.55, h * 0.8);
-    g.addColorStop(0, '#12203a');
-    g.addColorStop(1, '#0a1526');
-    ctx.fillStyle = g;
+    if (!bgGradient) {
+      bgGradient = ctx.createRadialGradient(w / 2, h * 0.35, 80, w / 2, h * 0.55, h * 0.8);
+      bgGradient.addColorStop(0, '#12203a');
+      bgGradient.addColorStop(1, '#0a1526');
+    }
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(-20, -20, w + 40, h + 40);
     ctx.fillStyle = '#ffffff';
     state.stars.forEach(function (s) {
@@ -807,7 +825,7 @@
     }
     for (var k = 0; k < state.enemies.length; k++) {
       var e = state.enemies[k];
-      if (!e.free && e.y > CONFIG.logical.h - 190) {
+      if (p.invuln <= 0 && !e.free && e.y > CONFIG.logical.h - 190) {
         playerHit();
         state.formation.y -= 240; // breach pushes the wave back up
         break;
