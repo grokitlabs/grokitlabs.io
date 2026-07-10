@@ -306,7 +306,9 @@
 
   function update(dt) {
     state.shake = Math.max(0, state.shake - dt * 2);
-    // gameplay systems land in later tasks
+    if (state.mode === 'playing' || state.mode === 'title') updatePlayer(dt);
+    updateBullets(dt);
+    updateParticles(dt);
   }
 
   function render() {
@@ -344,8 +346,139 @@
     ctx.fillText(CONFIG.copy.pressStart, CONFIG.logical.w / 2, 560);
   }
 
-  function drawWorld() { /* player/enemies land in later tasks */ }
+  function drawWorld() {
+    drawParticles();
+    drawBullets();
+    drawPlayer(state.player);
+  }
   function drawHud() { /* lands with game flow */ }
+
+  // ---------------------------------------------------- player + projectiles
+  var ROCKET = {
+    bounds: { x: 136.0, y: 47.8, w: 37.95, h: 58.0 },
+    flameTopY: 89.3,
+    body: [
+      'M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z',
+      'M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z',
+      'M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z',
+      'M 142.648438 75.535156 L 136.011719 75.507812 L 136.023438 72.210938 L 142.957031 67.167969 Z',
+      'M 166.441406 75.628906 L 173.925781 75.660156 L 173.9375 72.363281 L 167.046875 67.265625 Z',
+      'M 141.578125 70.046875 L 146.746094 70.066406 C 146.730469 74.554688 150.363281 78.214844 154.847656 78.234375 C 159.335938 78.253906 162.996094 74.617188 163.015625 70.132812 L 168.1875 70.152344 C 168.15625 77.488281 162.164062 83.433594 154.828125 83.402344 C 147.492188 83.375 141.546875 77.382812 141.578125 70.046875',
+      'M 146.820312 71.164062 L 141.652344 71.164062 L 141.652344 61.070312 L 146.832031 59.570312 Z',
+      'M 163.019531 71.164062 L 168.1875 71.164062 L 168.257812 61.015625 L 163.089844 59.90625 Z',
+      'M 168.261719 61.015625 L 163.089844 61.066406 C 163.042969 56.582031 159.359375 52.96875 154.871094 53.015625 C 150.386719 53.058594 146.777344 56.746094 146.820312 61.230469 L 141.652344 61.28125 C 141.578125 53.945312 147.488281 47.917969 154.820312 47.847656 C 162.15625 47.773438 168.1875 53.679688 168.261719 61.015625'
+    ],
+    flames: [
+      'M 150.253906 89.308594 L 148.8125 105.792969 L 146.066406 105.785156 L 144.757812 89.285156 Z',
+      'M 157.324219 89.335938 L 155.898438 101.699219 L 153.152344 101.6875 L 151.824219 89.316406 Z',
+      'M 164.78125 89.367188 L 163.375 97.410156 L 160.628906 97.398438 L 159.285156 89.347656 Z'
+    ],
+    window: 'M 154.917969 56.34375 C 157.007812 56.324219 158.71875 58 158.742188 60.089844 C 158.761719 62.179688 157.082031 63.894531 154.992188 63.914062 C 152.902344 63.933594 151.191406 62.257812 151.171875 60.167969 C 151.148438 58.074219 152.828125 56.363281 154.917969 56.34375'
+  };
+  var rocketPaths = null;
+  function buildRocketPaths() {
+    rocketPaths = {
+      body: ROCKET.body.map(function (d) { return new Path2D(d); }),
+      flames: ROCKET.flames.map(function (d) { return new Path2D(d); }),
+      window: new Path2D(ROCKET.window)
+    };
+  }
+
+  function drawPlayer(p) {
+    if (!rocketPaths) buildRocketPaths();
+    var s = p.h / ROCKET.bounds.h;
+    ctx.save();
+    if (p.invuln > 0 && Math.floor(state.t * 12) % 2) ctx.globalAlpha = 0.35;
+    ctx.translate(p.x - (ROCKET.bounds.x + ROCKET.bounds.w / 2) * s, p.y - (ROCKET.bounds.y + ROCKET.bounds.h / 2) * s);
+    ctx.scale(s, s);
+    // exhaust glow, breathing with the flames
+    var glow = reducedMotion ? 0.45 : 0.3 + 0.3 * Math.abs(Math.sin(state.t * 23));
+    var g = ctx.createRadialGradient(155, 100, 2, 155, 100, 26);
+    g.addColorStop(0, 'rgba(255, 140, 60, ' + glow + ')');
+    g.addColorStop(1, 'rgba(255, 140, 60, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(129, 74, 52, 52);
+    // flames: logo shapes, length flickering independently
+    ctx.fillStyle = '#e1001a';
+    rocketPaths.flames.forEach(function (path, i) {
+      var flick = reducedMotion ? 1
+        : 0.72 + 0.38 * (0.5 + 0.5 * Math.sin(state.t * 31 + i * 2.1)) + 0.08 * Math.sin(state.t * 57 + i * 5);
+      ctx.save();
+      ctx.translate(0, ROCKET.flameTopY);
+      ctx.scale(1, flick);
+      ctx.translate(0, -ROCKET.flameTopY);
+      ctx.fill(path);
+      ctx.restore();
+    });
+    ctx.fillStyle = '#213770';
+    rocketPaths.body.forEach(function (path) { ctx.fill(path); });
+    ctx.fillStyle = '#e1001a';
+    ctx.fill(rocketPaths.window);
+    ctx.restore();
+  }
+
+  function updatePlayer(dt) {
+    var p = state.player;
+    var dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    p.x += dir * CONFIG.player.speed * dt + input.dragDx;
+    input.dragDx = 0;
+    p.x = clamp(p.x, p.w / 2 + 10, CONFIG.logical.w - p.w / 2 - 10);
+    p.invuln = Math.max(0, p.invuln - dt);
+    p.cooldown -= dt;
+    var firing = input.fire || (input.touch && state.mode === 'playing');
+    if (firing && p.cooldown <= 0 && state.mode === 'playing') {
+      p.cooldown = CONFIG.player.fireInterval;
+      state.bullets.push({
+        x: p.x, y: p.y - p.h / 2 - 6,
+        w: CONFIG.bullet.w, h: CONFIG.bullet.h,
+        vy: -CONFIG.player.bulletSpeed
+      });
+      spark(p.x, p.y - p.h / 2 - 8, '#ffb347', 3);
+      audio.play('fire');
+    }
+  }
+
+  function updateBullets(dt) {
+    state.bullets = state.bullets.filter(function (b) {
+      b.y += b.vy * dt;
+      return b.y > -30;
+    });
+  }
+
+  function spark(x, y, color, n) {
+    for (var i = 0; i < n; i++) {
+      state.particles.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 160,
+        vy: (Math.random() - 0.5) * 160 - 30,
+        life: 0.35 + Math.random() * 0.25,
+        color: color, r: 1.5 + Math.random() * 2
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    state.particles = state.particles.filter(function (pt) {
+      pt.life -= dt;
+      pt.x += pt.vx * dt;
+      pt.y += pt.vy * dt;
+      return pt.life > 0;
+    });
+  }
+
+  function drawBullets() {
+    ctx.fillStyle = '#e1001a';
+    state.bullets.forEach(function (b) { ctx.fillRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h); });
+  }
+
+  function drawParticles() {
+    state.particles.forEach(function (pt) {
+      ctx.globalAlpha = Math.max(0, pt.life / 0.6);
+      ctx.fillStyle = pt.color;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, TAU); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
 
   // --- exports ---
   var api = {
