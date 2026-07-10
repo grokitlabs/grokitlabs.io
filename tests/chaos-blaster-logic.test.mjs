@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { CONFIG, _internals } = require('../assets/js/chaos-blaster.js');
-const { validateConfig, hits, spawnWave, splitEnemy } = _internals;
+const { validateConfig, hits, spawnWave, splitEnemy, breachCheck } = _internals;
 
 test('shipped CONFIG is valid', () => {
   assert.deepEqual(validateConfig(CONFIG), []);
@@ -75,6 +75,34 @@ test('validateConfig flags a non-positive dive.interval and a bad dive.max', () 
   const badMax = JSON.parse(JSON.stringify(CONFIG));
   badMax.waves[2].dive = { interval: 1, max: 0 };
   assert.ok(validateConfig(badMax).some((e) => e.includes('dive: max')));
+});
+
+test('breachCheck: not breached leaves the formation untouched', () => {
+  const h = 960;
+  const r = breachCheck(184, 100, h); // 184+100=284, well above the player
+  assert.equal(r.breached, false);
+  assert.equal(r.formationY, 100);
+});
+
+test('breachCheck: recovery lifts the wave fully clear of the breach line', () => {
+  const h = 960;
+  const lowestHomeY = 184;
+  // Formation has marched deep — past the breach line by more than any fixed
+  // nudge (184 + 900 = 1084, which is 314 past h-190=770). The old code
+  // subtracted a fixed 240, leaving 844 > 770: still breached, so the moment
+  // the 2s invuln expired it fired again -> death every ~2s until game over.
+  const r = breachCheck(lowestHomeY, 900, h);
+  assert.equal(r.breached, true);
+  assert.ok(
+    lowestHomeY + r.formationY <= h - 190,
+    'recovered formation still breaches the line -> repeated-death loop'
+  );
+});
+
+test('breachCheck: recovery only lifts, never shoves the wave down', () => {
+  const h = 960;
+  const r = breachCheck(184, 900, h);
+  assert.ok(r.formationY < 900);
 });
 
 test('motion/exit are set at spawn independent of glyph', () => {

@@ -24,10 +24,10 @@
     },
     copy: {
       title: 'CHAOS BLASTER',
-      subtitle: 'The everyday problems are coming. Clear them.',
+      subtitle: 'The chaos is coming! Prepare to blast!',
       pressStart: 'Tap, click, or press Space to start',
       victoryLine: "Chaos cleared. That's what we do.",
-      gameoverLine: 'Chaos is fractal - it keeps coming.',
+      gameoverLine: 'Chaos is relentless - it keeps coming.',
       playAgain: 'Play again',
       retry: 'Retry',
       legendTitle: 'KNOW YOUR CHAOS',
@@ -59,6 +59,23 @@
 
   function hits(a, b) {
     return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+  }
+
+  // The standing formation "reaches the player" when its lowest slot passes
+  // h - BREACH_MARGIN. On breach we don't nudge by a fixed amount (a fixed
+  // nudge can leave the wave still past the line when it has marched deep,
+  // re-firing every time invuln expires until game over) — we lift it so the
+  // lowest slot sits at h - BREACH_SAFE, provably clear of the line. Only ever
+  // lifts, never shoves the wave down.
+  var BREACH_MARGIN = 190;
+  var BREACH_SAFE = 320;
+
+  function breachCheck(lowestHomeY, formationY, logicalH) {
+    var breached = lowestHomeY + formationY > logicalH - BREACH_MARGIN;
+    var newY = breached
+      ? Math.min(formationY, (logicalH - BREACH_SAFE) - lowestHomeY)
+      : formationY;
+    return { breached: breached, formationY: newY };
   }
 
   function validateConfig(cfg) {
@@ -918,9 +935,12 @@
         var e = state.enemies[k];
         if (!e.free && e.homeY > lowestHomeY) lowestHomeY = e.homeY;
       }
-      if (lowestHomeY > -Infinity && lowestHomeY + state.formation.y > CONFIG.logical.h - 190) {
-        playerHit();
-        state.formation.y -= 240; // push the wave back up
+      if (lowestHomeY > -Infinity) {
+        var breach = breachCheck(lowestHomeY, state.formation.y, CONFIG.logical.h);
+        if (breach.breached) {
+          playerHit();
+          state.formation.y = breach.formationY; // lift the wave clear of the line
+        }
       }
     }
   }
@@ -1018,7 +1038,7 @@
     mount: mount,
     unmount: unmount,
     CONFIG: CONFIG,
-    _internals: { validateConfig: validateConfig, hits: hits, spawnWave: spawnWave, splitEnemy: splitEnemy },
+    _internals: { validateConfig: validateConfig, hits: hits, spawnWave: spawnWave, splitEnemy: splitEnemy, breachCheck: breachCheck },
     _debug: { getState: function () { return state; }, startWave: startWave }
   };
   if (typeof window !== 'undefined') window.ChaosBlaster = api;
