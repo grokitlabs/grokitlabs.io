@@ -16,6 +16,30 @@ Clean, credible, confident. GrokitLabs is the company/umbrella brand (more profe
 
 michael@grokitlabs.io
 
+## Running locally
+
+Jekyll is installed globally (via rbenv) rather than through a project
+`Gemfile`, so no `bundle exec` is needed:
+
+```bash
+jekyll serve
+```
+
+Then visit `http://localhost:4000`. `jekyll serve --watch` (the default)
+rebuilds on file changes; add `--drafts` if you ever use the built-in
+`_drafts/` folder for the native `posts` collection (not used here — see
+"Drafts" below for how `/writing/` pages handle this instead).
+
+To just build without serving (e.g. to sanity-check before committing):
+
+```bash
+jekyll build
+```
+
+This writes to `_site/` (gitignored). Check the output for any `Liquid
+Warning` lines — the build "succeeding" doesn't mean the Liquid rendered
+correctly, only that it didn't hard-error.
+
 ## The `/writing/` content system
 
 A shared Jekyll collection + layout for published content pages (how-tos,
@@ -60,6 +84,35 @@ from publish, git history only).
    `_config.yml` sets it automatically for everything in `_writing/`.
 4. It's live at `/writing/my-new-post/` and appears on `/writing/`
    automatically, newest first.
+
+### Drafts
+
+Jekyll's built-in `_drafts/` folder + `--drafts` flag only works for the
+native `posts` collection — it does nothing for a custom collection like
+`writing`. The equivalent for `_writing/` is a `published: false` front
+matter flag, which Jekyll honors on any collection document:
+
+```yaml
+---
+title: "Page Title"
+description: "One sentence — used for <meta description> and the index card."
+date: 2026-07-09
+published: false
+---
+```
+
+- `jekyll serve` / `jekyll build` (and what GitHub Pages runs to publish
+  the live site) **skip** any document with `published: false` — it won't
+  appear in `_site/`, won't appear on the `/writing/` index, and won't be
+  live.
+- `jekyll serve --unpublished` (or `jekyll build --unpublished`) **includes**
+  it, rendered at its real final URL (`/writing/my-new-post/`) — so you can
+  preview it locally exactly as it'll look once published, no separate
+  staging location to keep in sync.
+- To publish: delete the `published: false` line (or set it to `true`) and
+  commit. Nothing moves — the file's path and URL never change between
+  draft and published state, which avoids the class of bug where a
+  drafts-folder post gets a different permalink than its published version.
 
 ### The color system
 
