@@ -1,12 +1,18 @@
 # Public pricing for grokitlabs.io/work/ — the DISPLAYED subset only.
 #
-# Private reasoning (margins, effort-days, day-rate math) lives in
-# grokitlabs-studio/offer/pricing.md and never appears here.
-#
-# This is the single source of truth for every number on the /work/ page:
-# change a value here and `jekyll` re-renders every on-page occurrence — no
-# hand-retyping, no drift. (Tier 1 of studio issue GL-001. Currently
-# hand-maintained; Tier 2 will generate this file from the studio master.)
+# ┌─ SOURCE OF TRUTH — read _data/README.md before editing ────────────────┐
+# │ This file is the PUBLIC RENDER SOURCE, not where prices are decided.    │
+# │ The upstream source of truth is the PRIVATE studio repo:                │
+# │     grokitlabs-studio/offer/pricing.md                                  │
+# │ (which also holds the private reasoning — margins, effort-days,         │
+# │ day-rate math — that must NEVER be copied into this public repo).       │
+# │                                                                         │
+# │ Within this repo the /work/ page derives every number from here, so     │
+# │ changing a value re-renders every on-page occurrence — no hand-retyping.│
+# │ But this file is DOWNSTREAM: today it is hand-synced from the studio    │
+# │ master (keep the two consistent); once GL-001 Tier 2 lands it will be   │
+# │ GENERATED from that master — at which point DO NOT hand-edit it.        │
+# └─────────────────────────────────────────────────────────────────────────┘
 #
 # Prices are display strings (with thousands separators) so the template can
 # print them directly as `${{ ... }}`.

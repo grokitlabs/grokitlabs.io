@@ -40,6 +40,32 @@ This writes to `_site/` (gitignored). Check the output for any `Liquid
 Warning` lines — the build "succeeding" doesn't mean the Liquid rendered
 correctly, only that it didn't hard-error.
 
+## Pages that display data from the private studio repo
+
+Some pages (starting with the `/work/` offer page) show numbers — prices,
+scopes — that are *decided* in the private `grokitlabs-studio` repo, not here.
+Those pages never hardcode the numbers; they render them from a data file in
+`_data/`. This keeps a value in one place and lets the private reasoning
+behind it (margins, effort estimates) stay out of this public repo.
+
+The mechanism, the exact source-of-truth chain, and the step-by-step "how to
+change a price without breaking it" live in **[`_data/README.md`](_data/README.md)**
+— read that before editing anything under `_data/` or any number shown on a
+page. The one-line version: `_data/pricing.yml` is the *public render source*;
+the *upstream source of truth* is `grokitlabs-studio/offer/pricing.md`; keep
+them consistent, and never put private reasoning in this repo.
+
+### Publishing a page that uses studio data
+
+Same as any page (author on a `draft/*` branch → `jekyll serve` to preview →
+merge to `main` → push), with one added step: before you push, make sure the
+numbers in `_data/pricing.yml` match the current decision in the studio
+master. After building, `grep` the value in `_site/…/index.html` to confirm
+it rendered (an undefined data key renders *empty*, not as an error). The
+`/work/` page is also marked `noindex` while it's staged-but-not-launched;
+remove that front-matter flag (and add the homepage link) when you actually
+launch it.
+
 ## The `/writing/` content system
 
 A shared Jekyll collection + layout for published content pages (how-tos,
