@@ -772,8 +772,15 @@
           if (e.glyph === 'chaos') {
             e.y = -e.h; // wraps back in — pressure stays until it's dealt with
           } else {
+            // Missed the player — return to formation. Reposition now
+            // (not just next frame): collide()'s breach check runs later
+            // in this same tick and would otherwise still see the stale
+            // off-screen dive position and misread it as the formation
+            // itself having breached.
             e.free = false;
             e.vx = e.vy = 0;
+            e.x = e.homeX + state.formation.x;
+            e.y = e.homeY + state.formation.y;
           }
         }
       } else {

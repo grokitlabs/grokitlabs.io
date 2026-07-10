@@ -146,11 +146,11 @@ body {
 .cb-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(7, 13, 24, 0.97); display: flex; align-items: center; justify-content: center; }
 .cb-overlay[hidden] { display: none; }
 .cb-canvas { display: block; touch-action: none; }
-.cb-chrome { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 10px; }
+.cb-chrome { position: absolute; z-index: 2; top: max(12px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 10px; }
 .cb-chrome button { background: rgba(205, 216, 232, 0.12); color: #cdd8e8; border: 1px solid rgba(205, 216, 232, 0.35); border-radius: 8px; font: 600 14px/1 "Helvetica Neue", Arial, sans-serif; padding: 13px 16px; min-width: 44px; min-height: 44px; cursor: pointer; }
 .cb-close { font-size: 18px !important; }
 .cb-chrome button:hover, .cb-chrome button:focus-visible { background: rgba(205, 216, 232, 0.25); }
-.cb-end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; background: rgba(10, 21, 38, 0.82); color: #cdd8e8; font-family: "Helvetica Neue", Arial, sans-serif; padding: 24px; }
+.cb-end { position: absolute; z-index: 1; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; background: rgba(10, 21, 38, 0.82); color: #cdd8e8; font-family: "Helvetica Neue", Arial, sans-serif; padding: 24px; }
 .cb-end[hidden] { display: none; }
 .cb-end-cameo { color: #e1001a; font-size: 54px; line-height: 1; }
 .cb-end h2 { color: #ffffff; font-size: 30px; margin: 0; }
