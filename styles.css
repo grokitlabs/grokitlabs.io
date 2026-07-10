@@ -182,8 +182,11 @@ body {
    wrap sits above the scene, so it passes clicks through except on its text. */
 .wrap { pointer-events: none; }
 .wrap .def > * { pointer-events: auto; }
-.hero-rocket { pointer-events: auto; cursor: pointer; }
-.hero-rocket:focus-visible { outline: 2px solid #e1001a; outline-offset: 6px; }
+.hero-rocket { pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+/* No focus ring for mouse/touch activation (it read as a stray box on the
+   faded background rocket); keep a crisp one only for real keyboard focus. */
+.hero-rocket:focus:not(:focus-visible) { outline: none; }
+.hero-rocket:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
 .hero-rocket:hover, .hero-rocket:focus-visible { animation: cb-wiggle 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .hero-rocket:hover .hero-flame, .hero-rocket:focus-visible .hero-flame { animation: cb-flicker 0.32s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0%; }
 @keyframes cb-wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-1.4deg); } 75% { transform: rotate(1.4deg); } }

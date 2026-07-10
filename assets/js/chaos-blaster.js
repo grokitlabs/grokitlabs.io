@@ -133,6 +133,7 @@
   var overlay = null, canvas = null, ctx = null, raf = 0, lastT = 0, paused = false;
   var state = null;
   var bgGradient = null;
+  var launchedViaKeyboard = false;
   var input = { left: false, right: false, fire: false, touch: false, down: false, pointerX: 0, dragDx: 0 };
   var reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -380,7 +381,8 @@
 
   function startGame() { startWave(0); }
 
-  function mount() {
+  function mount(viaKeyboard) {
+    launchedViaKeyboard = !!viaKeyboard;
     if (!overlay) build();
     overlay.hidden = false;
     document.body.style.overflow = 'hidden';
@@ -407,8 +409,15 @@
     audio.stopMusic();
     overlay.hidden = true;
     document.body.style.overflow = '';
-    var rocket = document.getElementById('hero-rocket');
-    if (rocket) rocket.focus();
+    // Return focus to the launcher only for keyboard users — a mouse user
+    // doesn't expect a focus ring to appear on this background rocket, and
+    // returning focus here after an Esc close is what drew the stray box.
+    if (launchedViaKeyboard) {
+      var rocket = document.getElementById('hero-rocket');
+      if (rocket) rocket.focus();
+    } else if (document.activeElement && overlay.contains(document.activeElement)) {
+      document.activeElement.blur(); // don't leave focus on the hidden chrome
+    }
   }
 
   function frame(t) {

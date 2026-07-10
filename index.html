@@ -128,18 +128,20 @@ description: GrokitLabs — grok it.
     var rocket = document.getElementById('hero-rocket');
     if (!rocket) return;
     var loading = false;
-    function launch() {
-      if (window.ChaosBlaster) { window.ChaosBlaster.mount(); return; }
+    function launch(viaKeyboard) {
+      if (window.ChaosBlaster) { window.ChaosBlaster.mount(viaKeyboard); return; }
       if (loading) return;
       loading = true;
       var s = document.createElement('script');
       s.src = '{{ "/assets/js/chaos-blaster.js" | relative_url }}';
-      s.onload = function () { window.ChaosBlaster.mount(); };
+      s.onload = function () { window.ChaosBlaster.mount(viaKeyboard); };
       document.head.appendChild(s);
     }
-    rocket.addEventListener('click', launch);
+    // Pass how the game was launched so it only returns focus (and its
+    // keyboard ring) to this background rocket for keyboard users.
+    rocket.addEventListener('click', function () { launch(false); });
     rocket.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); launch(true); }
     });
   })();
 </script>
