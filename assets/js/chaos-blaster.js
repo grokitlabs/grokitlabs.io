@@ -58,7 +58,13 @@
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
   function hits(a, b) {
-    return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+    // Use the dedicated collision hitbox (hitW/hitH) when present, so a hit
+    // registers only when the visible art actually clips the other body, not
+    // when the two generous w/h sprite boxes merely overlap. Falls back to w/h
+    // so the AABB unit test (which provides only w/h) keeps passing.
+    var aw = a.hitW != null ? a.hitW : a.w, ah = a.hitH != null ? a.hitH : a.h;
+    var bw = b.hitW != null ? b.hitW : b.w, bh = b.hitH != null ? b.hitH : b.h;
+    return Math.abs(a.x - b.x) < (aw + bw) / 2 && Math.abs(a.y - b.y) < (ah + bh) / 2;
   }
 
   function validateConfig(cfg) {
@@ -111,6 +117,7 @@
         enemies.push({
           glyph: waveDef.glyph, color: waveDef.color,
           w: waveDef.size, h: waveDef.size,
+          hitW: waveDef.size * 0.62, hitH: waveDef.size * 0.62,
           x: startX + c * spacingX, y: 130 + r * spacingY,
           homeX: startX + c * spacingX, homeY: 130 + r * spacingY,
           hp: waveDef.hp, maxHp: waveDef.hp, points: waveDef.points,
@@ -133,6 +140,7 @@
       var ang = -Math.PI / 2 + (i - (d.count - 1) / 2) * 0.7;
       bits.push({
         glyph: d.glyph, color: d.color, w: d.size, h: d.size,
+        hitW: d.size * 0.6, hitH: d.size * 0.6,
         x: enemy.x, y: enemy.y, homeX: enemy.x, homeY: enemy.y,
         hp: d.hp, maxHp: d.hp, points: d.points,
         free: true, motion: 'wander', exit: 'wrap',
@@ -293,7 +301,8 @@
       waveIndex: -1, bannerT: 0, timeSinceKill: 0, diveT: 2.5, shake: 0,
       player: {
         x: CONFIG.logical.w / 2, y: CONFIG.logical.h - 90,
-        w: CONFIG.player.w, h: CONFIG.player.h, cooldown: 0, invuln: 0
+        w: CONFIG.player.w, h: CONFIG.player.h,
+        hitW: 34, hitH: 58, cooldown: 0, invuln: 0
       },
       bullets: [], enemies: [], particles: [], stars: stars,
       formation: { x: 0, y: 0, dir: 1 }
@@ -556,66 +565,119 @@
   }
 
   // ---------------------------------------------------- player + projectiles
-  var ROCKET = {
-    bounds: { x: 136.0, y: 47.8, w: 37.95, h: 58.0 },
-    flameTopY: 89.3,
-    body: [
-      'M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z',
-      'M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z',
-      'M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z',
-      'M 142.648438 75.535156 L 136.011719 75.507812 L 136.023438 72.210938 L 142.957031 67.167969 Z',
-      'M 166.441406 75.628906 L 173.925781 75.660156 L 173.9375 72.363281 L 167.046875 67.265625 Z',
-      'M 141.578125 70.046875 L 146.746094 70.066406 C 146.730469 74.554688 150.363281 78.214844 154.847656 78.234375 C 159.335938 78.253906 162.996094 74.617188 163.015625 70.132812 L 168.1875 70.152344 C 168.15625 77.488281 162.164062 83.433594 154.828125 83.402344 C 147.492188 83.375 141.546875 77.382812 141.578125 70.046875',
-      'M 146.820312 71.164062 L 141.652344 71.164062 L 141.652344 61.070312 L 146.832031 59.570312 Z',
-      'M 163.019531 71.164062 L 168.1875 71.164062 L 168.257812 61.015625 L 163.089844 59.90625 Z',
-      'M 168.261719 61.015625 L 163.089844 61.066406 C 163.042969 56.582031 159.359375 52.96875 154.871094 53.015625 C 150.386719 53.058594 146.777344 56.746094 146.820312 61.230469 L 141.652344 61.28125 C 141.578125 53.945312 147.488281 47.917969 154.820312 47.847656 C 162.15625 47.773438 168.1875 53.679688 168.261719 61.015625'
-    ],
-    flames: [
-      'M 150.253906 89.308594 L 148.8125 105.792969 L 146.066406 105.785156 L 144.757812 89.285156 Z',
-      'M 157.324219 89.335938 L 155.898438 101.699219 L 153.152344 101.6875 L 151.824219 89.316406 Z',
-      'M 164.78125 89.367188 L 163.375 97.410156 L 160.628906 97.398438 L 159.285156 89.347656 Z'
-    ],
-    window: 'M 154.917969 56.34375 C 157.007812 56.324219 158.71875 58 158.742188 60.089844 C 158.761719 62.179688 157.082031 63.894531 154.992188 63.914062 C 152.902344 63.933594 151.191406 62.257812 151.171875 60.167969 C 151.148438 58.074219 152.828125 56.363281 154.917969 56.34375'
-  };
-  var rocketPaths = null;
-  function buildRocketPaths() {
-    rocketPaths = {
-      body: ROCKET.body.map(function (d) { return new Path2D(d); }),
-      flames: ROCKET.flames.map(function (d) { return new Path2D(d); }),
-      window: new Path2D(ROCKET.window)
-    };
-  }
+  // 8-bit pixel-art rocket — pixel-traced from the exact logo SVG
+  // (assets/logo.svg). Two 24×36 grids overlay: navy body (nose, body, fins,
+  // nozzles) + red flames (three flame tongues + porthole window). Same grid
+  // dims so the pixel scale (px) is identical — they align perfectly. The
+  // flame grid is drawn after the body, pivoted at the flame-top so the
+  // vertical flicker stretches the flames downward without distorting the body.
+  var ROCKET_BODY = [
+    '.........++++++.........',
+    '.......++++++++++.......',
+    '......++++++++++++......',
+    '.....+++++....+++++.....',
+    '.....++++......++++.....',
+    '....++++........++++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '....+++..........+++....',
+    '..+++++..........+++++..',
+    '.++++++..........++++++.',
+    '+++++++..........+++++++',
+    '++++++++........++++++++',
+    '....++++.......++++.....',
+    '.....+++++....+++++.....',
+    '......++++++++++++......',
+    '......++++++++++++......',
+    '......++++++++++++......',
+    '......+++.+++..+++......',
+    '.....++++.++++.+++......',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................'
+  ];
+  var ROCKET_FLAMES = [
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '...........==...........',
+    '..........====..........',
+    '..........====..........',
+    '..........====..........',
+    '..........===...........',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '........................',
+    '......+++.+++..+++......',
+    '......+#+.+#+..+#+......',
+    '......+#+.+#+..+#+......',
+    '......+#+.+#+..+#+......',
+    '......=#=..==...=.......',
+    '......++...++...........',
+    '......++...++...........',
+    '......++................',
+    '......++................',
+    '......++................'
+  ];
+  // Flames start at row 26 of the 36-row grid. In centered grid coords
+  // (origin at center), that's y = (26 - 18) * px, and px = s / max(24,36) =
+  // s / 36, so flameTopY = (26-18)/36 * s = s * 8/36 = s * 0.222.
+  var FLAME_TOP_FRAC = 8 / 36;
 
   function drawPlayer(p) {
-    if (!rocketPaths) buildRocketPaths();
-    var s = p.h / ROCKET.bounds.h;
     ctx.save();
     if (p.invuln > 0 && Math.floor(state.t * 12) % 2) ctx.globalAlpha = 0.35;
-    ctx.translate(p.x - (ROCKET.bounds.x + ROCKET.bounds.w / 2) * s, p.y - (ROCKET.bounds.y + ROCKET.bounds.h / 2) * s);
-    ctx.scale(s, s);
-    // exhaust glow, breathing with the flames
+    ctx.translate(p.x, p.y);
+    // exhaust glow, breathing with the flames — anchored at the flame base
     var glow = reducedMotion ? 0.45 : 0.3 + 0.3 * Math.abs(Math.sin(state.t * 23));
-    var g = ctx.createRadialGradient(155, 100, 2, 155, 100, 26);
-    g.addColorStop(0, 'rgba(255, 140, 60, ' + glow + ')');
-    g.addColorStop(1, 'rgba(255, 140, 60, 0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(129, 74, 52, 52);
-    // flames: logo shapes, length flickering independently
-    ctx.fillStyle = '#e1001a';
-    rocketPaths.flames.forEach(function (path, i) {
-      var flick = reducedMotion ? 1
-        : 0.72 + 0.38 * (0.5 + 0.5 * Math.sin(state.t * 31 + i * 2.1)) + 0.08 * Math.sin(state.t * 57 + i * 5);
-      ctx.save();
-      ctx.translate(0, ROCKET.flameTopY);
-      ctx.scale(1, flick);
-      ctx.translate(0, -ROCKET.flameTopY);
-      ctx.fill(path);
-      ctx.restore();
-    });
+    var ftY = p.h * FLAME_TOP_FRAC;
+    var gr = ctx.createRadialGradient(0, ftY, 2, 0, ftY, 30);
+    gr.addColorStop(0, 'rgba(255, 140, 60, ' + glow + ')');
+    gr.addColorStop(1, 'rgba(255, 140, 60, 0)');
+    ctx.fillStyle = gr;
+    ctx.fillRect(-30, ftY - 8, 60, 54);
+    // body — navy pixel grid centered on the player origin
     ctx.fillStyle = '#213770';
-    rocketPaths.body.forEach(function (path) { ctx.fill(path); });
+    drawPixels(ROCKET_BODY, p.h);
+    // flames — pivot at the flame-top so a vertical flicker only lengthens
+    // the flames downward (anchored at the engine nozzles)
+    ctx.save();
+    ctx.translate(0, ftY);
+    var flick = reducedMotion ? 1
+      : 0.72 + 0.38 * (0.5 + 0.5 * Math.sin(state.t * 31 + 2.1)) + 0.08 * Math.sin(state.t * 57 + 5);
+    ctx.scale(1, flick);
+    ctx.translate(0, -ftY);
     ctx.fillStyle = '#e1001a';
-    ctx.fill(rocketPaths.window);
+    drawPixels(ROCKET_FLAMES, p.h);
+    ctx.restore();
     ctx.restore();
   }
 
@@ -683,61 +745,141 @@
   }
 
   // ------------------------------------------------------------- enemies
-  // Each glyph draws centered on the origin at size s using current stroke.
+  // 8-bit pixel-art glyphs. Each glyph is a small character grid drawn filled,
+  // centered on the origin at size s. The caller sets ctx.fillStyle to the wave
+  // color before the call; glyphs derive their tones from it, so the color still
+  // carries the type identity (spec: "color + silhouette carry the type").
+  //   '.' transparent   '#' primary(wave)   '+' shade(darker)   '=' lite   '*' accent
+  function shadeHex(hex, amt) {
+    var m = /^#([0-9a-f]{6})$/i.exec(String(hex));
+    if (!m) return hex;
+    var n = parseInt(m[1], 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var f = function (v) { return amt >= 0 ? Math.round(v + (255 - v) * amt) : Math.round(v * (1 + amt)); };
+    return '#' + ((1 << 24) + (f(r) << 16) + (f(g) << 8) + f(b)).toString(16).slice(1);
+  }
+  function drawPixels(rows, s) {
+    var cols = rows[0].length, n = rows.length, px = s / Math.max(cols, n);
+    var ox = -cols * px / 2, oy = -n * px / 2, pad = 0.6;
+    var base = ctx.fillStyle, pal = {
+      '#': base, '+': shadeHex(base, -0.36), '=': shadeHex(base, 0.55), '*': '#f4f8ff'
+    };
+    for (var r = 0; r < n; r++) {
+      var line = rows[r];
+      for (var c = 0; c < cols; c++) {
+        var ch = line.charAt(c);
+        if (ch === '.') continue;
+        ctx.fillStyle = pal[ch] || base;
+        ctx.fillRect(ox + c * px, oy + r * px, px + pad, px + pad);
+      }
+    }
+    ctx.fillStyle = base;
+  }
   var GLYPHS = {
     envelope: function (s) {
-      var w = s, h = s * 0.72;
-      ctx.strokeRect(-w / 2, -h / 2, w, h);
-      ctx.beginPath();
-      ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(0, h * 0.08); ctx.lineTo(w / 2, -h / 2);
-      ctx.stroke();
+      drawPixels([
+        '############',
+        '#+........+#',
+        '#.+......+.#',
+        '#..+....+..#',
+        '#...++++...#',
+        '#..........#',
+        '#..........#',
+        '############'
+      ], s);
     },
     receipt: function (s) {
-      var w = s * 0.72, h = s;
-      ctx.beginPath();
-      ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(w / 2, -h / 2); ctx.lineTo(w / 2, h / 2);
-      ctx.lineTo(w / 4, h / 2 - 5); ctx.lineTo(0, h / 2); ctx.lineTo(-w / 4, h / 2 - 5); ctx.lineTo(-w / 2, h / 2);
-      ctx.closePath(); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(-w * 0.3, -h * 0.22); ctx.lineTo(w * 0.3, -h * 0.22);
-      ctx.moveTo(-w * 0.3, 0.02 * h); ctx.lineTo(w * 0.3, 0.02 * h);
-      ctx.stroke();
+      drawPixels([
+        '############',
+        '############',
+        '#++++++++++#',
+        '############',
+        '#++++++++++#',
+        '############',
+        '#++++++++++#',
+        '############',
+        '#++++++++++#',
+        '############',
+        '#.#.#.#.#.#.',
+        '.#.#.#.#.#.#'
+      ], s);
     },
-    lead: function (s) {
-      ctx.beginPath();
-      ctx.moveTo(0, s / 2); ctx.lineTo(-s * 0.38, -s / 2); ctx.lineTo(0, -s * 0.2); ctx.lineTo(s * 0.38, -s / 2);
-      ctx.closePath(); ctx.stroke();
+    lead: function (s) { // MISSED LEADS — winged coin, money flying away
+      drawPixels([
+        '.....++++.....',
+        '..=.+#**#+.=..',
+        '.==.+#*.#+.==.',
+        '===.+#**#+.===',
+        '.==.+#.*#+.==.',
+        '..=.+#**#+.=..',
+        '....+####+....',
+        '.....++++.....'
+      ], s);
     },
-    clock: function (s) {
-      ctx.beginPath(); ctx.arc(0, 0, s * 0.45, 0, TAU); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, 0); ctx.lineTo(0, -s * 0.3);
-      ctx.moveTo(0, 0); ctx.lineTo(s * 0.2, s * 0.08);
-      ctx.stroke();
+    clock: function (s) { // FOLLOW-UP DRIFT — clock face at 3:00
+      drawPixels([
+        '....++++....',
+        '..+######+..',
+        '.+###*####+.',
+        '+####*#####+',
+        '+####*#####+',
+        '+####*****#+',
+        '+##########+',
+        '.+########+.',
+        '..+######+..',
+        '....++++....'
+      ], s);
     },
-    sprawl: function (s) {
-      var r = s * 0.18;
-      var pts = [[-s * 0.3, s * 0.18], [s * 0.3, s * 0.18], [0, -s * 0.32]];
-      ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[2][0], pts[2][1]);
-      ctx.closePath(); ctx.stroke();
-      pts.forEach(function (p) { ctx.strokeRect(p[0] - r, p[1] - r, r * 2, r * 2); });
+    sprawl: function (s) { // TOOL SPRAWL — four office tools bunched: spreadsheet, doc, slide, design palette
+      drawPixels([
+        '#######..#######',
+        '#=====#..#=====#',
+        '#+#+#+#..#====.#',
+        '#+#+#+#..#===..#',
+        '#######..#######',
+        '................',
+        '................',
+        '#######..#######',
+        '#=====#..#=====#',
+        '#.#==.#..#*#*#*#',
+        '#.#=#.#..#=#=#=#',
+        '#######..#######'
+      ], s);
     },
-    chaos: function (s) {
-      ctx.beginPath();
-      for (var i = 0; i < 10; i++) {
-        var ang = (i / 10) * TAU;
-        var rad = i % 2 ? s * 0.22 : s * 0.5;
-        ctx[i ? 'lineTo' : 'moveTo'](Math.cos(ang) * rad, Math.sin(ang) * rad);
-      }
-      ctx.closePath(); ctx.stroke();
+    chaos: function (s) { // split bits — 8-point pixel spark
+      drawPixels([
+        '....##....',
+        '....##....',
+        '##..##..##',
+        '###.##.###',
+        '##########',
+        '##########',
+        '###.##.###',
+        '##..##..##',
+        '....##....',
+        '....##....'
+      ], s);
     },
-    boss: function (s) {
-      var w = s * 0.7, h = s * 0.5;
-      ctx.strokeRect(-w / 2, -h * 0.1, w, h);
-      ctx.beginPath(); ctx.arc(0, -h * 0.1, w * 0.32, Math.PI, 0); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, h * 0.12, s * 0.06, 0, TAU); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, h * 0.16); ctx.lineTo(0, h * 0.3); ctx.stroke();
+    boss: function (s) { // LOCK-IN — boss padlock, keyhole + rivets
+      drawPixels([
+        '....++++++++....',
+        '....++++++++....',
+        '....++....++....',
+        '....++....++....',
+        '....++....++....',
+        '....++....++....',
+        '..++++++++++++..',
+        '..+##########+..',
+        '..+*########*+..',
+        '..+###====###+..',
+        '..+##======##+..',
+        '..+###====###+..',
+        '..+####==####+..',
+        '..+####==####+..',
+        '..+####==####+..',
+        '..+*########*+..',
+        '..+##########+..',
+        '..++++++++++++..'
+      ], s);
     }
   };
 
@@ -745,8 +887,7 @@
     state.enemies.forEach(function (e) {
       ctx.save();
       ctx.translate(e.x, e.y);
-      ctx.strokeStyle = e.color;
-      ctx.lineWidth = 3;
+      ctx.fillStyle = e.color;
       if (e.maxHp > 1 && e.hp < e.maxHp) ctx.globalAlpha = 0.55 + 0.45 * (e.hp / e.maxHp);
       GLYPHS[e.glyph](e.w);
       ctx.restore();
@@ -978,15 +1119,10 @@
   }
 
   function drawMiniRocket(x, y) {
-    if (!rocketPaths) buildRocketPaths();
-    var s = 22 / ROCKET.bounds.h;
     ctx.save();
-    ctx.translate(x - (ROCKET.bounds.x + ROCKET.bounds.w / 2) * s, y - (ROCKET.bounds.y + ROCKET.bounds.h / 2) * s);
-    ctx.scale(s, s);
+    ctx.translate(x, y);
     ctx.fillStyle = '#cdd8e8';
-    rocketPaths.body.forEach(function (p2) { ctx.fill(p2); });
-    ctx.fillStyle = '#e1001a';
-    rocketPaths.flames.forEach(function (p2) { ctx.fill(p2); });
+    drawPixels(ROCKET_BODY, 33); // 33px tall; 24×36 grid → px≈0.92, width≈22
     ctx.restore();
   }
 
@@ -1004,8 +1140,7 @@
       var ly = baseY + (i - state.waveIndex) * 30;
       ctx.save();
       ctx.translate(30, ly - 5);
-      ctx.strokeStyle = w.color;
-      ctx.lineWidth = 2;
+      ctx.fillStyle = w.color;
       GLYPHS[w.glyph](16);
       ctx.restore();
       ctx.fillStyle = '#9aa9bf';
