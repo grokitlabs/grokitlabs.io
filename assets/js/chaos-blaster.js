@@ -130,13 +130,109 @@
   var input = { left: false, right: false, fire: false, touch: false, down: false, pointerX: 0, dragDx: 0 };
   var reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Stub — replaced by the real WebAudio manager in a later task.
-  var audio = {
-    init: function () {}, play: function () {}, startMusic: function () {},
-    stopMusic: function () {}, setRate: function () {}, suspend: function () {},
-    resume: function () {}, toggleMuted: function () { return true; },
-    isMuted: function () { return true; }
-  };
+  // -------------------------------------------------------------- audio
+  // File-based: each sound is an OGG (MP3 fallback) under CONFIG.audio.basePath.
+  // Upgrading a sound later = dropping in a new file with the same name.
+  // Every failure path is silent — the game never depends on audio loading.
+  var audio = (function () {
+    var actx = null, master = null, musicGainNode = null, musicSrc = null;
+    var buffers = {};
+    var wantMusic = false;
+    var rate = 1;
+    var muted = false;
+    try { muted = localStorage.getItem(CONFIG.storage.muted) === '1'; } catch (e) {}
+
+    function init() {
+      if (!actx) {
+        var AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
+        if (!AC) return;
+        try { actx = new AC(); } catch (e) { return; }
+        master = actx.createGain();
+        master.gain.value = muted ? 0 : 1;
+        master.connect(actx.destination);
+        musicGainNode = actx.createGain();
+        musicGainNode.gain.value = CONFIG.audio.musicGain;
+        musicGainNode.connect(master);
+        CONFIG.audio.files.forEach(load);
+      }
+      resume();
+    }
+
+    function load(name) {
+      var tryFormat = function (fi) {
+        if (fi >= CONFIG.audio.formats.length) return; // give up quietly
+        fetch(CONFIG.audio.basePath + name + '.' + CONFIG.audio.formats[fi])
+          .then(function (res) {
+            if (!res.ok) throw new Error('http ' + res.status);
+            return res.arrayBuffer();
+          })
+          .then(function (ab) { return actx.decodeAudioData(ab); })
+          .then(function (buf) {
+            buffers[name] = buf;
+            if (name === 'soundtrack' && wantMusic) startMusic();
+          })
+          .catch(function () { tryFormat(fi + 1); });
+      };
+      tryFormat(0);
+    }
+
+    function play(name) {
+      if (!actx || !buffers[name] || muted) return;
+      try {
+        var src = actx.createBufferSource();
+        src.buffer = buffers[name];
+        var g = actx.createGain();
+        g.gain.value = CONFIG.audio.sfxGain;
+        src.connect(g);
+        g.connect(master);
+        src.start();
+      } catch (e) { /* never let audio break gameplay */ }
+    }
+
+    function startMusic() {
+      wantMusic = true;
+      if (!actx || !buffers.soundtrack || musicSrc) return;
+      try {
+        musicSrc = actx.createBufferSource();
+        musicSrc.buffer = buffers.soundtrack;
+        musicSrc.loop = true;
+        musicSrc.playbackRate.value = rate;
+        musicSrc.connect(musicGainNode);
+        musicSrc.start();
+      } catch (e) { musicSrc = null; }
+    }
+
+    function stopMusic() {
+      wantMusic = false;
+      if (musicSrc) {
+        try { musicSrc.stop(); } catch (e) {}
+        musicSrc = null;
+      }
+    }
+
+    function setRate(r) {
+      rate = r;
+      if (musicSrc) musicSrc.playbackRate.value = r;
+    }
+
+    function suspend() { if (actx && actx.state === 'running') actx.suspend(); }
+    function resume() { if (actx && actx.state === 'suspended') actx.resume(); }
+
+    function toggleMuted() {
+      muted = !muted;
+      try { localStorage.setItem(CONFIG.storage.muted, muted ? '1' : '0'); } catch (e) {}
+      if (master) master.gain.value = muted ? 0 : 1;
+      return muted;
+    }
+
+    function isMuted() { return muted; }
+
+    return {
+      init: init, play: play, startMusic: startMusic, stopMusic: stopMusic,
+      setRate: setRate, suspend: suspend, resume: resume,
+      toggleMuted: toggleMuted, isMuted: isMuted
+    };
+  })();
 
   function readHighScore() {
     try { return Number(localStorage.getItem(CONFIG.storage.highScore)) || 0; } catch (e) { return 0; }
