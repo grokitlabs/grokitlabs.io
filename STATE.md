@@ -12,10 +12,17 @@ simple and fast. Local preview: `jekyll serve` → http://localhost:4000.
   scene. The rocket is clickable and launches **Chaos Blaster** (below).
 - `assets/js/chaos-blaster.js` — hidden Galaga-style game (2026-07-10),
   fully self-contained, lazy-loaded on first rocket click. Waves, copy,
-  difficulty, and audio manifest all live in the `CONFIG` object at the top.
-- `assets/audio/chaos-blaster/` — game audio, rendered by
-  `tools/gen-audio/gen-audio.mjs` (re-run to regenerate; needs ffmpeg).
-  Replace files under the same names to upgrade sounds.
+  difficulty, and audio manifest live in the `CONFIG` object at the top.
+  Enemy appearance (glyph) is decoupled from behavior: per-wave `behavior`
+  + `dive`/`split` config and per-enemy `motion`/`exit` fields, so aliens
+  can be re-themed without touching logic. 8-bit lettering (Press Start 2P,
+  lazy-loaded on open; game only, not the storefront).
+- `assets/audio/chaos-blaster/` — game audio. SFX are synthesized by
+  `tools/gen-audio/gen-audio.mjs`; `soundtrack.ogg/.mp3` is the licensed
+  "Space Main Theme" trimmed to a seamless ~38s loop by
+  `tools/gen-audio/trim-soundtrack.mjs` (source in gitignored
+  `tools/gen-audio/source/`). Both need ffmpeg. Replace files under the
+  same names to upgrade sounds.
 - `_writing/` + `writing/` + `_layouts`/`_includes` — the content system for
   posts; drafts workflow documented in `README.md`.
 - `tests/` — `node --test tests/*.test.mjs` covers the game's pure logic.
