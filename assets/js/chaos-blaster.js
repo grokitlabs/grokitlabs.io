@@ -8,7 +8,7 @@
 
   var CONFIG = {
     logical: { w: 720, h: 960 },
-    player: { w: 56, h: 84, speed: 430, fireInterval: 0.16, bulletSpeed: 680, lives: 3, invulnSec: 2 },
+    player: { w: 56, h: 84, speed: 430, fireInterval: 0.36, bulletSpeed: 680, lives: 3, invulnSec: 2 },
     bullet: { w: 5, h: 16 },
     score: { waveClearBonus: 500 },
     storage: {
@@ -35,9 +35,10 @@
       linkHref: 'mailto:hello@grokitlabs.io'
     },
     waves: [
-      { name: 'INBOX OVERLOAD',   glyph: 'envelope', color: '#6f9bd8', cols: 6, rows: 2, size: 34,  hp: 1,  points: 50,   speed: 42, behavior: 'drift' },
+      { name: 'INBOX OVERLOAD',   glyph: 'envelope', color: '#6f9bd8', cols: 6, rows: 2, size: 34,  hp: 1,  points: 50,   speed: 42, behavior: 'drift', 
+        dive: { interval: 1.0 } },
       { name: 'RECEIPT BLIZZARD', glyph: 'receipt',  color: '#cdd8e8', cols: 7, rows: 3, size: 30,  hp: 1,  points: 60,   speed: 58, behavior: 'flutter',
-        dive: { interval: 3.0 } },
+        dive: { interval: 1.0 } },
       { name: 'MISSED LEADS',     glyph: 'lead',     color: '#e4b54a', cols: 6, rows: 2, size: 34,  hp: 1,  points: 80,   speed: 64, behavior: 'drift',
         dive: { interval: 2.0 } },
       { name: 'FOLLOW-UP DRIFT',  glyph: 'clock',    color: '#a07bd8', cols: 6, rows: 2, size: 34,  hp: 2,  points: 90,   speed: 66, behavior: 'regroup',
@@ -83,13 +84,25 @@
           errs.push(at + 'split: size/hp/points/speed invalid');
         }
       }
-      if (w.dive && !(w.dive.interval > 0)) errs.push(at + 'dive: interval must be > 0');
+      if (w.dive) {
+        if (!(w.dive.interval > 0)) errs.push(at + 'dive: interval must be > 0');
+        if (w.dive.max != null && !(w.dive.max >= 1)) errs.push(at + 'dive: max must be >= 1');
+        if (w.dive.speed != null && !(w.dive.speed > 0)) errs.push(at + 'dive: speed must be > 0');
+      }
     });
     return errs;
   }
 
+  // motion  = how an enemy moves when it's free (not sitting in formation):
+  //           'dive' (toward the player), 'orbit' (boss), 'wander' (chaos bits).
+  // exit    = what happens when a free enemy passes the bottom edge:
+  //           'return' (fly back to its formation slot) or 'wrap' (reappear up top).
+  // Both are set here at spawn and are INDEPENDENT of glyph — glyph is now
+  // purely the drawn shape, so aliens can be renamed/redesigned without
+  // touching any behavior.
   function spawnWave(waveDef, logical) {
     var enemies = [];
+    var isBoss = waveDef.behavior === 'boss';
     var spacingX = waveDef.size * 1.7;
     var spacingY = waveDef.size * 1.6;
     var startX = (logical.w - (waveDef.cols - 1) * spacingX) / 2;
@@ -101,7 +114,10 @@
           x: startX + c * spacingX, y: 130 + r * spacingY,
           homeX: startX + c * spacingX, homeY: 130 + r * spacingY,
           hp: waveDef.hp, maxHp: waveDef.hp, points: waveDef.points,
-          free: false, vx: 0, vy: 0, phase: Math.random() * TAU,
+          free: isBoss,
+          motion: isBoss ? 'orbit' : 'dive',
+          exit: isBoss ? 'none' : 'return',
+          vx: 0, vy: 0, phase: Math.random() * TAU,
           splitDef: waveDef.split || null, splitCredit: 0, turnT: 0
         });
       }
@@ -119,7 +135,7 @@
         glyph: d.glyph, color: d.color, w: d.size, h: d.size,
         x: enemy.x, y: enemy.y, homeX: enemy.x, homeY: enemy.y,
         hp: d.hp, maxHp: d.hp, points: d.points,
-        free: true,
+        free: true, motion: 'wander', exit: 'wrap',
         vx: Math.cos(ang) * d.speed,
         vy: Math.sin(ang) * d.speed * 0.6 + 40,
         phase: Math.random() * TAU,
@@ -742,21 +758,32 @@
       }
     }
     if (wave.dive) {
-      state.diveT -= dt;
-      if (state.diveT <= 0) {
-        state.diveT = wave.dive.interval;
-        var slotted = state.enemies.filter(function (e) { return !e.free; });
-        if (slotted.length) {
-          var d = slotted[Math.floor(Math.random() * slotted.length)];
-          d.free = true;
-          d.vx = (state.player.x - d.x) * 0.6;
-          d.vy = wave.speed * 3.2;
-          audio.play('dive');
+      var cap = wave.dive.max || 2;
+      var activeDivers = 0;
+      for (var di = 0; di < state.enemies.length; di++) {
+        if (state.enemies[di].free && state.enemies[di].motion === 'dive') activeDivers++;
+      }
+      // The timer only advances while there's room to dive, so `interval` is
+      // the minimum spacing between dives and `max` is the concurrency cap —
+      // the two tune independently, and no swarm builds up when a fast
+      // interval outruns how long a dive takes to complete.
+      if (activeDivers < cap) {
+        state.diveT -= dt;
+        if (state.diveT <= 0) {
+          state.diveT = wave.dive.interval;
+          var slotted = state.enemies.filter(function (e) { return !e.free; });
+          if (slotted.length) {
+            var d = slotted[Math.floor(Math.random() * slotted.length)];
+            d.free = true;
+            d.vx = (state.player.x - d.x) * 0.6;
+            d.vy = wave.dive.speed || wave.speed * 3.2;
+            audio.play('dive');
+          }
         }
       }
     }
     state.enemies.forEach(function (e) {
-      if (e.glyph === 'boss') {
+      if (e.motion === 'orbit') {
         e.free = true;
         e.phase += dt;
         e.x = CONFIG.logical.w / 2 + Math.sin(e.phase * 0.8) * (CONFIG.logical.w / 2 - 120);
@@ -764,7 +791,7 @@
         return;
       }
       if (e.free) {
-        if (e.glyph === 'chaos') {
+        if (e.motion === 'wander') {
           e.turnT -= dt;
           if (e.turnT <= 0) {
             e.turnT = 0.5 + Math.random() * 0.5;
@@ -778,8 +805,8 @@
         e.x += e.vx * dt;
         e.y += e.vy * dt;
         if (e.y > CONFIG.logical.h + e.h) {
-          if (e.glyph === 'chaos') {
-            e.y = -e.h; // wraps back in — pressure stays until it's dealt with
+          if (e.exit === 'wrap') {
+            e.y = -e.h; // reappears up top — pressure stays until it's dealt with
           } else {
             // Missed the player — return to formation. Reposition now
             // (not just next frame): collide()'s breach check runs later
@@ -845,12 +872,19 @@
         if (hits(p, state.enemies[j])) { playerHit(); break; }
       }
     }
-    for (var k = 0; k < state.enemies.length; k++) {
-      var e = state.enemies[k];
-      if (p.invuln <= 0 && !e.free && e.y > CONFIG.logical.h - 190) {
+    // Breach: the standing formation has marched down to the player. Keyed
+    // off the formation's nominal descent (lowest in-formation slot + the
+    // shared y offset), never a live enemy y — so a diver that just returned
+    // to its slot can't be misread as the whole wave breaching.
+    if (p.invuln <= 0) {
+      var lowestHomeY = -Infinity;
+      for (var k = 0; k < state.enemies.length; k++) {
+        var e = state.enemies[k];
+        if (!e.free && e.homeY > lowestHomeY) lowestHomeY = e.homeY;
+      }
+      if (lowestHomeY > -Infinity && lowestHomeY + state.formation.y > CONFIG.logical.h - 190) {
         playerHit();
-        state.formation.y -= 240; // breach pushes the wave back up
-        break;
+        state.formation.y -= 240; // push the wave back up
       }
     }
   }

@@ -14,7 +14,6 @@ const SR = 44100;
 const TAU = Math.PI * 2;
 
 // ---------------------------------------------------------------- synth
-const F = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
 const buf = (sec) => new Float32Array(Math.round(sec * SR));
 
 function tone(sec, f0, f1 = f0, type = 'square', gain = 1) {
@@ -68,38 +67,17 @@ function seq(notes, type, gain) {
   return out;
 }
 
-// Doom loop: 24 bars at 108 BPM (~53 s). Am-F-Dm-E pulse bass + minor arpeggio
-// + a high "alarm" bend every 4th bar. Tail is crossfaded onto the head so the
-// file loops seamlessly.
-function song() {
-  const beat = 60 / 108;
-  const bar = beat * 4;
-  const bars = 24;
-  const xfade = 0.06;
-  const out = buf(bars * bar + xfade);
-  const prog = [45, 45, 41, 41, 38, 38, 40, 40]; // A2 A2 F2 F2 D2 D2 E2 E2
-  const arp = [0, 3, 7, 12];
-  for (let b = 0; b < bars; b++) {
-    const root = prog[b % prog.length];
-    const t0 = b * bar;
-    for (let i = 0; i < 8; i++)
-      mix(out, shaped(decay(tone(beat * 0.5, F(root), F(root), 'saw', 0.5), 3)), t0 + i * beat * 0.5, 0.8);
-    for (let i = 0; i < 16; i++) {
-      const n = root + 24 + arp[i % 4];
-      mix(out, shaped(decay(tone(beat * 0.25, F(n), F(n), 'square', 0.22), 5)), t0 + i * beat * 0.25, 0.7);
-    }
-    if (b % 4 === 3)
-      mix(out, shaped(decay(tone(beat, F(root + 36), F(root + 36) * 0.97, 'sine', 0.3), 2)), t0 + 3 * beat, 0.8);
-  }
-  const n = Math.round(xfade * SR);
-  const body = out.slice(0, out.length - n);
-  for (let i = 0; i < n; i++)
-    body[i] = body[i] * (i / n) + out[out.length - n + i] * (1 - i / n);
-  return body;
-}
-
 const SOUNDS = {
-  fire: () => shaped(decay(tone(0.14, 1500, 320, 'square', 0.7), 4)),
+  // Richer arcade "pew": two detuned square sweeps (one an octave down for
+  // body) + a short noise transient at the attack. Evocative of a Galaga
+  // shot without copying it.
+  fire: () => {
+    const a = tone(0.18, 1500, 300, 'square', 0.5);
+    mix(a, tone(0.18, 760, 150, 'square', 0.28));   // sub-octave body
+    mix(a, tone(0.16, 2100, 520, 'square', 0.12));  // bright detuned overtone
+    mix(a, decay(tone(0.02, 0, 0, 'noise', 0.45), 8)); // click transient
+    return shaped(decay(a, 3.4), 0.001, 0.05);
+  },
   hit: () => {
     const b = tone(0.1, 640, 460, 'square', 0.55);
     mix(b, tone(0.05, 0, 0, 'noise', 0.35));
@@ -119,7 +97,9 @@ const SOUNDS = {
   },
   gameover: () => seq([[440, 0.22], [329.63, 0.22], [261.63, 0.22], [220, 0.5]], 'square', 0.45),
   victory: () => seq([[440, 0.14], [523.25, 0.14], [659.25, 0.14], [880, 0.4]], 'square', 0.5),
-  soundtrack: song,
+  // NOTE: soundtrack.ogg/.mp3 is NOT generated here — it's the licensed track
+  // trimmed to a seamless loop by trim-soundtrack.mjs. Re-running this script
+  // regenerates only the SFX and leaves the soundtrack files untouched.
 };
 
 // ------------------------------------------------------------ WAV writer

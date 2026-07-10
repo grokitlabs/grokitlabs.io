@@ -67,13 +67,31 @@ test('splitEnemy: no splitDef -> no bits', () => {
   assert.deepEqual(splitEnemy(e), []);
 });
 
-test('validateConfig flags a non-positive dive.interval', () => {
-  const bad = JSON.parse(JSON.stringify(CONFIG));
-  bad.waves[2].dive = { interval: 0 };
-  const errs = validateConfig(bad);
-  assert.ok(errs.some((e) => e.includes('dive')));
+test('validateConfig flags a non-positive dive.interval and a bad dive.max', () => {
+  const badInterval = JSON.parse(JSON.stringify(CONFIG));
+  badInterval.waves[2].dive = { interval: 0 };
+  assert.ok(validateConfig(badInterval).some((e) => e.includes('dive: interval')));
+
+  const badMax = JSON.parse(JSON.stringify(CONFIG));
+  badMax.waves[2].dive = { interval: 1, max: 0 };
+  assert.ok(validateConfig(badMax).some((e) => e.includes('dive: max')));
 });
 
-test('every wave but the tutorial and the boss has diving enemies', () => {
-  assert.deepEqual(CONFIG.waves.map((w) => !!w.dive), [false, true, true, true, true, false]);
+test('motion/exit are set at spawn independent of glyph', () => {
+  // formation enemies dive and return to their slot
+  for (const e of spawnWave(CONFIG.waves[0], { w: 720, h: 960 })) {
+    assert.equal(e.free, false);
+    assert.equal(e.motion, 'dive');
+    assert.equal(e.exit, 'return');
+  }
+  // the boss orbits and is free from the start
+  const boss = spawnWave(CONFIG.waves[5], { w: 720, h: 960 })[0];
+  assert.equal(boss.free, true);
+  assert.equal(boss.motion, 'orbit');
+  // chaos bits wander and wrap
+  const parent = spawnWave(CONFIG.waves[4], { w: 720, h: 960 })[0];
+  for (const b of splitEnemy(parent)) {
+    assert.equal(b.motion, 'wander');
+    assert.equal(b.exit, 'wrap');
+  }
 });
