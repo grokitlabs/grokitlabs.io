@@ -234,6 +234,9 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
     if(playing){
       vt = ts - clockStart;
       for(const c of cues){ if(!c.done && vt>=c.at){ c.done=true; c.fn(); } }
+      // fire the finale the instant the crawl block leaves the top of the
+      // screen — viewport-independent, so no dead black gap on tall phones.
+      if(crawlRunning && !finaleFired && crawl3d.getBoundingClientRect().bottom < 0) scheduleFinale();
     }
     requestAnimationFrame(frame);
   })(performance.now());
@@ -290,10 +293,10 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
 
   const show=e=>{e.classList.add('show');e.classList.remove('hide');};
   const hide=e=>{e.classList.add('hide');e.classList.remove('show');};
-  let finaleFired=false;
+  let finaleFired=false, crawlRunning=false;
 
   function scheduleFinale(){
-    if(finaleFired) return; finaleFired=true; ended=false;
+    if(finaleFired) return; finaleFired=true; crawlRunning=false; ended=false;
     hide(crawlScene); el.topFade.classList.remove('show');
     cueIn(200,  ()=>{show(finaleEl);finaleEl.classList.add('run');drift=0.05;});
     cueIn(2600, ()=>{ shootActive=true; });                       // shooting stars after the title lands
@@ -322,8 +325,12 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
       cueAt(showAt, ()=>{ show(node); if(s.type==='def') drift=0.08; });
       if(s.music) cueAt(showAt, startPlayback);
       if(s.type==='crawl'){
-        cueAt(showAt, ()=>{ crawlScene.classList.add('run'); el.topFade.classList.add('show'); drift=0.07; });
-        // finale fires on the crawl's animationend (primary); fallback cue in case it is missed
+        cueAt(showAt, ()=>{ crawlScene.classList.add('run'); el.topFade.classList.add('show'); drift=0.07; crawlRunning=true; });
+        // finale fires when the last line actually clears the top of the
+        // screen (measured in the frame loop) — NOT at the crawl's -66vh
+        // endpoint, which overshoots and left a ~10s black gap on tall mobile
+        // viewports. animationend + this cue are backups for reduced-motion
+        // (static crawl) and any missed frame.
         cueAt(showAt + CFG.crawl.run + 2000, scheduleFinale);
         at = showAt + CFG.crawl.run;   // crawl "ends" when the animation ends
       }else{
