@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
-<title>Chatronaut Academy</title>
+<title>Chatronaut Academy - cold open</title>
+<!--
+  GENERATED SCENES + TIMING come from site/intro-content.yml via build.rb.
+  Edit copy and pacing THERE, not here. This file is the ENGINE
+  (starfield, audio, the pausable virtual clock). GL-068.
+-->
 <style>
   :root{
     --void:#0b0d17; --ink:#e9edf8; --dim:#7d87a8; --cyan:#7dd3fc; --gold:#fbd38d; --border:#242b4d;
@@ -23,7 +23,7 @@
   .scene.show{opacity:1;transition:opacity 3s ease}
   .scene.hide{opacity:0;transition:opacity 3s ease}
 
-  /* credit cards (A GrokitLabs Production / A good boy training / In collaboration with The Internet) */
+  /* credit cards */
   .credit .small{letter-spacing:.42em;text-transform:uppercase;font-size:clamp(.7rem,2.4vw,1rem);color:var(--dim)}
   .credit .big{font-family:var(--serif);font-size:clamp(1.5rem,5.4vw,2.7rem);color:var(--ink);margin-top:.7rem;
     line-height:1.3;display:inline-flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center}
@@ -48,7 +48,7 @@
   #crawlPersp{position:absolute;inset:0;overflow:hidden;perspective:300px;perspective-origin:50% 40%}
   #crawl3d{position:absolute;top:0;left:50%;width:min(44rem,88vw);
     transform:translate(-50%,120vh) rotateX(18deg);transform-origin:50% 50%;color:var(--gold)}
-  #crawlScene.run #crawl3d{animation:crawl 27s linear forwards}   /* ends as the last line leaves the readable band */
+  #crawlScene.run #crawl3d{animation:crawl var(--crawl-run,27s) linear forwards}   /* duration set from config */
   #crawl3d p{font-family:var(--sans);font-weight:600;font-size:clamp(1.3rem,4.6vw,2.05rem);
     line-height:1.5;text-align:center;margin:0 0 1.9rem;text-shadow:0 0 18px rgba(251,211,141,.2)}
   #crawl3d p.dim{color:#e6b877}
@@ -69,6 +69,19 @@
   #finale.run .sub{animation:fadeIn 2.6s ease 5.5s forwards}
   @keyframes fadeIn{to{opacity:.92}}
   @keyframes resolve{0%{transform:scale(.82);opacity:0}30%{opacity:1}100%{transform:scale(1);opacity:1}}
+
+  /* PAUSE: freeze the crawl and finale CSS animations in place (GL-068).
+     Timers and audio are frozen in JS; these keep the visuals in lockstep. */
+  #stage.paused #crawlScene.run #crawl3d,
+  #stage.paused #finale.run .mark,
+  #stage.paused #finale.run .sub{animation-play-state:paused}
+
+  /* pause/play glyph: flashes on toggle, then fades */
+  #pauseGlyph{position:fixed;inset:0;z-index:7;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;opacity:0;transition:opacity .45s ease}
+  #pauseGlyph.flash{opacity:1;transition:opacity .12s ease}
+  #pauseGlyph span{font-size:clamp(3rem,12vw,6rem);color:var(--ink);opacity:.9;
+    text-shadow:0 0 40px rgba(11,13,23,.9);line-height:1}
 
   .ui{position:fixed;z-index:6;left:50%;transform:translateX(-50%)}
   #startWrap{inset:0;left:0;transform:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.4rem}
@@ -97,69 +110,72 @@
     #crawlScene{overflow:auto;display:block}
   }
 </style>
-</head>
-<body>
+
 <div id="stage">
   <canvas id="stars"></canvas>
   <audio id="track" src="/assets/chatronaut/arcade-skyline.mp3" preload="auto"></audio>
 
   <div id="startWrap" class="ui">
-    <button id="start">▶ Play the cold open</button>
+    <button id="start">&#9654; Play the cold open</button>
     <p>~85 seconds &middot; sound on</p>
   </div>
 
-  <section id="prod" class="scene credit" aria-hidden="true">
-    <div><div class="small">A</div><div class="big"><b>GrokitLabs</b> Production</div></div>
-  </section>
+  <section id="credit0" class="scene credit" aria-hidden="true">
+  <div><div class="small">A</div><div class="big"><b>GrokitLabs</b> Production</div></div>
+</section>
 
-  <section id="goodboy" class="scene credit" aria-hidden="true">
-    <div><div class="big">A good boy training
-      <img class="tjlogo" src="/assets/chatronaut/tj-cartoon.png" alt="TJ the golden retriever"></div></div>
-  </section>
+<section id="credit1" class="scene credit" aria-hidden="true">
+  <div><div class="big">A <b>Good Boy</b> Training <img class="tjlogo" src="/assets/chatronaut/tj-cartoon.png" alt="TJ the golden retriever"></div></div>
+</section>
 
-  <section id="collab" class="scene credit" aria-hidden="true">
-    <div><div class="big">In collaboration with<br><b>The Internet</b></div></div>
-  </section>
+<section id="credit2" class="scene credit" aria-hidden="true">
+  <div><div class="small">In collaboration with</div><div class="big"><b>The Internet</b></div></div>
+</section>
 
-  <section id="def" class="scene" aria-hidden="true">
-    <div class="inner">
-      <div class="word">Chatronaut</div>
-      <div class="phon">/ˈtʃat.rə.nɔːt/</div>
-      <div class="pos">noun &middot; <span style="font-style:normal">plural</span> <i>-nauts</i></div>
-      <ol>
-        <li><b>1.</b> An internet-savvy user who learned to fly the machine instead of fearing it; one who gets real work out of AI and knows exactly when <i>not</i> to trust it.</li>
+<section id="def" class="scene" aria-hidden="true">
+  <div class="inner">
+    <div class="word">Chatronaut</div>
+    <div class="phon">/ˈtʃat.rə.nɔːt/</div>
+    <div class="pos">noun · plural <i>-nauts</i></div>
+    <ol>
+    <li><b>1.</b> An internet-savvy user who learned to fly the machine instead of fearing it; one who gets real work out of AI and knows exactly when <i>not</i> to trust it.</li>
         <li><b>2.</b> Not a prompt engineer. Not a mark for the hype. A pilot.</li>
-      </ol>
-    </div>
-  </section>
+    </ol>
+  </div>
+</section>
 
-  <section id="crawlScene" class="scene" aria-hidden="true">
-    <div id="crawlPersp"><div id="crawl3d">
-      <p>Welcome to the future.</p>
+<section id="crawlScene" class="scene" aria-hidden="true">
+  <div id="crawlPersp"><div id="crawl3d">
+  <p>Welcome to the future.</p>
       <p class="dim">For decades you searched. You hunted. You typed fragments into a box and hoped someone else had already written the answer.</p>
-      <p>But now AI chat is here&hellip;</p>
-      <p class="dim">&hellip;and you still use it like Google.</p>
+      <p>But now AI chat is here…</p>
+      <p class="dim">…and you still use it like Google.</p>
       <p>We're here to fix that.</p>
-      <p>To transform you&hellip;</p>
-      <p>&hellip;into a Chatronaut.</p>
-      <p class="last">Welcome to&hellip;</p>
-    </div></div>
-  </section>
+      <p>To transform you…</p>
+      <p>…into a Chatronaut.</p>
+      <p class="last">Welcome to…</p>
+  </div></div>
+</section>
+
+<section id="finale" class="scene" aria-hidden="true">
+  <div class="mark">THE CHATRONAUT ACADEMY</div>
+  <div class="sub">Flight One · The Ground Floor</div>
+</section>
+
+
   <div id="topFade"></div>
 
-  <section id="finale" class="scene" aria-hidden="true">
-    <div class="mark">THE CHATRONAUT ACADEMY</div>
-    <div class="sub">Flight One &middot; The Ground Floor</div>
-  </section>
+  <div id="pauseGlyph"><span>&#10073;&#10073;</span></div>
 
   <button id="mute" class="ui">&#9834; sound on</button>
   <div id="endWrap" class="ui">
-    <a id="enter" href="#">Enter the Academy &rarr;</a>
+    <a id="enter" href="/chatronaut/">Enter the Academy &rarr;</a>
     <button id="replay">&#8635; replay intro</button>
   </div>
 </div>
 
 <script>
+const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",type:"credit",gap:3000,hold:7000,music:true},{id:"credit2",type:"credit",gap:3500,hold:7000},{id:"def",type:"def",gap:3500,hold:9000},{id:"crawlScene",type:"crawl",gap:2000}],crawl:{run:27000},finale:{musicRide:12000,ctaIn:14000}};
 (() => {
   const cv=document.getElementById('stars'), cx=cv.getContext('2d');
   let W,H,stars=[],drift=0.05;
@@ -187,32 +203,51 @@
       r:(Math.random()*1.4+0.3)*devicePixelRatio,tw:Math.random()*Math.PI*2}));}
   resize();addEventListener('resize',resize);
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ----- the pausable virtual clock -----
+  // Sequence cues fire off `vt` (virtual ms), which advances only while
+  // playing. The starfield loop below is ambient and runs continuously; it
+  // is deliberately NOT paused. `paused` freezes: the cue clock, the crawl/
+  // finale CSS animations (via #stage.paused), and audio (suspend/pause).
+  let vt=0, playing=false, started=false, ended=false, lastTs=0, cues=[];
+  function cueAt(at,fn){ cues.push({at,fn,done:false}); }
+  function cueIn(delay,fn){ cueAt(vt+delay,fn); }
+
   let t=0;
-  (function frame(){t+=0.016;cx.clearRect(0,0,W,H);
+  (function frame(ts){
+    // starfield time (real, ambient) + twinkle
+    t+=0.016;cx.clearRect(0,0,W,H);
     for(const s of stars){if(!reduce){s.y+=drift*s.z*devicePixelRatio;if(s.y>H)s.y=0;}
       const a=0.5+0.5*Math.sin(s.tw+t*1.6*s.z);cx.beginPath();cx.arc(s.x,s.y,s.r,0,7);
       cx.fillStyle=`rgba(230,240,255,${(0.35+0.55*a)*s.z})`;cx.fill();}
     if(shootActive && !reduce && t-lastShot>0.85){lastShot=t;spawnShooter();if(Math.random()<0.4)spawnShooter();}
     for(let i=shooters.length-1;i>=0;i--){const sh=shooters[i];sh.p+=sh.spd;if(sh.p>1){shooters.splice(i,1);continue;}drawShooter(sh);}
-    requestAnimationFrame(frame);})();
 
-  const ids=['prod','goodboy','collab','def','crawlScene','finale'];
-  const el={}; ids.forEach(i=>el[i]=document.getElementById(i));
-  const crawl3d=document.getElementById('crawl3d'), topFade=document.getElementById('topFade'),
+    // virtual clock: advance only while playing, then fire due cues
+    if(lastTs){
+      if(playing) vt += (ts-lastTs);
+      for(const c of cues){ if(!c.done && vt>=c.at){ c.done=true; c.fn(); } }
+    }
+    lastTs=ts;
+    requestAnimationFrame(frame);
+  })(performance.now());
+
+  const el={};
+  ['topFade'].forEach(i=>el[i]=document.getElementById(i));
+  const stage=document.getElementById('stage'),
+        crawlScene=document.getElementById('crawlScene'),
+        crawl3d=document.getElementById('crawl3d'),
+        finaleEl=document.getElementById('finale'),
         startWrap=document.getElementById('startWrap'), replay=document.getElementById('replay'),
         mute=document.getElementById('mute'), track=document.getElementById('track'),
-        endWrap=document.getElementById('endWrap');
-  // Web Audio path: an <audio> element is silenced by the iPhone ring/silent
-  // switch no matter what the on-screen toggle says; AudioContext output
-  // ignores that switch. The buffer is decoded straight from the base64
-  // data-URI via atob() -- NOT fetch() -- because the published artifact's
-  // CSP blocks fetch of a data: URI (connect-src), which silenced everything.
-  // If Web Audio is unavailable we fall back to the plain <audio> element.
+        endWrap=document.getElementById('endWrap'), pauseGlyph=document.getElementById('pauseGlyph');
+  const byId=i=>document.getElementById(i);
+
+  // ----- audio (preserved from the shipped intro; do not refactor) -----
+  // <audio> is silenced by the iPhone ring/silent switch; AudioContext output
+  // ignores it. Same-origin mp3 is fetched + decoded into a buffer; if Web
+  // Audio is unavailable we fall back to the plain <audio> element.
   let actx=null, gain=null, srcNode=null, audioBuf=null, audioReady=false, muted=false, useEl=false;
-  function b64buf(uri){
-    const bin=atob(uri.split(',')[1]); const u=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u.buffer;
-  }
   function unlockAudio(){
     if(useEl){ return; }
     if(actx){ if(actx.state==='suspended') actx.resume(); return; }
@@ -224,7 +259,9 @@
       if(actx.state==='suspended') actx.resume();
     }catch(e){ useEl=true; }
   }
+  let musicPlaying=false;
   function startPlayback(){
+    musicPlaying=true;
     if(useEl){ try{track.currentTime=0;track.muted=muted;track.volume=1;track.play();}catch(e){} return; }
     if(!actx){ return; }
     if(!audioReady){ setTimeout(startPlayback,120); return; }   // wait for decode
@@ -234,38 +271,6 @@
     gain.gain.setValueAtTime(muted?0:1, actx.currentTime);
     srcNode.connect(gain); try{ srcNode.start(0); }catch(e){}
   }
-  const timers=[]; const at=(ms,fn)=>timers.push(setTimeout(fn,ms));
-  const show=e=>{e.classList.add('show');e.classList.remove('hide');};
-  const hide=e=>{e.classList.add('hide');e.classList.remove('show');};
-  let finaleFired=false;
-
-  function run(){
-    timers.forEach(clearTimeout);timers.length=0;
-    ids.forEach(i=>el[i].classList.remove('show','hide','run'));
-    topFade.classList.remove('show'); void crawl3d.offsetWidth;
-    endWrap.classList.remove('show'); startWrap.style.display='none'; mute.classList.add('show');
-    finaleFired=false; shootActive=false; shooters=[];
-    try{ if(srcNode){srcNode.stop();srcNode.disconnect();srcNode=null;} }catch(e){}
-    if(gain){ gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.value=muted?0:1; }
-    if(useEl){ try{track.pause();track.currentTime=0;track.volume=1;}catch(e){} }
-
-    // 1 - A GrokitLabs Production (silent, ~6.4s on screen)
-    at(600,   ()=>show(el.prod));
-    at(7000,  ()=>hide(el.prod));
-    // 2 - A good boy training [TJ]  + MUSIC STARTS
-    at(10000, ()=>{show(el.goodboy); startPlayback();});
-    at(17000, ()=>hide(el.goodboy));
-    // 3 - In collaboration with The Internet
-    at(20500, ()=>show(el.collab));
-    at(27500, ()=>hide(el.collab));
-    // 4 - the definition (long dark beat, then a slow fade in)
-    at(31000, ()=>{show(el.def);drift=0.08;});
-    at(40000, ()=>hide(el.def));
-    // 5 - the crawl (starts ~42s; finale fires on ITS animationend, not a guessed clock)
-    at(42000, ()=>{show(el.crawlScene);el.crawlScene.classList.add('run');topFade.classList.add('show');drift=0.07;});
-    // fallback in case animationend is missed (duration 27s + margin)
-    at(42000 + 27000 + 2000, showFinale);
-  }
   function fadeAudioOut(){
     if(useEl){ let v=track.volume; const iv=setInterval(()=>{v-=0.009;
       if(v<=0){track.volume=0;track.pause();clearInterval(iv);} else track.volume=Math.max(0,v);},150); return; }
@@ -273,24 +278,87 @@
     const now=actx.currentTime;
     gain.gain.cancelScheduledValues(now);
     gain.gain.setValueAtTime(gain.gain.value, now);
-    gain.gain.setTargetAtTime(0.0001, now, 4.2);      // smooth exponential approach, long gentle tail
-    gain.gain.linearRampToValueAtTime(0, now+18);     // guaranteed silence by ~18s
+    gain.gain.setTargetAtTime(0.0001, now, 4.2);
+    gain.gain.linearRampToValueAtTime(0, now+18);
   }
-  function showFinale(){
-    if(finaleFired) return; finaleFired=true;
-    hide(el.crawlScene); topFade.classList.remove('show');
-    timers.push(setTimeout(()=>{show(el.finale);el.finale.classList.add('run');drift=0.05;}, 200));
-    timers.push(setTimeout(()=>{ shootActive=true; }, 2600));         // shooting stars after the title lands
-    timers.push(setTimeout(fadeAudioOut, 12000));                    // music rides ~12s past the reveal, then a long ~18s fade
-    timers.push(setTimeout(()=>endWrap.classList.add('show'), 14000));// Enter HQ CTA fades in while the music is still tailing off
+
+  const show=e=>{e.classList.add('show');e.classList.remove('hide');};
+  const hide=e=>{e.classList.add('hide');e.classList.remove('show');};
+  let finaleFired=false;
+
+  function scheduleFinale(){
+    if(finaleFired) return; finaleFired=true; ended=false;
+    hide(crawlScene); el.topFade.classList.remove('show');
+    cueIn(200,  ()=>{show(finaleEl);finaleEl.classList.add('run');drift=0.05;});
+    cueIn(2600, ()=>{ shootActive=true; });                       // shooting stars after the title lands
+    cueIn(CFG.finale.musicRide, fadeAudioOut);                    // music rides past the reveal, then fades
+    cueIn(CFG.finale.ctaIn, ()=>{ endWrap.classList.add('show'); ended=true; });  // Enter CTA
   }
-  crawl3d.addEventListener('animationend', e=>{ if(e.animationName==='crawl') showFinale(); });
-  function stopAll(){ timers.forEach(clearTimeout); try{ if(srcNode){srcNode.stop();srcNode.disconnect();srcNode=null;} }catch(e){} if(useEl){try{track.pause();}catch(e){}} }
+
+  function run(){
+    cues.length=0; vt=0; playing=true; started=true; ended=false; finaleFired=false;
+    shootActive=false; shooters=[]; stage.classList.remove('paused');
+    [...document.querySelectorAll('.scene')].forEach(s=>s.classList.remove('show','hide','run'));
+    el.topFade.classList.remove('show'); void crawl3d.offsetWidth;
+    endWrap.classList.remove('show'); startWrap.style.display='none'; mute.classList.add('show');
+    try{ if(srcNode){srcNode.stop();srcNode.disconnect();srcNode=null;} }catch(e){}
+    if(gain){ gain.gain.cancelScheduledValues(actx.currentTime); gain.gain.value=muted?0:1; }
+    if(useEl){ try{track.pause();track.currentTime=0;track.volume=1;}catch(e){} }
+    musicPlaying=false;
+    crawl3d.style.animationDuration=(CFG.crawl.run/1000)+'s';
+    document.documentElement.style.setProperty('--crawl-run',(CFG.crawl.run/1000)+'s');
+
+    // build the timeline from CFG: each scene stacks gap + hold onto `at`
+    let at=0;
+    for(const s of CFG.scenes){
+      at += s.gap;
+      const showAt=at, node=byId(s.id);
+      cueAt(showAt, ()=>{ show(node); if(s.type==='def') drift=0.08; });
+      if(s.music) cueAt(showAt, startPlayback);
+      if(s.type==='crawl'){
+        cueAt(showAt, ()=>{ crawlScene.classList.add('run'); el.topFade.classList.add('show'); drift=0.07; });
+        // finale fires on the crawl's animationend (primary); fallback cue in case it is missed
+        cueAt(showAt + CFG.crawl.run + 2000, scheduleFinale);
+        at = showAt + CFG.crawl.run;   // crawl "ends" when the animation ends
+      }else{
+        cueAt(showAt + s.hold, ()=>hide(node));
+        at = showAt + s.hold;
+      }
+    }
+  }
+  crawl3d.addEventListener('animationend', e=>{ if(e.animationName==='crawl') scheduleFinale(); });
+
+  // ----- pause / resume -----
+  function flashGlyph(sym){
+    pauseGlyph.querySelector('span').innerHTML=sym;
+    pauseGlyph.classList.add('flash');
+    clearTimeout(flashGlyph._t);
+    flashGlyph._t=setTimeout(()=>pauseGlyph.classList.remove('flash'), 650);
+  }
+  function setPaused(p){
+    if(!started || ended || p===!playing) return;
+    playing=!p;
+    stage.classList.toggle('paused', p);
+    if(p){
+      if(!useEl){ if(actx && actx.state==='running') actx.suspend(); }
+      else { try{ if(musicPlaying) track.pause(); }catch(e){} }
+      flashGlyph('&#9654;');        // show ▶ = "click to resume"
+    }else{
+      if(!useEl){ if(actx && actx.state==='suspended') actx.resume(); }
+      else { try{ if(musicPlaying) track.play(); }catch(e){} }
+      flashGlyph('&#10073;&#10073;'); // show ⏸
+    }
+  }
+  // click anywhere on the stage toggles pause, except on real controls
+  stage.addEventListener('click', e=>{
+    if(e.target.closest('button,a')) return;   // start/mute/enter/replay do their own thing
+    if(!started || ended) return;
+    setPaused(playing);
+  });
+  addEventListener('keydown', e=>{ if(e.code==='Space' && started && !ended){ e.preventDefault(); setPaused(playing); } });
 
   mute.addEventListener('click',()=>{ muted=!muted; if(useEl){track.muted=muted;} else if(gain){gain.gain.value=muted?0:1;} mute.innerHTML=muted?'&#9834; sound off':'&#9834; sound on'; });
-  document.getElementById('start').addEventListener('click',()=>{ unlockAudio(); run(); });
-  replay.addEventListener('click',()=>{stopAll();run();});
+  document.getElementById('start').addEventListener('click',e=>{ e.stopPropagation(); unlockAudio(); run(); });
+  replay.addEventListener('click',e=>{ e.stopPropagation(); run(); });
 })();
 </script>
-</body>
-</html>
