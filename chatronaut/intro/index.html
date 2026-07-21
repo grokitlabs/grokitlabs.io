@@ -28,6 +28,7 @@
   .credit .big{font-family:var(--serif);font-size:clamp(1.5rem,5.4vw,2.7rem);color:var(--ink);margin-top:.7rem;
     line-height:1.3;display:inline-flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center}
   .credit .big b{color:var(--cyan);font-weight:600}
+  .credit .subline{margin-top:.7rem}   /* optional small line UNDER big */
   /* TJ mascot lockup - placeholder for a real illustrated logo */
   .tjlogo{height:3em;width:auto;vertical-align:middle;margin-left:.25em}
 
@@ -125,7 +126,7 @@
 </section>
 
 <section id="credit1" class="scene credit" aria-hidden="true">
-  <div><div class="big">A <b>Good Boy</b> Training <img class="tjlogo" src="/assets/chatronaut/tj-cartoon.png" alt="TJ the golden retriever"></div></div>
+  <div><div class="big">A <b>Good Boy</b> Training <img class="tjlogo" src="/assets/chatronaut/tj-cartoon.png" alt="TJ the golden retriever"></div><div class="small subline">Production</div></div>
 </section>
 
 <section id="credit2" class="scene credit" aria-hidden="true">
@@ -209,7 +210,13 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
   // playing. The starfield loop below is ambient and runs continuously; it
   // is deliberately NOT paused. `paused` freezes: the cue clock, the crawl/
   // finale CSS animations (via #stage.paused), and audio (suspend/pause).
-  let vt=0, playing=false, started=false, ended=false, lastTs=0, cues=[];
+  // vt = wall-clock ms since the sequence started, minus any paused time.
+  // Derived from the rAF timestamp (NOT accumulated frame deltas) so it stays
+  // accurate even when the heavy 3D crawl drops frames on a phone — matching
+  // the old setTimeout behaviour, which is what the CSS crawl and audio also
+  // run on. `clockStart` is pushed forward by each pause so vt resumes cleanly.
+  let vt=0, playing=false, started=false, ended=false, cues=[];
+  let clockStart=0, pausedAt=0;
   function cueAt(at,fn){ cues.push({at,fn,done:false}); }
   function cueIn(delay,fn){ cueAt(vt+delay,fn); }
 
@@ -223,12 +230,11 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
     if(shootActive && !reduce && t-lastShot>0.85){lastShot=t;spawnShooter();if(Math.random()<0.4)spawnShooter();}
     for(let i=shooters.length-1;i>=0;i--){const sh=shooters[i];sh.p+=sh.spd;if(sh.p>1){shooters.splice(i,1);continue;}drawShooter(sh);}
 
-    // virtual clock: advance only while playing, then fire due cues
-    if(lastTs){
-      if(playing) vt += (ts-lastTs);
+    // virtual clock: wall-clock time since start, minus paused time
+    if(playing){
+      vt = ts - clockStart;
       for(const c of cues){ if(!c.done && vt>=c.at){ c.done=true; c.fn(); } }
     }
-    lastTs=ts;
     requestAnimationFrame(frame);
   })(performance.now());
 
@@ -296,7 +302,7 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
   }
 
   function run(){
-    cues.length=0; vt=0; playing=true; started=true; ended=false; finaleFired=false;
+    cues.length=0; vt=0; clockStart=performance.now(); playing=true; started=true; ended=false; finaleFired=false;
     shootActive=false; shooters=[]; stage.classList.remove('paused');
     [...document.querySelectorAll('.scene')].forEach(s=>s.classList.remove('show','hide','run'));
     el.topFade.classList.remove('show'); void crawl3d.offsetWidth;
@@ -340,10 +346,12 @@ const CFG={scenes:[{id:"credit0",type:"credit",gap:600,hold:6400},{id:"credit1",
     playing=!p;
     stage.classList.toggle('paused', p);
     if(p){
+      pausedAt=performance.now();
       if(!useEl){ if(actx && actx.state==='running') actx.suspend(); }
       else { try{ if(musicPlaying) track.pause(); }catch(e){} }
       flashGlyph('&#9654;');        // show ▶ = "click to resume"
     }else{
+      clockStart += performance.now()-pausedAt;   // discount the paused span
       if(!useEl){ if(actx && actx.state==='suspended') actx.resume(); }
       else { try{ if(musicPlaying) track.play(); }catch(e){} }
       flashGlyph('&#10073;&#10073;'); // show ⏸
