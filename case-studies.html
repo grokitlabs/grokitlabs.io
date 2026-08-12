@@ -1,0 +1,132 @@
+---
+layout: case-study
+permalink: /case-studies/
+title: "Case studies, GrokitLabs"
+noindex: true
+---
+{% assign items = site.case_studies | sort: 'slug' %}
+{% assign all_tags = '' | split: '' %}
+{% for item in items %}{% assign all_tags = all_tags | concat: item.tags %}{% endfor %}
+{% assign all_tags = all_tags | uniq | sort %}
+{% assign intro = site.data.case_studies_intro %}
+<div class="starfield" aria-hidden="true">
+  <svg viewBox="0 0 1440 1440" preserveAspectRatio="xMidYMid slice">
+    <g class="stars-far" fill="#eef2f9"><circle cx="756" cy="93" r="0.79" opacity="0.75"/><circle cx="960" cy="601" r="0.91" opacity="0.89"/><circle cx="396" cy="117" r="0.85" opacity="0.38"/><circle cx="1240" cy="785" r="0.83" opacity="0.38"/><circle cx="900" cy="1005" r="0.63" opacity="0.38"/><circle cx="272" cy="361" r="0.87" opacity="0.72"/><circle cx="380" cy="773" r="0.63" opacity="0.72"/><circle cx="1000" cy="1089" r="0.73" opacity="0.31"/><circle cx="436" cy="93" r="0.79" opacity="0.65"/><circle cx="1088" cy="569" r="1.03" opacity="0.75"/><circle cx="204" cy="213" r="0.67" opacity="0.79"/><circle cx="152" cy="1169" r="0.79" opacity="0.41"/><circle cx="196" cy="141" r="0.97" opacity="0.96"/><circle cx="464" cy="169" r="1.03" opacity="0.79"/><circle cx="892" cy="1061" r="0.71" opacity="0.96"/><circle cx="1352" cy="225" r="0.69" opacity="0.38"/><circle cx="148" cy="349" r="0.89" opacity="0.82"/><circle cx="640" cy="921" r="0.89" opacity="0.55"/><circle cx="1036" cy="21" r="0.61" opacity="0.21"/><circle cx="408" cy="945" r="0.79" opacity="0.48"/><circle cx="580" cy="45" r="0.69" opacity="0.28"/><circle cx="144" cy="489" r="0.83" opacity="0.92"/><circle cx="316" cy="357" r="0.67" opacity="0.82"/><circle cx="392" cy="513" r="0.99" opacity="0.62"/><circle cx="884" cy="1213" r="0.71" opacity="0.72"/><circle cx="704" cy="633" r="0.67" opacity="0.48"/><circle cx="524" cy="437" r="0.71" opacity="0.18"/><circle cx="632" cy="1265" r="1.01" opacity="0.28"/><circle cx="740" cy="173" r="0.65" opacity="0.55"/><circle cx="1200" cy="553" r="0.87" opacity="0.55"/><circle cx="60" cy="1093" r="0.67" opacity="0.55"/><circle cx="488" cy="1185" r="0.83" opacity="0.58"/><circle cx="596" cy="1245" r="0.85" opacity="0.24"/><circle cx="32" cy="1017" r="0.65" opacity="0.52"/><circle cx="972" cy="1365" r="0.71" opacity="0.52"/><circle cx="1304" cy="369" r="0.95" opacity="0.48"/><circle cx="1156" cy="685" r="0.67" opacity="0.18"/><circle cx="176" cy="873" r="1.09" opacity="0.21"/><circle cx="316" cy="1029" r="0.79" opacity="0.41"/><circle cx="1416" cy="417" r="0.77" opacity="0.45"/><circle cx="724" cy="1277" r="0.85" opacity="0.55"/><circle cx="32" cy="1273" r="0.93" opacity="0.82"/><circle cx="204" cy="1173" r="1.05" opacity="0.62"/><circle cx="1368" cy="1073" r="0.95" opacity="0.35"/><circle cx="964" cy="205" r="1.05" opacity="0.92"/><circle cx="848" cy="1289" r="0.99" opacity="0.99"/><circle cx="1116" cy="325" r="1.09" opacity="0.21"/><circle cx="232" cy="417" r="0.95" opacity="0.18"/><circle cx="1108" cy="93" r="0.73" opacity="0.62"/><circle cx="1216" cy="313" r="0.69" opacity="0.52"/><circle cx="972" cy="117" r="0.89" opacity="0.72"/><circle cx="312" cy="401" r="0.69" opacity="0.52"/><circle cx="964" cy="813" r="1.01" opacity="0.31"/><circle cx="336" cy="713" r="0.95" opacity="0.82"/><circle cx="220" cy="1285" r="1.09" opacity="0.58"/><circle cx="1352" cy="1409" r="0.83" opacity="0.31"/><circle cx="500" cy="317" r="0.97" opacity="0.31"/><circle cx="992" cy="697" r="0.97" opacity="0.18"/><circle cx="1420" cy="1365" r="0.61" opacity="0.58"/><circle cx="408" cy="337" r="0.93" opacity="0.65"/><circle cx="484" cy="1229" r="1.03" opacity="0.92"/><circle cx="1040" cy="1033" r="0.89" opacity="0.82"/><circle cx="988" cy="101" r="0.75" opacity="0.89"/><circle cx="712" cy="1377" r="0.73" opacity="0.82"/><circle cx="500" cy="1341" r="1.01" opacity="0.31"/><circle cx="192" cy="1433" r="0.61" opacity="0.55"/><circle cx="300" cy="1333" r="0.79" opacity="0.45"/><circle cx="1336" cy="1009" r="0.79" opacity="0.96"/><circle cx="772" cy="1261" r="1.01" opacity="0.28"/><circle cx="400" cy="201" r="0.61" opacity="0.58"/></g>
+    <g class="stars-near" fill="#eef2f9"><circle cx="276" cy="509" r="1.69" opacity="0.92"/><circle cx="512" cy="249" r="1.82" opacity="0.66"/><circle cx="620" cy="629" r="1.47" opacity="0.66"/><circle cx="696" cy="1073" r="1.37" opacity="0.53"/><circle cx="612" cy="205" r="1.56" opacity="0.76"/><circle cx="784" cy="1193" r="1.28" opacity="0.58"/><circle cx="1244" cy="549" r="1.88" opacity="0.66"/><circle cx="8" cy="97" r="1.31" opacity="0.97"/><circle cx="852" cy="957" r="1.50" opacity="0.53"/><circle cx="384" cy="185" r="1.85" opacity="0.73"/><circle cx="332" cy="1141" r="1.85" opacity="0.84"/><circle cx="1080" cy="721" r="1.24" opacity="0.76"/><circle cx="260" cy="1229" r="1.88" opacity="0.81"/><circle cx="1392" cy="713" r="1.72" opacity="0.40"/><circle cx="1116" cy="229" r="1.21" opacity="0.86"/><circle cx="328" cy="449" r="1.15" opacity="0.71"/><circle cx="1396" cy="317" r="1.47" opacity="0.63"/><circle cx="192" cy="793" r="1.15" opacity="0.99"/><circle cx="1356" cy="949" r="1.44" opacity="0.94"/><circle cx="248" cy="497" r="1.18" opacity="0.97"/><circle cx="164" cy="621" r="1.50" opacity="0.58"/><circle cx="16" cy="1385" r="1.44" opacity="0.50"/><circle cx="1180" cy="261" r="1.44" opacity="0.40"/><circle cx="488" cy="353" r="1.47" opacity="0.68"/><circle cx="52" cy="1277" r="1.53" opacity="0.94"/><circle cx="1376" cy="697" r="1.12" opacity="0.60"/></g>
+  </svg>
+</div>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">{{ intro.eyebrow }}</div>
+    <h1>{{ intro.title }}</h1>
+    <p class="lead">{{ intro.lead }}</p>
+    {% for p in intro.paras %}<p>{{ p }}</p>{% endfor %}
+    <div class="seal-mark" aria-hidden="true">
+  <svg class="patch" viewBox="0 0 130 130" role="img" aria-label="GrokitLabs mission log wax seal">
+    <defs>
+      <radialGradient id="wax" cx="46%" cy="42%" r="60%"><stop offset="0%" stop-color="#ad141f"/><stop offset="100%" stop-color="#9a1019"/></radialGradient>
+      <radialGradient id="puddle" cx="46%" cy="42%" r="62%"><stop offset="0%" stop-color="#93101a"/><stop offset="100%" stop-color="#780c14"/></radialGradient>
+      <filter id="raise" x="-30%" y="-30%" width="160%" height="160%">
+        <feOffset in="SourceAlpha" dx="-0.7" dy="-0.7" result="tl"/><feFlood flood-color="#ff9f92" result="lc"/><feComposite in="lc" in2="tl" operator="in" result="hl"/>
+        <feOffset in="SourceAlpha" dx="0.7" dy="0.7" result="br"/><feFlood flood-color="#480610" result="dc"/><feComposite in="dc" in2="br" operator="in" result="sh"/>
+        <feMerge><feMergeNode in="sh"/><feMergeNode in="hl"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="seat" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.6" flood-color="#3a0610" flood-opacity="0.7"/></filter>
+      <filter id="paint" x="-25%" y="-25%" width="150%" height="150%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="g"/>
+        <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.3 0 0 0 0.74" result="ga"/>
+        <feComposite in="SourceGraphic" in2="ga" operator="in" result="worn"/>
+        <feDropShadow in="worn" dx="0" dy="0.45" stdDeviation="0.28" flood-color="#4a0610" flood-opacity="0.75" result="base"/>
+        <feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="hb"/>
+        <feSpecularLighting in="hb" surfaceScale="2.1" specularConstant="0.85" specularExponent="21" lighting-color="#ffffff" result="spec">
+          <feDistantLight azimuth="235" elevation="62"/>
+        </feSpecularLighting>
+        <feComposite in="spec" in2="SourceAlpha" operator="in" result="specC"/>
+        <feMerge><feMergeNode in="base"/><feMergeNode in="specC"/></feMerge>
+      </filter>
+      <path id="cs-arc-top" d="M22,50 A28,28 0 0 1 78,50" fill="none"/>
+      <path id="cs-arc-bot" d="M15.5,50 A34.5,34.5 0 0 0 84.5,50" fill="none"/>
+    </defs>
+    <g transform="translate(15,15)">
+      <path d="M50.0,3.6 C57.2,4.0 64.6,4.0 70.8,6.7 C77.1,9.5 83.6,14.6 87.4,20.1 C91.3,25.7 91.7,33.1 93.8,40.0 C95.9,46.9 100.6,54.4 99.9,61.4 C99.3,68.4 95.0,76.9 90.1,81.9 C85.1,87.0 76.7,88.3 70.1,91.7 C63.4,95.1 56.6,102.5 50.0,102.3 C43.4,102.1 37.0,94.0 30.5,90.5 C24.0,87.0 15.4,86.2 10.9,81.2 C6.3,76.2 4.8,67.8 3.1,60.7 C1.5,53.6 0.5,46.3 1.2,38.9 C1.8,31.4 2.6,21.5 7.1,15.8 C11.5,10.0 20.8,6.2 27.9,4.2 C35.1,2.1 42.8,3.2 50.0,3.6 Z" fill="url(#puddle)" filter="url(#raise)"/>
+      <g filter="url(#seat)"><circle cx="50" cy="50" r="45.5" fill="url(#wax)"/></g>
+      <circle cx="50" cy="50" r="42.5" fill="none" stroke="#9a1019" stroke-width="5" filter="url(#raise)"/>
+      <g class="rays" fill="#8a0f17" opacity="0.5">M61.0,50.0 L84.0,50.5 L84.0,49.5 Z M60.9,51.6 L83.6,55.3 L83.7,54.4 Z M60.6,53.1 L82.5,60.0 L82.7,59.1 Z M60.0,54.6 L80.7,64.5 L81.1,63.7 Z M59.3,55.9 L78.4,68.8 L78.8,68.0 Z M58.3,57.2 L75.4,72.6 L76.0,71.9 Z M57.2,58.3 L71.9,76.0 L72.6,75.4 Z M55.9,59.3 L68.0,78.8 L68.8,78.4 Z M54.6,60.0 L63.7,81.1 L64.5,80.7 Z M53.1,60.6 L59.1,82.7 L60.0,82.5 Z M51.6,60.9 L54.4,83.7 L55.3,83.6 Z M50.0,61.0 L49.6,84.0 L50.5,84.0 Z M48.4,60.9 L44.7,83.6 L45.6,83.7 Z M46.9,60.6 L40.0,82.5 L40.9,82.7 Z M45.4,60.0 L35.5,80.7 L36.3,81.1 Z M44.1,59.3 L31.2,78.4 L32.0,78.8 Z M42.8,58.3 L27.4,75.4 L28.1,76.0 Z M41.7,57.2 L24.0,71.9 L24.6,72.6 Z M40.7,55.9 L21.2,68.0 L21.6,68.8 Z M40.0,54.6 L18.9,63.7 L19.3,64.5 Z M39.4,53.1 L17.3,59.1 L17.5,60.0 Z M39.1,51.6 L16.3,54.4 L16.4,55.3 Z M39.0,50.0 L16.0,49.6 L16.0,50.5 Z M39.1,48.4 L16.4,44.7 L16.3,45.6 Z M39.4,46.9 L17.5,40.0 L17.3,40.9 Z M40.0,45.4 L19.3,35.5 L18.9,36.3 Z M40.7,44.1 L21.6,31.2 L21.2,32.0 Z M41.7,42.8 L24.6,27.4 L24.0,28.1 Z M42.8,41.7 L28.1,24.0 L27.4,24.6 Z M44.1,40.7 L32.0,21.2 L31.2,21.6 Z M45.4,40.0 L36.3,18.9 L35.5,19.3 Z M46.9,39.4 L40.9,17.3 L40.0,17.5 Z M48.4,39.1 L45.6,16.3 L44.7,16.4 Z M50.0,39.0 L50.4,16.0 L49.5,16.0 Z M51.6,39.1 L55.3,16.4 L54.4,16.3 Z M53.1,39.4 L60.0,17.5 L59.1,17.3 Z M54.6,40.0 L64.5,19.3 L63.7,18.9 Z M55.9,40.7 L68.8,21.6 L68.0,21.2 Z M57.2,41.7 L72.6,24.6 L71.9,24.0 Z M58.3,42.8 L76.0,28.1 L75.4,27.4 Z M59.3,44.1 L78.8,32.0 L78.4,31.2 Z M60.0,45.4 L81.1,36.3 L80.7,35.5 Z M60.6,46.9 L82.7,40.9 L82.5,40.0 Z M60.9,48.4 L83.7,45.6 L83.6,44.7 Z</g>
+      <g class="paint" fill="#f2ebda" filter="url(#paint)">
+        <g transform="translate(50,49) scale(0.46) translate(-49,-50)"><g transform="translate(-115.64,-32.10) scale(1.0690)">
+    <path fill="currentColor" d="M 150.574219 86.914062 L 144.40625 86.886719 L 145.65625 79.152344 L 149.386719 79.167969 Z M 150.574219 86.914062 "/>
+    <path fill="currentColor" d="M 165.222656 86.972656 L 159.054688 86.945312 L 160.304688 79.085938 L 164.035156 79.101562 Z M 165.222656 86.972656 "/>
+    <path fill="currentColor" d="M 157.894531 86.941406 L 151.722656 86.917969 L 152.96875 80.636719 L 156.699219 80.652344 Z M 157.894531 86.941406 "/>
+    <path fill="currentColor" d="M 142.648438 75.535156 L 136.011719 75.507812 L 136.023438 72.210938 L 142.957031 67.167969 Z M 142.648438 75.535156 "/>
+    <path fill="currentColor" d="M 166.441406 75.628906 L 173.925781 75.660156 L 173.9375 72.363281 L 167.046875 67.265625 Z M 166.441406 75.628906 "/>
+    <path fill="currentColor" d="M 141.578125 70.046875 L 146.746094 70.066406 C 146.730469 74.554688 150.363281 78.214844 154.847656 78.234375 C 159.335938 78.253906 162.996094 74.617188 163.015625 70.132812 L 168.1875 70.152344 C 168.15625 77.488281 162.164062 83.433594 154.828125 83.402344 C 147.492188 83.375 141.546875 77.382812 141.578125 70.046875 "/>
+    <path fill="currentColor" d="M 146.820312 71.164062 L 141.652344 71.164062 L 141.652344 61.070312 L 146.832031 59.570312 Z M 146.820312 71.164062 "/>
+    <path fill="currentColor" d="M 163.019531 71.164062 L 168.1875 71.164062 L 168.257812 61.015625 L 163.089844 59.90625 Z M 163.019531 71.164062 "/>
+    <path fill="currentColor" d="M 150.253906 89.308594 L 148.8125 105.792969 L 146.066406 105.785156 L 144.757812 89.285156 Z M 150.253906 89.308594 "/>
+    <path fill="currentColor" d="M 157.324219 89.335938 L 155.898438 101.699219 L 153.152344 101.6875 L 151.824219 89.316406 Z M 157.324219 89.335938 "/>
+    <path fill="currentColor" d="M 164.78125 89.367188 L 163.375 97.410156 L 160.628906 97.398438 L 159.285156 89.347656 Z M 164.78125 89.367188 "/>
+    <path fill="currentColor" d="M 168.261719 61.015625 L 163.089844 61.066406 C 163.042969 56.582031 159.359375 52.96875 154.871094 53.015625 C 150.386719 53.058594 146.777344 56.746094 146.820312 61.230469 L 141.652344 61.28125 C 141.578125 53.945312 147.488281 47.917969 154.820312 47.847656 C 162.15625 47.773438 168.1875 53.679688 168.261719 61.015625 "/>
+    <path fill="currentColor" d="M 154.917969 56.34375 C 157.007812 56.324219 158.71875 58 158.742188 60.089844 C 158.761719 62.179688 157.082031 63.894531 154.992188 63.914062 C 152.902344 63.933594 151.191406 62.257812 151.171875 60.167969 C 151.148438 58.074219 152.828125 56.363281 154.917969 56.34375 "/>
+  </g></g>
+        <text class="patch-arc" stroke="none"><textPath href="#cs-arc-top" startOffset="50%" text-anchor="middle">GROKITLABS</textPath></text>
+        <text class="patch-arc" stroke="none"><textPath href="#cs-arc-bot" startOffset="50%" text-anchor="middle">MISSION LOG</textPath></text>
+      </g>
+    </g>
+  </svg>
+</div>
+  </header>
+
+  <nav class="filters">
+    <button class="chip active" data-tag="all">All</button>
+    {% for t in all_tags %}<button class="chip" data-tag="{{ t }}">{{ t }}</button>{% endfor %}
+  </nav>
+
+
+
+  <main>
+  {% for item in items %}
+    <details class="log" data-tags="{{ item.tags | join: '|' }}" data-cap="{{ item.capacity }}">
+      <summary class="row">
+        <div class="row-main">
+          <div class="tags">
+            {% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+            {% if item.capacity %}<span class="cap" data-cap="{{ item.capacity }}">{{ item.capacity }}</span>{% if item.role %}<span class="role">{{ item.role }}</span>{% endif %}{% endif %}
+            {% if item.draft %}<span class="draft">draft</span>{% endif %}
+          </div>
+          <h2>{{ item.title }}</h2>
+          <p class="summary">{{ item.summary }}</p>
+        </div>
+        <span class="chev" aria-hidden="true">&rsaquo;</span>
+      </summary>
+      <div class="body">
+        <div class="story">{{ item.content }}</div>
+        {% if item.has_machine %}
+        <details class="machine">
+          <summary><svg class="gears" viewBox="0 0 34 24" width="30" height="21" fill="currentColor" aria-hidden="true"><g class="gear-a"><circle cx="11" cy="13" r="7"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(0 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(40 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(80 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(120 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(160 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(200 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(240 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(280 11 13)"/><rect x="9.9" y="3.9" width="2.2" height="4.4" rx="0.7" transform="rotate(320 11 13)"/><circle cx="11" cy="13" r="2.9" fill="var(--panel)"/></g><g class="gear-b"><circle cx="25.5" cy="8.5" r="4.6"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(0 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(45 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(90 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(135 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(180 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(225 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(270 25.5 8.5)"/><rect x="24.4" y="1.8" width="2.2" height="4.4" rx="0.7" transform="rotate(315 25.5 8.5)"/><circle cx="25.5" cy="8.5" r="1.9" fill="var(--panel)"/></g></svg><span class="mono">Inside the machine</span></summary>
+          <div class="machine-body">{{ item.machine | markdownify }}</div>
+        </details>
+        {% endif %}
+      </div>
+    </details>
+  {% endfor %}
+  </main>
+</div>
+<script>
+  const near = document.querySelector('.stars-near');
+  if (near && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    addEventListener('scroll', () => {
+      near.setAttribute('transform', 'translate(0 ' + (scrollY * 0.10).toFixed(1) + ')');
+    }, { passive: true });
+  }
+  const chips = document.querySelectorAll('.chip');
+  const logs = document.querySelectorAll('.log');
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    const t = c.dataset.tag;
+    logs.forEach(l => {
+      const has = (l.dataset.tags || '').split('|').includes(t);
+      l.classList.toggle('hidden', t !== 'all' && !has);
+    });
+  }));
+</script>
