@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fore!Cast Points Course — Prototype</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <!-- THROWAWAY PROTOTYPE: can optional waypoint values create several viable routes to one cup? -->
+  <main class="shell">
+    <header class="masthead">
+      <span class="shield" aria-hidden="true">ϟ</span>
+      <div class="brand"><strong>Fore!Cast Points Course</strong><span>Cleveland Open · Par 4</span></div>
+      <a class="home-link" href="index.html">All prototypes</a>
+    </header>
+
+    <div class="game-layout">
+      <section class="play-column stack">
+        <header class="game-heading">
+          <div><p class="eyebrow">Hole 1 · Cleveland</p><h1>The Erie Carry</h1></div>
+          <span class="frame-clock" data-frame-clock>Radar 2:10 PM</span>
+        </header>
+
+        <section class="board-shell" aria-label="Points course board">
+          <div class="board" data-board>
+            <img class="radar-frame is-current" src="assets/radar-2110.png" alt="Cleveland radar at 2:10 PM">
+            <img class="radar-frame" src="assets/radar-2120.png" alt="Cleveland radar at 2:20 PM">
+            <img class="radar-frame" src="assets/radar-2130.png" alt="Cleveland radar at 2:30 PM">
+            <img class="radar-frame" src="assets/radar-2140.png" alt="Cleveland radar at 2:40 PM">
+            <svg class="board-overlay" viewBox="0 0 978 490" role="img" aria-label="Golf course with optional point waypoints">
+              <g data-waypoint-layer></g>
+              <g aria-label="Cup">
+                <circle cx="855" cy="90" r="30" fill="#36a75f" fill-opacity=".35" stroke="#fff" stroke-width="4"/>
+                <path d="M855 90V40L895 53L855 66" fill="#f28922" stroke="#10151a" stroke-width="4"/>
+                <text x="855" y="118" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
+              </g>
+              <line data-aim-line x1="120" y1="410" x2="370" y2="310" stroke="#fff" stroke-width="4" stroke-dasharray="9 8" opacity=".82"/>
+              <circle data-aim-marker cx="370" cy="310" r="11" fill="none" stroke="#fff" stroke-width="4"/>
+              <g data-shot-trails></g>
+              <circle data-ball cx="120" cy="410" r="10" fill="#fff" stroke="#10151a" stroke-width="4"/>
+              <text x="120" y="442" fill="#fff" font-size="18" font-weight="950" text-anchor="middle">TEE</text>
+            </svg>
+          </div>
+
+          <div class="frame-strip" aria-label="Four radar frames">
+            <button class="frame-chip is-current" type="button" disabled>2:10</button>
+            <button class="frame-chip" type="button" disabled>2:20</button>
+            <button class="frame-chip" type="button" disabled>2:30</button>
+            <button class="frame-chip" type="button" disabled>2:40</button>
+          </div>
+        </section>
+
+        <section class="shot-controls">
+          <div class="control-copy">
+            <strong data-instruction>Choose a club, then tap or click a landing point.</strong>
+            <div class="club-bank" aria-label="Club selection">
+              <button class="club-button is-selected" type="button" data-club="driver">Driver<span>long · 320</span></button>
+              <button class="club-button" type="button" data-club="iron">Iron<span>medium · 235</span></button>
+              <button class="club-button" type="button" data-club="wedge">Wedge<span>short · 150</span></button>
+            </div>
+          </div>
+          <button class="shot-button" type="button" data-shoot>Take stroke 1</button>
+        </section>
+
+        <section class="rules">
+          <h2>What this prototype is testing</h2>
+          <ol>
+            <li>Collect a waypoint only by coming to rest inside it.</li>
+            <li>Moving waypoints carry the ball when the radar advances.</li>
+            <li>Hole out within six strokes or the entire card scores zero.</li>
+          </ol>
+          <p>The direct route rewards fewer strokes. Detours offer more points. The question is whether several routes feel genuinely competitive rather than decorative.</p>
+        </section>
+      </section>
+
+      <aside class="score-rail">
+        <section class="panel">
+          <h2>Current card</h2>
+          <strong class="big-score" data-score>0</strong>
+          <p class="score-meta" data-score-meta>Stroke 1 · Fairway lie</p>
+          <div class="stat-grid">
+            <div class="stat"><span>Strokes</span><strong data-strokes>0 / 6</strong></div>
+            <div class="stat"><span>Waypoints</span><strong data-points>0 pts</strong></div>
+          </div>
+          <button class="reset-button" type="button" data-reset>Reset hole</button>
+        </section>
+
+        <section class="panel">
+          <h2>Route values</h2>
+          <ul class="target-list">
+            <li><span class="target-key" style="color:#76c77a"><i class="target-dot"></i>Anchor</span><strong>+2</strong></li>
+            <li><span class="target-key" style="color:#00e5d4"><i class="target-dot"></i>Rider</span><strong>+4</strong></li>
+            <li><span class="target-key" style="color:#fdd835"><i class="target-dot"></i>Gawd mark</span><strong>+6</strong></li>
+          </ul>
+        </section>
+
+        <section class="panel">
+          <h2>Hole feed</h2>
+          <ol class="event-log" data-event-log aria-live="polite"><li>On the tee. Six-stroke limit.</li></ol>
+        </section>
+
+        <section class="panel">
+          <h2>Friends today</h2>
+          <ol class="leaderboard"><li><span>1 · Moose</span><strong>19</strong></li><li><span>2 · Pickles</span><strong>16</strong></li><li><span>3 · You</span><strong data-board-score>—</strong></li></ol>
+        </section>
+      </aside>
+    </div>
+
+    <p class="prototype-note">Standalone responsive prototype · intentionally simplified shot physics and course generation</p>
+  </main>
+  <script src="course.js"></script>
+</body>
+</html>

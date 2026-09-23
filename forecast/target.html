@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fore!Cast Target Range — Prototype</title>
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <!-- THROWAWAY PROTOTYPE: does four-shot target scoring create immediate risk/reward? -->
+  <main class="shell">
+    <header class="masthead">
+      <span class="shield" aria-hidden="true">ϟ</span>
+      <div class="brand"><strong>Fore!Cast Target Range</strong><span>Cleveland Open · Four-ball card</span></div>
+      <a class="home-link" href="index.html">All prototypes</a>
+    </header>
+
+    <div class="game-layout">
+      <section class="play-column stack">
+        <header class="game-heading">
+          <div><p class="eyebrow">Daily Cleveland board</p><h1>Lake Effect Four</h1></div>
+          <span class="frame-clock" data-frame-clock>Radar 2:10 PM</span>
+        </header>
+
+        <section class="board-shell" aria-label="Target range board">
+          <div class="board" data-board>
+            <img class="radar-frame is-current" src="assets/radar-2110.png" alt="Cleveland radar at 2:10 PM">
+            <img class="radar-frame" src="assets/radar-2120.png" alt="Cleveland radar at 2:20 PM">
+            <img class="radar-frame" src="assets/radar-2130.png" alt="Cleveland radar at 2:30 PM">
+            <img class="radar-frame" src="assets/radar-2140.png" alt="Cleveland radar at 2:40 PM">
+            <svg class="board-overlay" viewBox="0 0 978 490" role="img" aria-label="Four point targets over the radar">
+              <g data-target-layer></g>
+              <line data-aim-line x1="489" y1="470" x2="250" y2="330" stroke="#fff" stroke-width="4" stroke-dasharray="9 8" opacity=".82"/>
+              <circle data-aim-marker cx="250" cy="330" r="10" fill="#fff" stroke="#10151a" stroke-width="5"/>
+              <circle data-ball cx="489" cy="470" r="9" fill="#fff" stroke="#10151a" stroke-width="4"/>
+              <g data-shot-trails></g>
+              <text x="489" y="455" fill="#fff" font-size="18" font-weight="950" text-anchor="middle">TEE</text>
+            </svg>
+          </div>
+
+          <div class="frame-strip" aria-label="Four radar frames">
+            <button class="frame-chip is-current" type="button" disabled>2:10</button>
+            <button class="frame-chip" type="button" disabled>2:20</button>
+            <button class="frame-chip" type="button" disabled>2:30</button>
+            <button class="frame-chip" type="button" disabled>2:40</button>
+          </div>
+        </section>
+
+        <section class="shot-controls">
+          <div class="control-copy" aria-live="polite">
+            <strong data-instruction>Tap or click a target to aim ball one.</strong>
+            <span>Targets move with the radar after every shot. The center ring earns full points; the outer ring earns half.</span>
+          </div>
+          <button class="shot-button" type="button" data-shoot>Shoot ball 1</button>
+        </section>
+
+        <section class="rules">
+          <h2>What this prototype is testing</h2>
+          <ol>
+            <li>Choose one target on each radar frame.</li>
+            <li>Large targets are safer; smaller storm targets pay more.</li>
+            <li>After four balls, compare total score—not strokes.</li>
+          </ol>
+          <p>The aiming is deliberately simple. The question is whether target selection alone creates tension and immediate replay desire.</p>
+        </section>
+      </section>
+
+      <aside class="score-rail">
+        <section class="panel">
+          <h2>Current card</h2>
+          <strong class="big-score" data-score>0</strong>
+          <p class="score-meta" data-score-meta>Ball 1 of 4 · Aim set</p>
+          <div class="stat-grid">
+            <div class="stat"><span>Best hit</span><strong data-best>—</strong></div>
+            <div class="stat"><span>Accuracy</span><strong data-accuracy>—</strong></div>
+          </div>
+          <button class="reset-button" type="button" data-reset>Reset card</button>
+        </section>
+
+        <section class="panel">
+          <h2>Targets this frame</h2>
+          <ul class="target-list" data-target-list></ul>
+        </section>
+
+        <section class="panel">
+          <h2>Shot feed</h2>
+          <ol class="event-log" data-event-log aria-live="polite"><li>Card ready. Four balls remain.</li></ol>
+        </section>
+
+        <section class="panel">
+          <h2>Friends today</h2>
+          <ol class="leaderboard"><li><span>1 · Moose</span><strong>2,450</strong></li><li><span>2 · Pickles</span><strong>2,100</strong></li><li><span>3 · You</span><strong data-board-score>—</strong></li></ol>
+        </section>
+      </aside>
+    </div>
+
+    <p class="prototype-note">Standalone responsive prototype · no account, persistence, or production game rules</p>
+  </main>
+  <script src="target.js"></script>
+</body>
+</html>

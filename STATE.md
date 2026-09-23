@@ -25,6 +25,10 @@ simple and fast. Local preview: `jekyll serve` → http://localhost:4000.
   same names to upgrade sounds.
 - `_writing/` + `writing/` + `_layouts`/`_includes` — the content system for
   posts; drafts workflow documented in `README.md`.
+- `forecast/` — unlinked, standalone **Fore!Cast** game prototypes (2026-09-23):
+  a four-shot target range and a persistent-ball points course, using four
+  owner-supplied Cleveland WatchDawg radar screenshots. Published for mobile
+  and desktop playtesting; not integrated with the GrokitLabs homepage.
 - `tests/` — `node --test tests/*.test.mjs` covers the game's pure logic.
 - `docs/superpowers/` — specs and plans (excluded from publish, as are
   `tools/` and `tests/`).
