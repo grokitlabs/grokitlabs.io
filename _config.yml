@@ -18,6 +18,8 @@ collections:
   writing:
     output: true
     permalink: /writing/:name/
+  case_studies:
+    output: false
 
 defaults:
   - scope:
