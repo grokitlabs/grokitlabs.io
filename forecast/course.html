@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fore!Cast — Breakwater Bend Prototype</title>
+  <title>Fore!Cast — Four-hole rain round</title>
   <link rel="stylesheet" href="shared.css">
 </head>
 <body class="course-page">
@@ -22,8 +22,10 @@
 
     <div class="game-layout">
       <section class="play-column stack">
+        <nav class="round-strip" data-round-strip aria-label="Four-hole course"></nav>
+
         <header class="game-heading">
-          <div><p class="eyebrow">Hole 1 · Cleveland · Par 3</p><h1>Breakwater Bend</h1></div>
+          <div><p class="eyebrow" data-hole-meta>Hole 1 · Cleveland · Par 3</p><h1 data-hole-name>Breakwater Bend</h1></div>
           <div class="frame-pair"><span data-current-clock>Current 2:10</span><b>→</b><span data-next-clock>Next 2:20</span></div>
         </header>
 
@@ -34,13 +36,13 @@
           <span><small>Lie</small><strong data-mobile-lie>Tee</strong></span>
         </div>
 
-        <section class="board-shell" aria-label="Breakwater Bend course board">
+        <section class="board-shell" data-board-shell aria-label="Breakwater Bend course board">
           <div class="board-viewport is-zoomed" data-board-viewport>
           <div class="board" data-board>
-            <img class="radar-frame is-current" src="assets/forecast-radar-2110.png" alt="Cleveland radar at 2:10 PM" data-frame="0">
-            <img class="radar-frame" src="assets/forecast-radar-2120.png" alt="Cleveland radar at 2:20 PM" data-frame="1">
-            <img class="radar-frame" src="assets/forecast-radar-2130.png" alt="Cleveland radar at 2:30 PM" data-frame="2">
-            <img class="radar-frame" src="assets/forecast-radar-2140.png" alt="Cleveland radar at 2:40 PM" data-frame="3">
+            <img class="radar-frame is-current" src="assets/forecast-radar-2110.png" alt="Radar frame 1" data-frame="0">
+            <img class="radar-frame" src="assets/forecast-radar-2120.png" alt="Radar frame 2" data-frame="1">
+            <img class="radar-frame" src="assets/forecast-radar-2130.png" alt="Radar frame 3" data-frame="2">
+            <img class="radar-frame" src="assets/forecast-radar-2140.png" alt="Radar frame 4" data-frame="3">
 
             <svg class="board-overlay" viewBox="0 0 978 490" role="img" aria-label="Moving radar golf hole with reachable next-frame bonuses, ball, and cup">
               <defs>
@@ -167,7 +169,7 @@
 
       <aside class="score-rail">
         <section class="panel scorecard">
-          <div class="section-heading compact"><div><p class="eyebrow">Live card</p><h2>Breakwater Bend</h2></div><strong class="to-par" data-to-par>E</strong></div>
+          <div class="section-heading compact"><div><p class="eyebrow">Live card</p><h2 data-scorecard-name>Breakwater Bend</h2></div><strong class="to-par" data-to-par>E</strong></div>
           <p class="score-meta" data-score-meta>Stroke 1 · Tee lie</p>
           <div class="stat-grid">
             <div class="stat"><span>Strokes</span><strong data-strokes>0</strong></div>
@@ -176,6 +178,12 @@
             <div class="stat"><span>Lie</span><strong data-lie>Tee</strong></div>
           </div>
           <button class="reset-button" type="button" data-reset>Reset hole</button>
+        </section>
+
+        <section class="panel round-card">
+          <div class="section-heading compact"><div><p class="eyebrow">Rain round</p><h2>Course card</h2></div><strong data-round-total>—</strong></div>
+          <ol class="round-scorecard" data-round-scorecard></ol>
+          <button class="reset-button" type="button" data-new-round>Start new round</button>
         </section>
 
         <section class="panel forecast-card">
@@ -205,13 +213,14 @@
           <p class="eyebrow">Card complete</p>
           <h2 data-result-title>Par</h2>
           <p data-result-copy></p>
-          <button class="reset-button" type="button" data-play-again>Play another line</button>
+          <button class="next-hole-button" type="button" data-next-hole>Next hole</button>
+          <button class="reset-button" type="button" data-play-again>Replay this hole</button>
         </section>
       </aside>
     </div>
 
     <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js?v=14"></script>
+  <script src="course.js?v=15"></script>
 </body>
 </html>

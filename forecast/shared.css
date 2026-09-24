@@ -80,6 +80,15 @@ button { color: inherit; }
 .eyebrow { margin: 0 0 .35rem; color: var(--accent); font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
 .frame-clock { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 900; text-align: end; }
 
+.round-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gap-1); }
+.round-strip a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .08rem .5rem; min-inline-size: 0; padding: .55rem .65rem; border: 1px solid var(--line); border-radius: .65rem; background: var(--panel); color: var(--muted); text-decoration: none; }
+.round-strip a > span { grid-row: span 2; display: grid; place-items: center; inline-size: 1.7rem; block-size: 1.7rem; border-radius: 50%; background: #ffffff12; color: var(--ink); font-weight: 1000; }
+.round-strip strong, .round-strip small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.round-strip strong { color: var(--ink); font-size: .7rem; }
+.round-strip small { font-size: .58rem; }
+.round-strip a.is-current { border-color: var(--accent); background: #f2892218; box-shadow: inset 0 0 0 1px var(--accent); }
+.round-strip a.is-complete > span { background: var(--green); color: #071008; }
+
 .board-shell {
   display: grid;
   gap: var(--gap-2);
@@ -306,6 +315,19 @@ button { color: inherit; }
 .target-dot { inline-size: .75rem; block-size: .75rem; border: 2px solid currentColor; border-radius: 50%; }
 .event-log { max-block-size: 9rem; color: var(--muted); font-size: .75rem; overflow: auto; }
 .event-log li:first-child { color: var(--ink); }
+.round-card { border-color: #f2892266; }
+.round-card [data-round-total] { color: var(--yellow); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.round-scorecard { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.round-scorecard a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: .5rem; padding: .45rem; border: 1px solid transparent; border-radius: .45rem; color: var(--muted); text-decoration: none; }
+.round-scorecard li.is-current a { border-color: var(--accent); background: #f2892212; }
+.round-scorecard i { display: grid; place-items: center; inline-size: 1.45rem; block-size: 1.45rem; border-radius: 50%; background: #ffffff12; color: var(--ink); font-style: normal; font-weight: 1000; }
+.round-scorecard a > span { display: grid; min-inline-size: 0; }
+.round-scorecard a > span b { color: var(--ink); font-size: .7rem; }
+.round-scorecard a > span small { overflow: hidden; font-size: .55rem; text-overflow: ellipsis; white-space: nowrap; }
+.round-scorecard a > strong { color: var(--ink); font-size: .7rem; text-align: end; }
+.round-scorecard a > strong small { color: var(--accent); font-size: .58rem; }
+.round-scorecard a > span:last-child { display: block; font-size: .58rem; text-align: end; white-space: nowrap; }
+.next-hole-button { inline-size: 100%; min-block-size: 3rem; border: 2px solid var(--yellow); border-radius: 999px; background: var(--yellow); color: #17120a; cursor: pointer; font-weight: 1000; text-transform: uppercase; }
 
 .rules { display: grid; gap: var(--gap-2); padding: var(--gap-3); border: 1px solid var(--line); border-radius: var(--radius); background: #20281f; }
 .rules > * { margin-block: 0; }
@@ -349,6 +371,12 @@ button { color: inherit; }
   .brand span, .prototype-question, .prototype-nav a:last-child { display: none; }
   .prototype-nav .home-link { min-block-size: 2rem; display: grid; place-items: center; padding-inline: .55rem; border: 1px solid var(--line); border-radius: 999px; font-size: .62rem; }
   .game-layout, .play-column { gap: .35rem; }
+  .round-strip { display: flex; gap: .3rem; padding: .3rem; overflow-x: auto; scrollbar-width: none; }
+  .round-strip::-webkit-scrollbar { display: none; }
+  .round-strip a { flex: 0 0 7.6rem; padding: .38rem .45rem; }
+  .round-strip a > span { inline-size: 1.45rem; block-size: 1.45rem; font-size: .7rem; }
+  .round-strip strong { font-size: .62rem; }
+  .round-strip small { font-size: .52rem; }
   .game-heading { align-items: center; padding: .5rem .65rem; border-inline: 0; border-radius: 0; }
   .game-heading .eyebrow { margin-block-end: .15rem; font-size: .56rem; }
   .game-heading h1 { font-size: 1.05rem; }

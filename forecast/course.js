@@ -2,10 +2,82 @@
 window.ForeCastGame = (() => {
   const width = 978
   const height = 490
-  const par = 3
-  const strokeCap = 7
-  const cup = { x: 840, y: 230, r: 11 }
-  const tee = { x: 140, y: 180 }
+  const holes = [
+    {
+      id: 1,
+      name: "Breakwater Bend",
+      place: "Cleveland",
+      date: "September 23, 2026",
+      par: 3,
+      strokeCap: 7,
+      times: ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"],
+      images: ["assets/forecast-radar-2110.png", "assets/forecast-radar-2120.png", "assets/forecast-radar-2130.png", "assets/forecast-radar-2140.png"],
+      tee: { x: 140, y: 180 },
+      cup: { x: 840, y: 230, r: 11 },
+      targets: {
+        1: { safe: { x: 340, y: 170 }, window: { x: 390, y: 180 }, gawd: { x: 430, y: 210 } },
+        2: { safe: { x: 550, y: 220 }, window: { x: 640, y: 210 }, gawd: { x: 700, y: 260 } },
+        3: { safe: { x: 650, y: 250 }, window: { x: 700, y: 260 }, gawd: { x: 740, y: 280 } }
+      }
+    },
+    {
+      id: 2,
+      name: "Shattered Shore",
+      place: "Cleveland",
+      date: "August 11, 2026",
+      par: 4,
+      strokeCap: 8,
+      times: ["6:20 PM", "6:30 PM", "6:40 PM", "6:50 PM"],
+      images: ["assets/candidates/aug11-1.png", "assets/candidates/aug11-2.png", "assets/candidates/aug11-3.png", "assets/candidates/aug11-4.png"],
+      tee: { x: 280, y: 250 },
+      cup: { x: 880, y: 420, r: 11 },
+      targets: {
+        1: { safe: { x: 532, y: 232 }, window: { x: 540, y: 216 }, gawd: { x: 612, y: 240 } },
+        2: { safe: { x: 556, y: 288 }, window: { x: 508, y: 304 }, gawd: { x: 676, y: 216 } },
+        3: { safe: { x: 716, y: 232 }, window: { x: 668, y: 360 }, gawd: { x: 756, y: 168 } }
+      }
+    },
+    {
+      id: 3,
+      name: "Backwash",
+      place: "Cleveland",
+      date: "August 30, 2026",
+      par: 4,
+      strokeCap: 8,
+      times: ["9:10 AM", "9:20 AM", "9:30 AM", "9:40 AM"],
+      images: ["assets/candidates/aug30-1.png", "assets/candidates/aug30-2.png", "assets/candidates/aug30-3.png", "assets/candidates/aug30-4.png"],
+      tee: { x: 836, y: 188 },
+      cup: { x: 212, y: 192, r: 11 },
+      targets: {
+        1: { safe: { x: 704, y: 250 }, window: { x: 680, y: 120 }, gawd: { x: 600, y: 100 } },
+        2: { safe: { x: 440, y: 108 }, window: { x: 448, y: 140 }, gawd: { x: 428, y: 72 } },
+        3: { safe: { x: 364, y: 304 }, window: { x: 300, y: 220 }, gawd: { x: 428, y: 76 } }
+      }
+    },
+    {
+      id: 4,
+      name: "Anvil Crossing",
+      place: "Cleveland",
+      date: "August 10, 2026",
+      par: 5,
+      strokeCap: 9,
+      times: ["8:30 AM", "8:40 AM", "8:50 AM", "9:00 AM"],
+      images: ["assets/candidates/aug10-1.png", "assets/candidates/aug10-2.png", "assets/candidates/aug10-3.png", "assets/candidates/aug10-4.png"],
+      tee: { x: 120, y: 160 },
+      cup: { x: 900, y: 160, r: 11 },
+      targets: {
+        1: { safe: { x: 400, y: 250 }, window: { x: 350, y: 200 }, gawd: { x: 412, y: 94 } },
+        2: { safe: { x: 640, y: 322 }, window: { x: 628, y: 322 }, gawd: { x: 676, y: 304 } },
+        3: { safe: { x: 698, y: 322 }, window: { x: 746, y: 256 }, gawd: { x: 806, y: 232 } }
+      }
+    }
+  ]
+  const requestedHole = Number(new URLSearchParams(window.location.search).get("hole"))
+  const hole = holes.find(candidate => candidate.id === requestedHole) || holes[0]
+  const par = hole.par
+  const strokeCap = hole.strokeCap
+  const cup = hole.cup
+  const tee = hole.tee
   const clubs = {
     driver: { label: "Driver", reach: 335, rollSpeed: 7.5 },
     iron: { label: "Iron", reach: 245, rollSpeed: 6 },
@@ -30,11 +102,7 @@ window.ForeCastGame = (() => {
     window: { name: "Deep Green", value: 5, r: 29, color: "#00e5d4" },
     gawd: { name: "Storm Edge", value: 8, r: 25, color: "#fdd835" }
   }
-  const targetPositions = {
-    1: { safe: { x: 340, y: 170 }, window: { x: 390, y: 180 }, gawd: { x: 430, y: 210 } },
-    2: { safe: { x: 550, y: 220 }, window: { x: 640, y: 210 }, gawd: { x: 700, y: 260 } },
-    3: { safe: { x: 650, y: 250 }, window: { x: 700, y: 260 }, gawd: { x: 740, y: 280 } }
-  }
+  const targetPositions = hole.targets
   function bonusesForFrame(frame) {
     const positions = targetPositions[Math.max(1, Math.min(3, frame))]
     return Object.entries(targetTypes).map(([route, target]) => ({
@@ -223,10 +291,10 @@ window.ForeCastGame = (() => {
     return difference > 0 ? `+${difference}` : `${difference}`
   }
 
-  return { width, height, par, cup, clubs, surfaces, routes, lieEffects, bonusesForFrame, initialState, effectiveClub, clampAim, powerTarget, selectClub, selectRoute, aim, shotGeometry, safeDrop, resolveShot, scoreToPar, distance }
+  return { width, height, holes, hole, par, strokeCap, cup, tee, clubs, surfaces, routes, lieEffects, bonusesForFrame, initialState, effectiveClub, clampAim, powerTarget, selectClub, selectRoute, aim, shotGeometry, safeDrop, resolveShot, scoreToPar, distance }
 })()
 
-const frameTimes = ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"]
+const frameTimes = ForeCastGame.hole.times
 const board = document.querySelector("[data-board]")
 const boardViewport = document.querySelector("[data-board-viewport]")
 const boardZoomButtons = [...document.querySelectorAll("[data-board-zoom]")]
@@ -246,6 +314,8 @@ const replayButton = document.querySelector("[data-replay-shot]")
 const shotToast = document.querySelector("[data-shot-toast]")
 const log = document.querySelector("[data-event-log]")
 const frameImages = [...document.querySelectorAll("[data-frame]")]
+const currentHole = ForeCastGame.hole
+const roundStorageKey = "forecast-four-hole-round-v1"
 const cupMarkerButtons = [...document.querySelectorAll("[data-cup-marker]")]
 const requestedCupMarker = new URLSearchParams(window.location.search).get("cup")
 let cupMarker = requestedCupMarker === "umbrella" ? "umbrella" : "flag"
@@ -257,6 +327,70 @@ let meterFrame = null
 let meterStartedAt = 0
 let livePower = 0
 let liveAccuracy = 50
+
+function holeUrl(holeId) {
+  const url = new URL(window.location.href)
+  url.searchParams.set("hole", holeId)
+  return `${url.pathname}${url.search}`
+}
+
+function readRound() {
+  try { return JSON.parse(window.localStorage.getItem(roundStorageKey)) || {} }
+  catch { return {} }
+}
+
+function writeRound(round) {
+  try { window.localStorage.setItem(roundStorageKey, JSON.stringify(round)) }
+  catch { /* A private browser can refuse storage; the hole remains playable. */ }
+}
+
+function configureHole() {
+  document.title = `Fore!Cast — Hole ${currentHole.id}: ${currentHole.name}`
+  const timeWindow = `${currentHole.times[0]}–${currentHole.times.at(-1)}`
+  document.querySelector("[data-hole-meta]").textContent = `Hole ${currentHole.id} · ${currentHole.place} · ${currentHole.date} · ${timeWindow} · Par ${currentHole.par}`
+  document.querySelector("[data-hole-name]").textContent = currentHole.name
+  document.querySelector("[data-scorecard-name]").textContent = currentHole.name
+  document.querySelector("[data-board-shell]").setAttribute("aria-label", `${currentHole.name} course board`)
+  frameImages.forEach((image, index) => {
+    image.src = currentHole.images[index]
+    image.alt = `${currentHole.place} radar on ${currentHole.date} at ${currentHole.times[index]}`
+  })
+  log.innerHTML = `<li>On the radar tee. Reveal ${currentHole.times[1]}, choose its moving target, then execute from ${currentHole.times[0]}.</li>`
+  renderRoundCard()
+}
+
+function roundToPar(strokes, par) {
+  const difference = strokes - par
+  if (difference === 0) return "E"
+  return difference > 0 ? `+${difference}` : `${difference}`
+}
+
+function renderRoundCard() {
+  const round = readRound()
+  const rows = ForeCastGame.holes.map(hole => {
+    const result = round[hole.id]
+    const active = hole.id === currentHole.id
+    const status = result ? `<strong>${result.strokes} <small>${roundToPar(result.strokes, hole.par)}</small></strong><span>${result.points} pts</span>` : active ? `<strong>Playing</strong><span>Par ${hole.par}</span>` : `<strong>—</strong><span>Par ${hole.par}</span>`
+    return `<li class="${active ? "is-current" : ""}${result ? " is-complete" : ""}"><a href="${holeUrl(hole.id)}"><i>${hole.id}</i><span><b>${hole.name}</b><small>${hole.date} · ${hole.times[0]}–${hole.times.at(-1)}</small></span>${status}</a></li>`
+  })
+  document.querySelector("[data-round-scorecard]").innerHTML = rows.join("")
+  document.querySelector("[data-round-strip]").innerHTML = ForeCastGame.holes.map(hole => {
+    const result = round[hole.id]
+    return `<a class="${hole.id === currentHole.id ? "is-current" : ""}${result ? " is-complete" : ""}" href="${holeUrl(hole.id)}"><span>${hole.id}</span><strong>${hole.name}</strong><small>${result ? `${result.strokes} strokes` : `Par ${hole.par}`}</small></a>`
+  }).join("")
+  const results = ForeCastGame.holes.map(hole => round[hole.id]).filter(Boolean)
+  const total = results.reduce((sum, result) => sum + result.strokes, 0)
+  const par = ForeCastGame.holes.filter(hole => round[hole.id]).reduce((sum, hole) => sum + hole.par, 0)
+  const points = results.reduce((sum, result) => sum + result.points, 0)
+  document.querySelector("[data-round-total]").textContent = results.length ? `${total} · ${roundToPar(total, par)} · ${points} pts` : "—"
+}
+
+function recordHoleResult() {
+  const round = readRound()
+  round[currentHole.id] = { strokes: state.strokes, penalties: state.penalties, points: state.points, capped: state.capped }
+  writeRound(round)
+  renderRoundCard()
+}
 
 function centerBoard(point, behavior = "smooth") {
   if (!boardViewport.classList.contains("is-zoomed")) return
@@ -304,8 +438,13 @@ function readSurface(frame, point) {
 }
 
 function verifySurfaceFairness() {
-  const surface = readSurface(2, { x: 373, y: 56 })
-  if (surface !== "light") throw new Error(`Surface fairness check failed: expected light radar, got ${surface}`)
+  const checks = [
+    { label: "tee", frame: 0, point: ForeCastGame.tee },
+    { label: "cup", frame: 3, point: ForeCastGame.cup },
+    ...[1, 2, 3].flatMap(frame => ForeCastGame.bonusesForFrame(frame).map(target => ({ label: `${target.name} on frame ${frame + 1}`, frame, point: target })))
+  ]
+  const failures = checks.map(check => ({ ...check, surface: readSurface(check.frame, check.point) })).filter(check => ForeCastGame.surfaces[check.surface].penalty)
+  if (failures.length) throw new Error(`${currentHole.name} geometry check failed: ${failures.map(check => `${check.label} is ${check.surface}`).join(", ")}`)
 }
 
 function buildIslandCatalog(frame) {
@@ -458,8 +597,10 @@ function prepareRadarSamplers() {
       samplers[index] = context
       resolve()
     }
-    if (image.complete) ready()
-    else image.addEventListener("load", ready, { once: true })
+    image.decode().then(ready).catch(() => {
+      if (image.complete && image.naturalWidth) ready()
+      else image.addEventListener("load", ready, { once: true })
+    })
   }))).then(() => {
     verifySurfaceFairness()
     for (let frame = 1; frame < frameImages.length; frame += 1) islandCatalogs[frame] = buildIslandCatalog(frame)
@@ -488,7 +629,10 @@ function renderRoutes() {
 }
 
 function renderCupMarker() {
-  document.querySelectorAll("[data-cup-art]").forEach(marker => marker.toggleAttribute("hidden", marker.dataset.cupArt !== cupMarker))
+  document.querySelectorAll("[data-cup-art]").forEach(marker => {
+    marker.toggleAttribute("hidden", marker.dataset.cupArt !== cupMarker)
+    marker.setAttribute("transform", `translate(${ForeCastGame.cup.x - 840} ${ForeCastGame.cup.y - 230})`)
+  })
   cupMarkerButtons.forEach(button => {
     const selected = button.dataset.cupMarker === cupMarker
     button.classList.toggle("is-current", selected)
@@ -663,8 +807,11 @@ function render() {
   result.hidden = !state.complete
   if (state.complete) {
     document.querySelector("[data-result-title]").textContent = state.capped ? "Stroke limit" : `${ForeCastGame.scoreToPar(state)} · ${state.points} bonus pts`
-    document.querySelector("[data-result-copy]").textContent = state.capped ? "The hole is capped at seven strokes. Try a safer route or a cleaner meter." : `Finished in ${state.strokes} strokes with ${state.penalties} penalties. Your route earned ${state.points} bonus points.`
+    document.querySelector("[data-result-copy]").textContent = state.capped ? `The hole is capped at ${ForeCastGame.strokeCap} strokes. Try a safer route or a cleaner meter.` : `Finished in ${state.strokes} strokes with ${state.penalties} penalties. Your route earned ${state.points} bonus points.`
+    const nextButton = document.querySelector("[data-next-hole]")
+    nextButton.textContent = currentHole.id < ForeCastGame.holes.length ? `Play hole ${currentHole.id + 1}` : "View round card"
   }
+  renderRoundCard()
 }
 
 function meterValue(elapsed, speed = 1) {
@@ -809,6 +956,7 @@ function strike() {
   animateShot(resolved.geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = resolved.state
+    if (state.complete) recordHoleResult()
     livePower = 0
     liveAccuracy = 50
     const message = outcomeMessage(previous, state, resolved.geometry)
@@ -863,15 +1011,20 @@ function swing() {
   }
 }
 
-function reset() {
+function reset(clearResult = false) {
   cancelAnimationFrame(meterFrame)
+  if (clearResult) {
+    const round = readRound()
+    delete round[currentHole.id]
+    writeRound(round)
+  }
   state = ForeCastGame.initialState()
   livePower = 0
   liveAccuracy = 50
   trails.replaceChildren()
   effects.replaceChildren()
   shotToast.hidden = true
-  log.innerHTML = "<li>On the radar tee. Reveal 2:20, choose its moving target, then execute from 2:10.</li>"
+  log.innerHTML = `<li>On the radar tee. Reveal ${frameTimes[1]}, choose its moving target, then execute from ${frameTimes[0]}.</li>`
   render()
 }
 
@@ -915,7 +1068,16 @@ boardZoomButtons.forEach(button => button.addEventListener("click", () => {
   requestAnimationFrame(() => centerBoard(state.ball, "auto"))
 }))
 swingButton.addEventListener("click", swing)
-document.querySelector("[data-reset]").addEventListener("click", reset)
-document.querySelector("[data-play-again]").addEventListener("click", reset)
+document.querySelector("[data-reset]").addEventListener("click", () => reset(true))
+document.querySelector("[data-play-again]").addEventListener("click", () => reset(true))
+document.querySelector("[data-next-hole]").addEventListener("click", () => {
+  if (currentHole.id < ForeCastGame.holes.length) window.location.href = holeUrl(currentHole.id + 1)
+  else document.querySelector("[data-round-scorecard]").scrollIntoView({ behavior: "smooth", block: "center" })
+})
+document.querySelector("[data-new-round]").addEventListener("click", () => {
+  writeRound({})
+  window.location.href = holeUrl(1)
+})
+configureHole()
 prepareRadarSamplers()
 render()
