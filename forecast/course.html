@@ -3,112 +3,192 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fore!Cast Points Course — Prototype</title>
+  <title>Fore!Cast — Breakwater Bend Prototype</title>
   <link rel="stylesheet" href="shared.css">
 </head>
 <body>
-  <!-- THROWAWAY PROTOTYPE: can optional waypoint values create several viable routes to one cup? -->
+  <!-- THROWAWAY PROTOTYPE: can next-frame planning plus execution skill create several viable routes? -->
   <main class="shell">
     <header class="masthead">
       <span class="shield" aria-hidden="true">ϟ</span>
-      <div class="brand"><strong>Fore!Cast Points Course</strong><span>Cleveland Open · Par 4</span></div>
-      <a class="home-link" href="index.html">All prototypes</a>
+      <div class="brand"><strong>Fore!Cast</strong><span>Golf only when it rains</span></div>
+      <nav class="cluster prototype-nav" aria-label="Prototype navigation">
+        <a class="home-link" href="rules.html?variant=field-guide">How to play</a>
+        <a class="home-link" href="index.html">All prototypes</a>
+      </nav>
     </header>
+
+    <p class="prototype-question"><strong>Prototype question:</strong> Does a moving precipitation platform turn radar-reading into a golf skill instead of a visual gimmick?</p>
 
     <div class="game-layout">
       <section class="play-column stack">
         <header class="game-heading">
-          <div><p class="eyebrow">Hole 1 · Cleveland</p><h1>The Erie Carry</h1></div>
-          <span class="frame-clock" data-frame-clock>Radar 2:10 PM</span>
+          <div><p class="eyebrow">Hole 1 · Cleveland · Par 3</p><h1>Breakwater Bend</h1></div>
+          <div class="frame-pair"><span data-current-clock>Current 2:10</span><b>→</b><span data-next-clock>Next 2:20</span></div>
         </header>
 
-        <section class="board-shell" aria-label="Points course board">
+        <section class="board-shell" aria-label="Breakwater Bend course board">
           <div class="board" data-board>
-            <img class="radar-frame is-current" src="assets/radar-2110.png" alt="Cleveland radar at 2:10 PM">
-            <img class="radar-frame" src="assets/radar-2120.png" alt="Cleveland radar at 2:20 PM">
-            <img class="radar-frame" src="assets/radar-2130.png" alt="Cleveland radar at 2:30 PM">
-            <img class="radar-frame" src="assets/radar-2140.png" alt="Cleveland radar at 2:40 PM">
-            <svg class="board-overlay" viewBox="0 0 978 490" role="img" aria-label="Golf course with optional point waypoints">
-              <g data-waypoint-layer></g>
-              <g aria-label="Cup">
-                <circle cx="855" cy="90" r="30" fill="#36a75f" fill-opacity=".35" stroke="#fff" stroke-width="4"/>
-                <path d="M855 90V40L895 53L855 66" fill="#f28922" stroke="#10151a" stroke-width="4"/>
-                <text x="855" y="118" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
+            <img class="radar-frame is-current" src="assets/forecast-radar-2110.png" alt="Cleveland radar at 2:10 PM" data-frame="0">
+            <img class="radar-frame" src="assets/forecast-radar-2120.png" alt="Cleveland radar at 2:20 PM" data-frame="1">
+            <img class="radar-frame" src="assets/forecast-radar-2130.png" alt="Cleveland radar at 2:30 PM" data-frame="2">
+            <img class="radar-frame" src="assets/forecast-radar-2140.png" alt="Cleveland radar at 2:40 PM" data-frame="3">
+
+            <svg class="board-overlay" viewBox="0 0 978 490" role="img" aria-label="Moving radar golf hole with reachable next-frame bonuses, ball, and cup">
+              <defs>
+                <marker id="route-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="currentColor"/></marker>
+              </defs>
+              <g data-route-layer></g>
+              <g data-bonus-layer></g>
+              <g class="cup-marker cup-marker--flag" data-cup-art="flag" aria-label="Cup marked by the original golf flag">
+                <circle cx="840" cy="230" r="11" fill="#36a75f" fill-opacity=".45" stroke="#fff" stroke-width="4"/>
+                <path d="M840 230V180L880 193L840 206" fill="#f28922" stroke="#10151a" stroke-width="4"/>
+                <text x="840" y="259" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
               </g>
-              <line data-aim-line x1="120" y1="410" x2="370" y2="310" stroke="#fff" stroke-width="4" stroke-dasharray="9 8" opacity=".82"/>
-              <circle data-aim-marker cx="370" cy="310" r="11" fill="none" stroke="#fff" stroke-width="4"/>
+              <g class="cup-marker cup-marker--umbrella" data-cup-art="umbrella" aria-label="Cup marked by an open rain umbrella" hidden>
+                <circle cx="840" cy="230" r="11" fill="#36a75f" fill-opacity=".45" stroke="#fff" stroke-width="4"/>
+                <path class="umbrella-canopy" d="M816 191C818 174 827 163 840 159C853 163 862 174 864 191C858 186 852 186 846 191C842 187 838 187 834 191C828 186 822 186 816 191Z"/>
+                <path class="umbrella-panel umbrella-panel--left" d="M816 191C818 174 827 163 840 159C834 168 833 180 834 191C828 186 822 186 816 191Z"/>
+                <path class="umbrella-panel umbrella-panel--right" d="M840 159C853 163 862 174 864 191C858 186 852 186 846 191C847 180 846 168 840 159Z"/>
+                <path class="umbrella-ribs" d="M840 160C834 170 833 181 834 190M840 160C846 170 847 181 846 190M840 160V190"/>
+                <circle class="umbrella-finial" cx="840" cy="158" r="3"/>
+                <path class="umbrella-shaft" d="M840 190V230"/>
+                <text x="840" y="259" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
+              </g>
+              <path data-shot-cone class="shot-cone"/>
+              <line data-aim-line x1="140" y1="180" x2="340" y2="170"/>
+              <circle data-aim-marker cx="340" cy="170" r="13"/>
               <g data-shot-trails></g>
-              <circle data-ball cx="120" cy="410" r="10" fill="#fff" stroke="#10151a" stroke-width="4"/>
-              <text x="120" y="442" fill="#fff" font-size="18" font-weight="950" text-anchor="middle">TEE</text>
+              <g data-shot-effects aria-hidden="true"></g>
+              <circle data-ball cx="140" cy="180" r="11"/>
+              <text data-ball-label x="140" y="212" fill="#fff" font-size="17" font-weight="950" text-anchor="middle">TEE</text>
             </svg>
+
+            <div class="board-status"><strong data-view-label>CURRENT · 2:10</strong><span data-aim-weather>Aim on the course to read next-frame weather</span></div>
           </div>
 
-          <div class="frame-strip" aria-label="Four radar frames">
-            <button class="frame-chip is-current" type="button" disabled>2:10</button>
-            <button class="frame-chip" type="button" disabled>2:20</button>
-            <button class="frame-chip" type="button" disabled>2:30</button>
-            <button class="frame-chip" type="button" disabled>2:40</button>
+          <div class="frame-compare" aria-label="Compare current and next radar">
+            <button class="frame-choice is-current" type="button" data-view="current"><span>Current lie</span><strong data-current-button>2:10 PM</strong></button>
+            <span class="compare-glyph" aria-hidden="true">↔</span>
+            <button class="frame-choice" type="button" data-view="next"><span>Shot resolves here</span><strong data-next-button>2:20 PM</strong></button>
+          </div>
+          <div class="cup-marker-switcher" aria-label="Compare cup marker artwork">
+            <span>Cup marker</span>
+            <div>
+              <button class="is-current" type="button" data-cup-marker="flag">Original flag</button>
+              <button type="button" data-cup-marker="umbrella">Umbrella</button>
+            </div>
+          </div>
+          <div class="shot-review-controls">
+            <button class="shot-review-control" type="button" data-review-shot disabled aria-pressed="false">
+              <span>Previous stroke</span><strong data-review-label>No shot yet</strong>
+            </button>
+            <button class="shot-review-control replay-shot-button" type="button" data-replay-shot disabled>
+              <span>Replay stroke</span><strong>▶ Watch again</strong>
+            </button>
           </div>
         </section>
 
-        <section class="shot-controls">
-          <div class="control-copy">
-            <strong data-instruction>Choose a club, then tap or click a landing point.</strong>
-            <div class="club-bank" aria-label="Club selection">
-              <button class="club-button is-selected" type="button" data-club="driver">Driver<span>long · 320</span></button>
-              <button class="club-button" type="button" data-club="iron">Iron<span>medium · 235</span></button>
-              <button class="club-button" type="button" data-club="wedge">Wedge<span>short · 150</span></button>
-            </div>
+        <section class="route-picker" aria-labelledby="route-heading">
+          <div class="section-heading"><div><p class="eyebrow">1 · Reveal + choose</p><h2 id="route-heading">Pick a target on the next frame</h2></div><span>Targets move with every frame</span></div>
+          <div class="route-bank">
+            <button class="route-card is-selected" type="button" data-route="safe"><span>Broad + forgiving</span><strong>Open Green</strong><small>+2 · light green radar</small></button>
+            <button class="route-card" type="button" data-route="window"><span>Narrow + valuable</span><strong>Deep Green</strong><small>+5 · dark green radar</small></button>
+            <button class="route-card" type="button" data-route="gawd"><span>High stakes</span><strong>Storm Edge</strong><small>+8 · yellow hazard beside it</small></button>
           </div>
-          <button class="shot-button" type="button" data-shoot>Take stroke 1</button>
+        </section>
+
+        <section class="shot-workbench" aria-labelledby="swing-heading">
+          <div class="club-panel">
+            <p class="eyebrow">2 · Club + aim</p>
+            <div class="club-bank" aria-label="Club selection">
+              <button class="club-button is-selected" type="button" data-club="driver">Driver<span>335 yd</span></button>
+              <button class="club-button" type="button" data-club="iron">Iron<span>245 yd</span></button>
+              <button class="club-button" type="button" data-club="wedge">Wedge<span>155 yd</span></button>
+            </div>
+            <p class="aim-copy" data-instruction>Tap or click the board to choose the ball's intended landing point. Plan for roll after contact.</p>
+          </div>
+
+          <div class="swing-panel">
+            <div class="section-heading compact"><div><p class="eyebrow">3 · Swing</p><h2 id="swing-heading">Power, then accuracy</h2></div><span data-swing-status>Ready</span></div>
+            <div class="meter-row">
+              <span>Power</span>
+              <div class="meter meter--power"><i data-power-fill></i><b data-power-needle></b><em data-power-target title="Power needed for the aim point"></em></div>
+              <strong data-power-readout>—</strong>
+            </div>
+            <div class="meter-row">
+              <span>Accuracy</span>
+              <div class="meter meter--accuracy"><i></i><b data-accuracy-needle></b></div>
+              <strong data-accuracy-readout>—</strong>
+            </div>
+            <button class="swing-button" type="button" data-swing>Start swing</button>
+            <p class="swing-help">Tap once to lock power at the orange marker. Tap again near the center pin for accuracy.</p>
+          </div>
         </section>
 
         <section class="rules">
-          <h2>What this prototype is testing</h2>
+          <h2>What this proof is testing</h2>
           <ol>
-            <li>Collect a waypoint only by coming to rest inside it.</li>
-            <li>Moving waypoints carry the ball when the radar advances.</li>
-            <li>Hole out within six strokes or the entire card scores zero.</li>
+            <li>Flip between <strong>Current</strong> and <strong>Next</strong> as often as you want before starting the swing.</li>
+            <li><strong>Green precipitation is the only playable surface.</strong> Your intended landing point is only a plan; the two meters determine where the ball actually arrives.</li>
+            <li>The shot resolves against the visible next frame. Miss the moved radar and the ball falls through: land is +1, water is +2, and yellow-or-worse radar is a +1 storm hazard.</li>
+            <li>After any penalty, the ball drops onto the nearest safe green radar on that new frame—never back onto an empty old lie.</li>
+            <li>Flight and roll are separate. Club, power, accuracy, and each green surface determine the ball's remaining momentum.</li>
+            <li>Rolling off the precipitation edge counts exactly like missing it in flight.</li>
+            <li>Disconnected green <strong>radar islands</strong> are natural bonuses when they are large enough to hold the ball, reachable, closer to the cup than the ball, and not underneath the current lie. Smaller islands pay more.</li>
+            <li>After every stroke, only a banked target's 55-degree umbrella remains on the current frame. <strong>Replay stroke</strong> temporarily restores the old targets and path; both disappear when replay ends. <strong>Previous stroke</strong> can inspect the path without restoring old targets.</li>
+            <li><strong>Replay stroke</strong> reruns the exact stored flight, roll, fall, and impact without changing the score or lie.</li>
           </ol>
-          <p>The direct route rewards fewer strokes. Detours offer more points. The question is whether several routes feel genuinely competitive rather than decorative.</p>
         </section>
       </section>
 
       <aside class="score-rail">
-        <section class="panel">
-          <h2>Current card</h2>
-          <strong class="big-score" data-score>0</strong>
-          <p class="score-meta" data-score-meta>Stroke 1 · Fairway lie</p>
+        <section class="panel scorecard">
+          <div class="section-heading compact"><div><p class="eyebrow">Live card</p><h2>Breakwater Bend</h2></div><strong class="to-par" data-to-par>E</strong></div>
+          <p class="score-meta" data-score-meta>Stroke 1 · Tee lie</p>
           <div class="stat-grid">
-            <div class="stat"><span>Strokes</span><strong data-strokes>0 / 6</strong></div>
-            <div class="stat"><span>Waypoints</span><strong data-points>0 pts</strong></div>
+            <div class="stat"><span>Strokes</span><strong data-strokes>0</strong></div>
+            <div class="stat"><span>Bonus</span><strong data-points>0 pts</strong></div>
+            <div class="stat"><span>Penalties</span><strong data-penalties>0</strong></div>
+            <div class="stat"><span>Lie</span><strong data-lie>Tee</strong></div>
           </div>
           <button class="reset-button" type="button" data-reset>Reset hole</button>
         </section>
 
+        <section class="panel forecast-card">
+          <p class="eyebrow">If this shot lands</p>
+          <h2 data-preview-title>Next frame · Light green</h2>
+          <p data-preview-copy>Broad, forgiving radar. Lower-value targets live here.</p>
+        </section>
+
         <section class="panel">
-          <h2>Route values</h2>
-          <ul class="target-list">
-            <li><span class="target-key" style="color:#76c77a"><i class="target-dot"></i>Anchor</span><strong>+2</strong></li>
-            <li><span class="target-key" style="color:#00e5d4"><i class="target-dot"></i>Rider</span><strong>+4</strong></li>
-            <li><span class="target-key" style="color:#fdd835"><i class="target-dot"></i>Gawd mark</span><strong>+6</strong></li>
-          </ul>
+          <h2>Bonuses on this hole</h2>
+          <ul class="target-list" data-bonus-list></ul>
+        </section>
+
+        <section class="panel rivalry-card">
+          <p class="eyebrow">Multiplayer experiment</p>
+          <h2>Weather Hold</h2>
+          <p>Bank a Storm Edge target to earn one hold. Play it before a rival aims: their weather stays on the same frame for one stroke.</p>
+          <p><strong>Comeback rule:</strong> holds never stack, and the challenged player earns +3 if they still hit a target.</p>
         </section>
 
         <section class="panel">
           <h2>Hole feed</h2>
-          <ol class="event-log" data-event-log aria-live="polite"><li>On the tee. Six-stroke limit.</li></ol>
+          <ol class="event-log" data-event-log aria-live="polite"><li>On the radar tee. Reveal 2:20, choose its moving target, then execute from 2:10.</li></ol>
         </section>
 
-        <section class="panel">
-          <h2>Friends today</h2>
-          <ol class="leaderboard"><li><span>1 · Moose</span><strong>19</strong></li><li><span>2 · Pickles</span><strong>16</strong></li><li><span>3 · You</span><strong data-board-score>—</strong></li></ol>
+        <section class="panel result-card" data-result hidden>
+          <p class="eyebrow">Card complete</p>
+          <h2 data-result-title>Par</h2>
+          <p data-result-copy></p>
+          <button class="reset-button" type="button" data-play-again>Play another line</button>
         </section>
       </aside>
     </div>
 
-    <p class="prototype-note">Standalone responsive prototype · intentionally simplified shot physics and course generation</p>
+    <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js"></script>
+  <script src="course.js?v=13"></script>
 </body>
 </html>

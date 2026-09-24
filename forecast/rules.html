@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Play Fore!Cast — Prototype</title>
+  <link rel="stylesheet" href="shared.css">
+  <link rel="stylesheet" href="rules.css?v=2">
+</head>
+<body class="rules-page">
+  <!-- THROWAWAY UI PROTOTYPE: three rules-page structures, switchable with ?variant=. -->
+  <header class="rules-masthead">
+    <a class="rules-brand" href="index.html" aria-label="Fore!Cast home">
+      <span class="shield" aria-hidden="true">ϟ</span>
+      <span><strong>FORE!CAST</strong><small>Golf only when it rains</small></span>
+    </a>
+    <span class="course-open"><i aria-hidden="true"></i> Cleveland course open</span>
+  </header>
+
+  <main>
+    <article class="rules-variant briefing" data-rules-variant="briefing">
+      <section class="briefing-hero rules-stack">
+        <p class="rules-kicker">Your 60-second tee briefing</p>
+        <h1>Real rain.<br>A brand-new hole.</h1>
+        <p class="rules-lede">This one is a par 3 played on moving precipitation. Land on green radar—or fall through to the land or water below.</p>
+        <div class="hero-actions">
+          <a class="play-cta" href="course.html">Play the Cleveland hole <span>→</span></a>
+          <span>One official card · About a minute</span>
+        </div>
+      </section>
+
+      <section class="three-beats" aria-label="How each stroke works">
+        <article><b>1</b><div><strong>Reveal the target</strong><p>Flip to next. Its placed rings and reachable radar islands show where your shot can score.</p></div></article>
+        <article><b>2</b><div><strong>Swing it</strong><p>Choose a club, aim, then tap for power and tap again for accuracy.</p></div></article>
+        <article><b>3</b><div><strong>Watch the result</strong><p>Flight becomes roll at first contact. Review or replay the exact stroke on its resolved frame without changing your score.</p></div></article>
+      </section>
+
+      <section class="decision-demo">
+        <div class="decision-copy rules-stack">
+          <p class="rules-kicker">Every shot is a wager</p>
+          <h2>How brave is your next stroke?</h2>
+          <div class="route-choice safe"><span>Safe</span><strong>Light-green radar</strong><small>Broad landing · +2 target</small></div>
+          <div class="route-choice risk"><span>Risk</span><strong>Storm edge</strong><small>Narrow landing · +8 target</small></div>
+        </div>
+        <div class="mini-course" aria-label="Example radar hole with safe and risky routes">
+          <img src="assets/forecast-radar-2130.png" alt="Cleveland weather radar used as a Fore!Cast hole">
+          <svg viewBox="0 0 978 490" aria-hidden="true">
+            <path class="route safe-line" d="M140 180 Q355 185 550 220 T840 230"/>
+            <path class="route risk-line" d="M140 180 Q420 140 700 260 T840 230"/>
+            <circle class="tee" cx="140" cy="180" r="13"/>
+            <circle class="bonus" cx="700" cy="260" r="30"/>
+            <text x="700" y="267">+8</text>
+            <path class="flag" d="M840 230V175L885 191L840 207"/>
+          </svg>
+          <span class="course-tag course-tag--safe">SAFE</span>
+          <span class="course-tag course-tag--risk">RISK</span>
+        </div>
+      </section>
+
+      <p class="rules-fineprint">A course designer built this hole over recent local radar. Fore!Cast is a game—not a weather-safety tool.</p>
+    </article>
+
+    <article class="rules-variant field-guide" data-rules-variant="field-guide" hidden>
+      <header class="guide-intro">
+        <div class="rules-stack">
+          <p class="rules-kicker">Cleveland Open · Player's guide</p>
+          <h1>Read the weather.<br>Play the opening.</h1>
+          <p>The radar is the course. Flip between current and next, aim for where the green platform and its bonuses move, then earn the shot.</p>
+        </div>
+        <a class="play-cta" href="course.html">Tee off <span>→</span></a>
+      </header>
+
+      <section class="guide-board">
+        <div class="guide-map">
+          <img src="assets/forecast-radar-2130.png" alt="Annotated Cleveland radar course">
+          <div class="frame-peek" aria-label="Compare current radar at 2:20 PM with next radar at 2:30 PM"><strong>Current 2:20</strong><span>↔</span><strong>Next 2:30</strong></div>
+          <svg viewBox="0 0 978 490" aria-hidden="true">
+            <path class="guide-path" d="M140 180 C310 155 420 185 550 220 S700 260 840 230"/>
+            <circle class="guide-pin pin-one" cx="300" cy="170" r="20"/><text x="300" y="177">1</text>
+            <circle class="guide-pin pin-two" cx="550" cy="220" r="20"/><text x="550" y="227">2</text>
+            <circle class="guide-pin pin-three" cx="700" cy="260" r="20"/><text x="700" y="267">3</text>
+            <path class="flag" d="M840 230V175L885 191L840 207"/>
+          </svg>
+        </div>
+        <ol class="guide-callouts">
+          <li><b>1</b><div><strong>Find the next platform</strong><p>Flip current ↔ next. Only green precipitation can hold your ball when it arrives.</p></div></li>
+          <li><b>2</b><div><strong>Choose the wager</strong><p>Light green is broad. Storm-edge rings pay more. Reachable radar islands score by size—the smaller the island, the bigger the bonus.</p></div></li>
+          <li><b>3</b><div><strong>Control the finish</strong><p>A safe first bounce can still run off. After a penalty, your next lie is the nearest safe green on the new frame.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="weather-legend" aria-label="Course conditions">
+        <div><i class="condition fairway"></i><strong>Light green radar</strong><span>Playable · broad · +2</span></div>
+        <div><i class="condition wet"></i><strong>Deep green radar</strong><span>Playable · narrow · +5</span></div>
+        <div><i class="condition storm"></i><strong>Yellow+ radar</strong><span>Storm hazard · +1</span></div>
+        <div><i class="condition water"></i><strong>No radar</strong><span>Fall through · land +1 / water +2</span></div>
+      </section>
+
+      <section class="swing-strip">
+        <div><span>Aim</span><strong>Choose club + line</strong></div>
+        <b>→</b>
+        <div><span>Power</span><strong>Tap at your distance</strong></div>
+        <b>→</b>
+        <div><span>Accuracy</span><strong>Tap near the pin</strong></div>
+      </section>
+
+      <p class="rules-fineprint">Breakwater Bend is a par 3. Every authored hole has its own par and radar sequence. Fore!Cast is a game—not a weather-safety tool.</p>
+    </article>
+
+    <article class="rules-variant scorecard-rules" data-rules-variant="scorecard" hidden>
+      <section class="scorecard-sheet">
+        <header class="scorecard-title">
+          <div><p class="rules-kicker">Official local rules</p><h1>Cleveland Open</h1><span>Breakwater Bend · Live rain course</span></div>
+          <div class="par-stamp"><small>Par</small><strong>3</strong><span>this hole</span></div>
+        </header>
+
+        <div class="scorecard-grid">
+          <section class="win-column rules-stack">
+            <h2>Win the hole</h2>
+            <p class="big-rule">Hole out. Beat par. Chase the points.</p>
+            <ol class="numbered-rules">
+              <li><b>01</b><span>Choose a club and aim your landing point.</span></li>
+              <li><b>02</b><span>Tap for power. Tap again for accuracy.</span></li>
+              <li><b>03</b><span>Flip current ↔ next until you know where the radar, placed rings, and reachable island bonuses will move.</span></li>
+              <li><b>04</b><span>Land and finish your roll on green radar. A penalty gets the nearest safe drop on the new frame.</span></li>
+              <li><b>05</b><span>Review or replay the previous stroke on its resolved frame; replay never changes the score or lie.</span></li>
+            </ol>
+          </section>
+
+          <section class="points-column rules-stack">
+            <h2>Build the score</h2>
+            <div class="points-row"><span class="points-icon safe-icon">✓</span><div><strong>Take light green</strong><small>Broad landing · +2 target</small></div></div>
+            <div class="points-row"><span class="points-icon target-icon">+</span><div><strong>Challenge the storm edge</strong><small>Narrow landing · +8 target</small></div></div>
+            <div class="points-row"><span class="points-icon target-icon">◌</span><div><strong>Land a radar island</strong><small>Natural target · smaller pays more</small></div></div>
+            <div class="points-row"><span class="points-icon read-icon">↔</span><div><strong>Read the next frame</strong><small>Targets and playable radar move together</small></div></div>
+            <div class="points-row"><span class="points-icon hazard-icon">!</span><div><strong>Avoid the fall</strong><small>Land +1 · water +2 · yellow radar +1</small></div></div>
+          </section>
+        </div>
+
+        <section class="example-card">
+          <div><small>Example result</small><strong>FRAME READER</strong><span>Birdie · 2 targets · clean finish</span></div>
+          <div class="example-score"><small>Golf</small><strong>−1</strong><span>8 bonus points</span></div>
+        </section>
+
+        <footer class="scorecard-footer">
+          <p>Everyone in Cleveland gets the same hole and frames. Your reads—and your swing—make the card.</p>
+          <a class="play-cta" href="course.html">Play your official card <span>→</span></a>
+        </footer>
+      </section>
+      <p class="rules-fineprint">One official card; practice follows. Par and point ranking are prototype rules, not final tuning. Fore!Cast is a game—not a weather-safety tool.</p>
+    </article>
+  </main>
+
+  <nav class="prototype-switcher" aria-label="Rules-page prototype variants">
+    <button type="button" data-variant-previous aria-label="Previous variant">←</button>
+    <span><small>Rules prototype</small><strong data-variant-label>A · Tee briefing</strong></span>
+    <button type="button" data-variant-next aria-label="Next variant">→</button>
+  </nav>
+
+  <script src="rules.js?v=2"></script>
+</body>
+</html>

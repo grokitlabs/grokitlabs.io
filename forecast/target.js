@@ -3,25 +3,25 @@ const frameTimes = ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"]
 const targetFrames = [
   [
     { name: "Safe shelf", x: 235, y: 325, r: 70, value: 150, color: "#76c77a" },
-    { name: "Lake carry", x: 455, y: 295, r: 52, value: 350, color: "#00e5d4" },
+    { name: "Lake line", x: 455, y: 295, r: 52, value: 350, color: "#00e5d4" },
     { name: "Storm pocket", x: 675, y: 165, r: 37, value: 650, color: "#fdd835" },
     { name: "Gawd mark", x: 855, y: 320, r: 25, value: 1000, color: "#f57c00" }
   ],
   [
     { name: "Safe shelf", x: 250, y: 318, r: 70, value: 150, color: "#76c77a" },
-    { name: "Lake carry", x: 470, y: 285, r: 52, value: 350, color: "#00e5d4" },
+    { name: "Lake line", x: 470, y: 285, r: 52, value: 350, color: "#00e5d4" },
     { name: "Storm pocket", x: 700, y: 178, r: 37, value: 650, color: "#fdd835" },
     { name: "Gawd mark", x: 875, y: 305, r: 25, value: 1000, color: "#f57c00" }
   ],
   [
     { name: "Safe shelf", x: 262, y: 312, r: 70, value: 150, color: "#76c77a" },
-    { name: "Lake carry", x: 492, y: 275, r: 52, value: 350, color: "#00e5d4" },
+    { name: "Lake line", x: 492, y: 275, r: 52, value: 350, color: "#00e5d4" },
     { name: "Storm pocket", x: 722, y: 190, r: 37, value: 650, color: "#fdd835" },
     { name: "Gawd mark", x: 895, y: 292, r: 25, value: 1000, color: "#f57c00" }
   ],
   [
     { name: "Safe shelf", x: 278, y: 305, r: 70, value: 150, color: "#76c77a" },
-    { name: "Lake carry", x: 510, y: 266, r: 52, value: 350, color: "#00e5d4" },
+    { name: "Lake line", x: 510, y: 266, r: 52, value: 350, color: "#00e5d4" },
     { name: "Storm pocket", x: 748, y: 205, r: 37, value: 650, color: "#fdd835" },
     { name: "Gawd mark", x: 915, y: 280, r: 25, value: 1000, color: "#f57c00" }
   ]
