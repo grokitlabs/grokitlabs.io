@@ -31,7 +31,9 @@ simple and fast. Local preview: `jekyll serve` → http://localhost:4000.
   original and game-palette versions of four owner-supplied Cleveland WatchDawg
   radar frames. Its mobile course keeps the enlarged/pannable radar, score,
   targets, clubs, swing meters, and shot payoff in one play viewport while the
-  existing two-column desktop treatment remains intact. Published for mobile
+  existing two-column desktop treatment remains intact. `forecast/candidates.html`
+  is a separate mobile-first review gallery for four real archived four-frame
+  sequences; none has been integrated as a playable hole. Published for mobile
   and desktop playtesting; not integrated with the GrokitLabs homepage.
 - `tests/` — `node --test tests/*.test.mjs` covers the game's pure logic.
 - `docs/superpowers/` — specs and plans (excluded from publish, as are

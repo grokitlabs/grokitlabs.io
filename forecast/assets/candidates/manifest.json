@@ -1,0 +1,12 @@
+{
+  "source": "Local Cleveland MergedReflectivityQCComposite_00.50 archive",
+  "generated_at": "2026-09-24",
+  "cadence_minutes": 10,
+  "selection_note": "Mechanically screened for playable-green coverage, storm-hazard coverage, frame overlap, frame-to-frame change, centroid motion, and natural green components; final four chosen by visual editorial review.",
+  "candidates": [
+    {"id": "A", "slug": "aug10", "date": "2026-08-10", "times_eastern": ["08:30", "08:40", "08:50", "09:00"], "green_share": 0.4833, "hazard_share": 0.1224, "minimum_successive_green_overlap": 0.6751},
+    {"id": "B", "slug": "aug11", "date": "2026-08-11", "times_eastern": ["18:20", "18:30", "18:40", "18:50"], "green_share": 0.3892, "hazard_share": 0.0452, "minimum_successive_green_overlap": 0.6415},
+    {"id": "C", "slug": "aug16", "date": "2026-08-16", "times_eastern": ["15:10", "15:20", "15:30", "15:40"], "green_share": 0.2487, "hazard_share": 0.0916, "minimum_successive_green_overlap": 0.5082},
+    {"id": "D", "slug": "aug30", "date": "2026-08-30", "times_eastern": ["09:10", "09:20", "09:30", "09:40"], "green_share": 0.3707, "hazard_share": 0.11, "minimum_successive_green_overlap": 0.5959}
+  ]
+}
