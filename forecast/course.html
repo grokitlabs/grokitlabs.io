@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fore!Cast — Four-hole rain round</title>
-  <link rel="stylesheet" href="shared.css?v=17">
+  <link rel="stylesheet" href="shared.css?v=18">
 </head>
 <body class="course-page">
   <!-- THROWAWAY PROTOTYPE: can next-frame planning plus execution skill create several viable routes? -->
@@ -83,18 +83,17 @@
             </svg>
 
             <div class="board-status"><strong data-view-label>CURRENT · 2:10</strong><span data-aim-weather>Aim on the course to read next-frame weather</span></div>
-            <div class="shot-toast" data-shot-toast hidden></div>
           </div>
           </div>
-
-          <button class="board-zoom-toggle" type="button" data-board-zoom-toggle aria-label="Zoom out to the whole hole" title="Zoom out to the whole hole"><span aria-hidden="true">⌕</span><strong data-zoom-symbol>−</strong></button>
 
           <div class="frame-compare" aria-label="Compare current and next radar">
             <button class="frame-choice is-current" type="button" data-view="current"><span>Current lie</span><strong data-current-button>2:10 PM</strong></button>
             <span class="compare-glyph" aria-hidden="true">↔</span>
             <button class="frame-choice" type="button" data-view="next"><span>Shot resolves here</span><strong data-next-button>2:20 PM</strong></button>
           </div>
-          <div class="shot-review-controls">
+          <div class="shot-toast board-result" data-shot-toast hidden></div>
+          <div class="board-actions">
+            <button class="board-action board-zoom-toggle" type="button" data-board-zoom-toggle><span>Course view</span><strong data-zoom-label>Whole hole</strong></button>
             <button class="shot-review-control replay-shot-button" type="button" data-replay-shot disabled>
               <span>Replay stroke</span><strong>▶ Watch again</strong>
             </button>
@@ -199,6 +198,6 @@
 
     <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js?v=18"></script>
+  <script src="course.js?v=19"></script>
 </body>
 </html>

@@ -337,58 +337,19 @@ let meterFrame = null
 let meterStartedAt = 0
 let livePower = 0
 let liveAccuracy = 50
-let audioContext = null
-
-function gameAudio() {
-  const AudioContext = window.AudioContext || window.webkitAudioContext
-  if (!AudioContext) return null
-  audioContext ||= new AudioContext()
-  if (audioContext.state === "suspended") audioContext.resume()
-  return audioContext
+const recordedAudio = {
+  shot: new Audio("assets/audio/golf-shot.mp3"),
+  applause: new Audio("assets/audio/golf-applause.mp3")
 }
+recordedAudio.shot.preload = "auto"
+recordedAudio.applause.preload = "auto"
+recordedAudio.shot.volume = .78
+recordedAudio.applause.volume = .52
 
-function noiseBurst(context, start, duration, volume, frequency) {
-  const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate)
-  const samples = buffer.getChannelData(0)
-  for (let index = 0; index < samples.length; index += 1) samples[index] = Math.random() * 2 - 1
-  const source = context.createBufferSource()
-  const filter = context.createBiquadFilter()
-  const gain = context.createGain()
-  filter.type = "bandpass"
-  filter.frequency.value = frequency
-  filter.Q.value = .75
-  gain.gain.setValueAtTime(volume, start)
-  gain.gain.exponentialRampToValueAtTime(.001, start + duration)
-  source.buffer = buffer
-  source.connect(filter).connect(gain).connect(context.destination)
-  source.start(start)
-  source.stop(start + duration)
-}
-
-function playSwingSound() {
-  const context = gameAudio()
-  if (!context) return
-  const now = context.currentTime
-  noiseBurst(context, now, .22, .09, 850)
-  noiseBurst(context, now + .19, .07, .2, 2400)
-  const strike = context.createOscillator()
-  const gain = context.createGain()
-  strike.type = "triangle"
-  strike.frequency.setValueAtTime(190, now + .19)
-  strike.frequency.exponentialRampToValueAtTime(95, now + .27)
-  gain.gain.setValueAtTime(.12, now + .19)
-  gain.gain.exponentialRampToValueAtTime(.001, now + .29)
-  strike.connect(gain).connect(context.destination)
-  strike.start(now + .19)
-  strike.stop(now + .3)
-}
-
-function playGolfClap() {
-  const context = gameAudio()
-  if (!context) return
-  const now = context.currentTime + .08
-  const beats = [0, .08, .15, .25, .34, .47, .58, .7]
-  beats.forEach((offset, index) => noiseBurst(context, now + offset, .055, .035 + (index % 3) * .012, 1300 + (index % 2) * 450))
+function playRecordedSound(sound) {
+  sound.pause()
+  sound.currentTime = 0
+  sound.play().catch(() => { /* The game remains playable when a browser blocks audio. */ })
 }
 
 function holeUrl(holeId) {
@@ -489,10 +450,10 @@ function planningFocusPoint() {
 
 function renderBoardZoomControl() {
   const zoomed = boardViewport.classList.contains("is-zoomed")
-  const label = zoomed ? "Zoom out to the whole hole" : "Zoom in to the shot window"
+  const label = zoomed ? "Show the whole hole" : "Return to the shot view"
   boardZoomButton.setAttribute("aria-label", label)
   boardZoomButton.title = label
-  boardZoomButton.querySelector("[data-zoom-symbol]").textContent = zoomed ? "−" : "+"
+  boardZoomButton.querySelector("[data-zoom-label]").textContent = zoomed ? "Whole hole" : "Shot view"
 }
 
 function startHole() {
@@ -1034,7 +995,7 @@ function strike() {
   drawTrail(resolved.geometry)
   shotToast.hidden = true
   swingButton.disabled = true
-  playSwingSound()
+  playRecordedSound(recordedAudio.shot)
   animateShot(resolved.geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = resolved.state
@@ -1049,7 +1010,7 @@ function strike() {
     render()
     drawImpact(resolved.geometry)
     drawDrop(resolved.geometry)
-    if (resolved.geometry.bonus) playGolfClap()
+    if (resolved.geometry.bonus) playRecordedSound(recordedAudio.applause)
     centerBoard(planningFocusPoint())
   })
 }
@@ -1068,14 +1029,14 @@ function replayLastShot() {
   ballLabel.setAttribute("y", geometry.start.y + 32)
   ballLabel.textContent = "REPLAY"
   drawTrail(geometry)
-  playSwingSound()
+  playRecordedSound(recordedAudio.shot)
   animateShot(geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = { ...state, phase: "aim", reviewShot: false }
     render()
     drawImpact(geometry)
     drawDrop(geometry)
-    if (geometry.bonus) playGolfClap()
+    if (geometry.bonus) playRecordedSound(recordedAudio.applause)
   })
 }
 
