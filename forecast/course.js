@@ -10,6 +10,8 @@ window.ForeCastGame = (() => {
       date: "September 23, 2026",
       par: 3,
       strokeCap: 7,
+      summary: "A short lakefront opener played across a rain band that keeps pulling away from the tee.",
+      challenges: ["Use the next frame to find the landing corridor.", "The lake and the radar edge punish a miss.", "Small storm-edge targets trade safety for points."],
       times: ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"],
       images: ["assets/forecast-radar-2110.png", "assets/forecast-radar-2120.png", "assets/forecast-radar-2130.png", "assets/forecast-radar-2140.png"],
       tee: { x: 140, y: 180 },
@@ -27,6 +29,8 @@ window.ForeCastGame = (() => {
       date: "August 11, 2026",
       par: 4,
       strokeCap: 8,
+      summary: "A long par 4 across broken radar platforms with no single safe line to the cup.",
+      challenges: ["Choose a wide layup or jump to the narrow center.", "Disconnected rain makes every rollout matter.", "The final approach tightens near the shoreline."],
       times: ["6:20 PM", "6:30 PM", "6:40 PM", "6:50 PM"],
       images: ["assets/candidates/aug11-1.png", "assets/candidates/aug11-2.png", "assets/candidates/aug11-3.png", "assets/candidates/aug11-4.png"],
       tee: { x: 280, y: 250 },
@@ -44,6 +48,8 @@ window.ForeCastGame = (() => {
       date: "August 30, 2026",
       par: 4,
       strokeCap: 8,
+      summary: "A reverse-direction par 4 that asks you to read the storm from east to west.",
+      challenges: ["The course moves against the usual visual flow.", "High islands offer points but little room for roll.", "Plan two frames ahead before committing left."],
       times: ["9:10 AM", "9:20 AM", "9:30 AM", "9:40 AM"],
       images: ["assets/candidates/aug30-1.png", "assets/candidates/aug30-2.png", "assets/candidates/aug30-3.png", "assets/candidates/aug30-4.png"],
       tee: { x: 836, y: 188 },
@@ -61,6 +67,8 @@ window.ForeCastGame = (() => {
       date: "August 10, 2026",
       par: 5,
       strokeCap: 9,
+      summary: "A long dogleg threaded around the strongest cells on the course.",
+      challenges: ["Build position before attacking the far side.", "Yellow cores turn aggressive lines into penalty drops.", "The closing corridor shifts on every frame."],
       times: ["8:30 AM", "8:40 AM", "8:50 AM", "9:00 AM"],
       images: ["assets/candidates/aug10-1.png", "assets/candidates/aug10-2.png", "assets/candidates/aug10-3.png", "assets/candidates/aug10-4.png"],
       tee: { x: 120, y: 160 },
@@ -297,7 +305,9 @@ window.ForeCastGame = (() => {
 const frameTimes = ForeCastGame.hole.times
 const board = document.querySelector("[data-board]")
 const boardViewport = document.querySelector("[data-board-viewport]")
-const boardZoomButtons = [...document.querySelectorAll("[data-board-zoom]")]
+const boardZoomButton = document.querySelector("[data-board-zoom-toggle]")
+const holeIntro = document.querySelector("[data-hole-intro]")
+const startHoleButton = document.querySelector("[data-start-hole]")
 const overlay = board.querySelector(".board-overlay")
 const ball = document.querySelector("[data-ball]")
 const ballLabel = document.querySelector("[data-ball-label]")
@@ -309,16 +319,12 @@ const bonusLayer = document.querySelector("[data-bonus-layer]")
 const trails = document.querySelector("[data-shot-trails]")
 const effects = document.querySelector("[data-shot-effects]")
 const swingButton = document.querySelector("[data-swing]")
-const reviewButton = document.querySelector("[data-review-shot]")
 const replayButton = document.querySelector("[data-replay-shot]")
 const shotToast = document.querySelector("[data-shot-toast]")
 const log = document.querySelector("[data-event-log]")
 const frameImages = [...document.querySelectorAll("[data-frame]")]
 const currentHole = ForeCastGame.hole
 const roundStorageKey = "forecast-four-hole-round-v1"
-const cupMarkerButtons = [...document.querySelectorAll("[data-cup-marker]")]
-const requestedCupMarker = new URLSearchParams(window.location.search).get("cup")
-let cupMarker = requestedCupMarker === "umbrella" ? "umbrella" : "flag"
 const samplers = []
 const islandCatalogs = []
 const islandGridStep = 4
@@ -327,10 +333,64 @@ let meterFrame = null
 let meterStartedAt = 0
 let livePower = 0
 let liveAccuracy = 50
+let audioContext = null
+
+function gameAudio() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext
+  if (!AudioContext) return null
+  audioContext ||= new AudioContext()
+  if (audioContext.state === "suspended") audioContext.resume()
+  return audioContext
+}
+
+function noiseBurst(context, start, duration, volume, frequency) {
+  const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate)
+  const samples = buffer.getChannelData(0)
+  for (let index = 0; index < samples.length; index += 1) samples[index] = Math.random() * 2 - 1
+  const source = context.createBufferSource()
+  const filter = context.createBiquadFilter()
+  const gain = context.createGain()
+  filter.type = "bandpass"
+  filter.frequency.value = frequency
+  filter.Q.value = .75
+  gain.gain.setValueAtTime(volume, start)
+  gain.gain.exponentialRampToValueAtTime(.001, start + duration)
+  source.buffer = buffer
+  source.connect(filter).connect(gain).connect(context.destination)
+  source.start(start)
+  source.stop(start + duration)
+}
+
+function playSwingSound() {
+  const context = gameAudio()
+  if (!context) return
+  const now = context.currentTime
+  noiseBurst(context, now, .22, .09, 850)
+  noiseBurst(context, now + .19, .07, .2, 2400)
+  const strike = context.createOscillator()
+  const gain = context.createGain()
+  strike.type = "triangle"
+  strike.frequency.setValueAtTime(190, now + .19)
+  strike.frequency.exponentialRampToValueAtTime(95, now + .27)
+  gain.gain.setValueAtTime(.12, now + .19)
+  gain.gain.exponentialRampToValueAtTime(.001, now + .29)
+  strike.connect(gain).connect(context.destination)
+  strike.start(now + .19)
+  strike.stop(now + .3)
+}
+
+function playGolfClap() {
+  const context = gameAudio()
+  if (!context) return
+  const now = context.currentTime + .08
+  const beats = [0, .08, .15, .25, .34, .47, .58, .7]
+  beats.forEach((offset, index) => noiseBurst(context, now + offset, .055, .035 + (index % 3) * .012, 1300 + (index % 2) * 450))
+}
 
 function holeUrl(holeId) {
   const url = new URL(window.location.href)
   url.searchParams.set("hole", holeId)
+  url.searchParams.delete("play")
   return `${url.pathname}${url.search}`
 }
 
@@ -351,10 +411,23 @@ function configureHole() {
   document.querySelector("[data-hole-name]").textContent = currentHole.name
   document.querySelector("[data-scorecard-name]").textContent = currentHole.name
   document.querySelector("[data-board-shell]").setAttribute("aria-label", `${currentHole.name} course board`)
+  document.querySelector(".cup-marker--flag").setAttribute("transform", `translate(${currentHole.cup.x - 840} ${currentHole.cup.y - 230})`)
   frameImages.forEach((image, index) => {
     image.src = currentHole.images[index]
     image.alt = `${currentHole.place} radar on ${currentHole.date} at ${currentHole.times[index]}`
   })
+  document.querySelector("[data-intro-kicker]").textContent = `Hole ${currentHole.id} · ${currentHole.place}`
+  document.querySelector("[data-intro-name]").textContent = currentHole.name
+  document.querySelector("[data-intro-par]").textContent = currentHole.par
+  document.querySelector("[data-intro-stamp]").textContent = `${currentHole.date} · ${timeWindow} · Par ${currentHole.par}`
+  const introImage = document.querySelector("[data-intro-image]")
+  introImage.src = currentHole.images[0]
+  introImage.alt = `${currentHole.name} opening radar frame`
+  document.querySelector("[data-intro-copy]").textContent = currentHole.summary
+  document.querySelector("[data-intro-challenges]").innerHTML = currentHole.challenges.map(challenge => `<li>${challenge}</li>`).join("")
+  const skipIntro = new URLSearchParams(window.location.search).get("play") === "1"
+  holeIntro.hidden = skipIntro
+  document.body.classList.toggle("is-intro", !skipIntro)
   log.innerHTML = `<li>On the radar tee. Reveal ${currentHole.times[1]}, choose its moving target, then execute from ${currentHole.times[0]}.</li>`
   renderRoundCard()
 }
@@ -399,8 +472,29 @@ function centerBoard(point, behavior = "smooth") {
   boardViewport.scrollTo({ left: Math.max(0, Math.min(board.clientWidth - boardViewport.clientWidth, desired)), behavior })
 }
 
-function focusPointForView() {
-  return state.view === "next" ? state.aim : state.ball
+function planningFocusPoint() {
+  const nextFrame = Math.min(state.frame + 1, 3)
+  const points = [state.ball, ...ForeCastGame.bonusesForFrame(nextFrame)]
+  const xs = points.map(point => point.x)
+  const ys = points.map(point => point.y)
+  return {
+    x: (Math.min(...xs) + Math.max(...xs)) / 2,
+    y: (Math.min(...ys) + Math.max(...ys)) / 2
+  }
+}
+
+function renderBoardZoomControl() {
+  const zoomed = boardViewport.classList.contains("is-zoomed")
+  const label = zoomed ? "Zoom out to the whole hole" : "Zoom in to the shot window"
+  boardZoomButton.setAttribute("aria-label", label)
+  boardZoomButton.title = label
+  boardZoomButton.querySelector("[data-zoom-symbol]").textContent = zoomed ? "−" : "+"
+}
+
+function startHole() {
+  holeIntro.hidden = true
+  document.body.classList.remove("is-intro")
+  requestAnimationFrame(() => centerBoard(planningFocusPoint(), "auto"))
 }
 
 function svgPoint(event) {
@@ -632,18 +726,6 @@ function renderRoutes() {
   ).join("")
 }
 
-function renderCupMarker() {
-  document.querySelectorAll("[data-cup-art]").forEach(marker => {
-    marker.toggleAttribute("hidden", marker.dataset.cupArt !== cupMarker)
-    marker.setAttribute("transform", `translate(${ForeCastGame.cup.x - 840} ${ForeCastGame.cup.y - 230})`)
-  })
-  cupMarkerButtons.forEach(button => {
-    const selected = button.dataset.cupMarker === cupMarker
-    button.classList.toggle("is-current", selected)
-    button.setAttribute("aria-pressed", String(selected))
-  })
-}
-
 function bonusStatus(item, frame) {
   if (state.collected.includes(item.id)) return { label: "Banked", className: "banked" }
   if (item.kind === "island") {
@@ -773,15 +855,7 @@ function render() {
   document.querySelector("[data-score-meta]").textContent = state.complete ? `Final · ${state.strokes} strokes · ${state.points} bonus points` : `Stroke ${state.strokes + 1} · ${state.lie} lie`
   const reviewing = Boolean(state.lastOutcome && state.reviewShot && state.view === "current")
   const replaying = state.phase === "replay"
-  reviewButton.disabled = !state.lastOutcome || replaying
   replayButton.disabled = !state.lastOutcome || replaying
-  reviewButton.classList.toggle("is-active", reviewing)
-  reviewButton.setAttribute("aria-pressed", String(reviewing))
-  const reviewLabel = document.querySelector("[data-review-label]")
-  if (!state.lastOutcome) reviewLabel.textContent = "No shot yet"
-  else if (!reviewing) reviewLabel.textContent = "Hidden"
-  else if (state.lastOutcome.bonus) reviewLabel.textContent = `On · +${state.lastOutcome.bonus.value} banked`
-  else reviewLabel.textContent = "On · No bonus"
   trails.toggleAttribute("hidden", !reviewing)
   document.querySelectorAll("[data-club]").forEach(button => {
     button.classList.toggle("is-selected", button.dataset.club === state.club)
@@ -803,7 +877,6 @@ function render() {
   ballLabel.setAttribute("y", state.ball.y + 32)
   ballLabel.textContent = state.strokes === 0 ? "TEE" : state.lie === "Drop" ? "SAFE DROP" : "BALL"
   renderRoutes()
-  renderCupMarker()
   renderBonuses()
   renderAim()
   renderMeters()
@@ -957,6 +1030,7 @@ function strike() {
   drawTrail(resolved.geometry)
   shotToast.hidden = true
   swingButton.disabled = true
+  playSwingSound()
   animateShot(resolved.geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = resolved.state
@@ -971,7 +1045,8 @@ function strike() {
     render()
     drawImpact(resolved.geometry)
     drawDrop(resolved.geometry)
-    centerBoard(state.ball)
+    if (resolved.geometry.bonus) playGolfClap()
+    centerBoard(planningFocusPoint())
   })
 }
 
@@ -989,12 +1064,14 @@ function replayLastShot() {
   ballLabel.setAttribute("y", geometry.start.y + 32)
   ballLabel.textContent = "REPLAY"
   drawTrail(geometry)
+  playSwingSound()
   animateShot(geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = { ...state, phase: "aim", reviewShot: false }
     render()
     drawImpact(geometry)
     drawDrop(geometry)
+    if (geometry.bonus) playGolfClap()
   })
 }
 
@@ -1041,22 +1118,9 @@ document.querySelectorAll("[data-view]").forEach(button => button.addEventListen
   if (state.phase !== "aim" || state.complete) return
   state = { ...state, view: button.dataset.view }
   render()
-  requestAnimationFrame(() => centerBoard(focusPointForView()))
+  requestAnimationFrame(() => centerBoard(planningFocusPoint()))
 }))
-reviewButton.addEventListener("click", () => {
-  if (!state.lastOutcome || state.phase !== "aim") return
-  state = { ...state, view: "current", reviewShot: !state.reviewShot }
-  render()
-})
 replayButton.addEventListener("click", replayLastShot)
-cupMarkerButtons.forEach(button => button.addEventListener("click", () => {
-  cupMarker = button.dataset.cupMarker
-  const url = new URL(window.location.href)
-  if (cupMarker === "flag") url.searchParams.delete("cup")
-  else url.searchParams.set("cup", cupMarker)
-  window.history.replaceState({}, "", url)
-  renderCupMarker()
-}))
 document.querySelectorAll("[data-club]").forEach(button => button.addEventListener("click", () => {
   state = ForeCastGame.selectClub(state, button.dataset.club)
   render()
@@ -1065,14 +1129,14 @@ document.querySelectorAll("[data-route]").forEach(button => button.addEventListe
   state = ForeCastGame.selectRoute(state, button.dataset.route)
   state = { ...state, view: "next" }
   render()
-  centerBoard(state.aim)
+  centerBoard(planningFocusPoint())
 }))
-boardZoomButtons.forEach(button => button.addEventListener("click", () => {
-  const zoomed = button.dataset.boardZoom === "zoom"
-  boardViewport.classList.toggle("is-zoomed", zoomed)
-  boardZoomButtons.forEach(candidate => candidate.classList.toggle("is-current", candidate === button))
-  requestAnimationFrame(() => centerBoard(focusPointForView(), "auto"))
-}))
+boardZoomButton.addEventListener("click", () => {
+  boardViewport.classList.toggle("is-zoomed")
+  renderBoardZoomControl()
+  requestAnimationFrame(() => centerBoard(planningFocusPoint(), "auto"))
+})
+startHoleButton.addEventListener("click", startHole)
 swingButton.addEventListener("click", swing)
 document.querySelector("[data-reset]").addEventListener("click", () => reset(true))
 document.querySelector("[data-play-again]").addEventListener("click", () => reset(true))
@@ -1086,4 +1150,6 @@ document.querySelector("[data-new-round]").addEventListener("click", () => {
 })
 configureHole()
 prepareRadarSamplers()
+renderBoardZoomControl()
 render()
+if (holeIntro.hidden) requestAnimationFrame(() => centerBoard(planningFocusPoint(), "auto"))

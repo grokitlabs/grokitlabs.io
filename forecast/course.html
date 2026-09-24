@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fore!Cast — Four-hole rain round</title>
-  <link rel="stylesheet" href="shared.css?v=15">
+  <link rel="stylesheet" href="shared.css?v=16">
 </head>
 <body class="course-page">
   <!-- THROWAWAY PROTOTYPE: can next-frame planning plus execution skill create several viable routes? -->
@@ -19,6 +19,20 @@
     </header>
 
     <p class="prototype-question"><strong>Prototype question:</strong> Does a moving precipitation platform turn radar-reading into a golf skill instead of a visual gimmick?</p>
+
+    <section class="hole-intro" data-hole-intro aria-labelledby="hole-intro-name">
+      <article class="hole-intro-card">
+        <div class="hole-intro-heading">
+          <div><p class="eyebrow" data-intro-kicker>Hole 1 · Par 3</p><h1 id="hole-intro-name" data-intro-name>Breakwater Bend</h1></div>
+          <strong data-intro-par>3</strong>
+        </div>
+        <p class="hole-intro-stamp" data-intro-stamp>Cleveland · September 23, 2026 · 2:10 PM–2:40 PM</p>
+        <div class="hole-intro-visual"><img data-intro-image src="assets/forecast-radar-2110.png" alt="Breakwater Bend opening radar frame"></div>
+        <p class="hole-intro-copy" data-intro-copy></p>
+        <ul class="hole-intro-challenges" data-intro-challenges></ul>
+        <button class="tee-off-button" type="button" data-start-hole>Tee off</button>
+      </article>
+    </section>
 
     <div class="game-layout">
       <section class="play-column stack">
@@ -50,19 +64,9 @@
               </defs>
               <g data-route-layer></g>
               <g data-bonus-layer></g>
-              <g class="cup-marker cup-marker--flag" data-cup-art="flag" aria-label="Cup marked by the original golf flag">
+              <g class="cup-marker cup-marker--flag" aria-label="Cup marked by a golf flag">
                 <circle cx="840" cy="230" r="11" fill="#36a75f" fill-opacity=".45" stroke="#fff" stroke-width="4"/>
                 <path d="M840 230V180L880 193L840 206" fill="#f28922" stroke="#10151a" stroke-width="4"/>
-                <text x="840" y="259" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
-              </g>
-              <g class="cup-marker cup-marker--umbrella" data-cup-art="umbrella" aria-label="Cup marked by an open rain umbrella" hidden>
-                <circle cx="840" cy="230" r="11" fill="#36a75f" fill-opacity=".45" stroke="#fff" stroke-width="4"/>
-                <path class="umbrella-canopy" d="M816 191C818 174 827 163 840 159C853 163 862 174 864 191C858 186 852 186 846 191C842 187 838 187 834 191C828 186 822 186 816 191Z"/>
-                <path class="umbrella-panel umbrella-panel--left" d="M816 191C818 174 827 163 840 159C834 168 833 180 834 191C828 186 822 186 816 191Z"/>
-                <path class="umbrella-panel umbrella-panel--right" d="M840 159C853 163 862 174 864 191C858 186 852 186 846 191C847 180 846 168 840 159Z"/>
-                <path class="umbrella-ribs" d="M840 160C834 170 833 181 834 190M840 160C846 170 847 181 846 190M840 160V190"/>
-                <circle class="umbrella-finial" cx="840" cy="158" r="3"/>
-                <path class="umbrella-shaft" d="M840 190V230"/>
                 <text x="840" y="259" fill="#fff" font-size="18" font-weight="1000" text-anchor="middle">CUP</text>
               </g>
               <path data-shot-cone class="shot-cone"/>
@@ -79,30 +83,14 @@
           </div>
           </div>
 
-          <div class="board-zoom-controls" aria-label="Course view size">
-            <span>Course view</span>
-            <div>
-              <button type="button" data-board-zoom="whole">Whole hole</button>
-              <button class="is-current" type="button" data-board-zoom="zoom">Bigger radar</button>
-            </div>
-          </div>
+          <button class="board-zoom-toggle" type="button" data-board-zoom-toggle aria-label="Zoom out to the whole hole" title="Zoom out to the whole hole"><span aria-hidden="true">⌕</span><strong data-zoom-symbol>−</strong></button>
 
           <div class="frame-compare" aria-label="Compare current and next radar">
             <button class="frame-choice is-current" type="button" data-view="current"><span>Current lie</span><strong data-current-button>2:10 PM</strong></button>
             <span class="compare-glyph" aria-hidden="true">↔</span>
             <button class="frame-choice" type="button" data-view="next"><span>Shot resolves here</span><strong data-next-button>2:20 PM</strong></button>
           </div>
-          <div class="cup-marker-switcher" aria-label="Compare cup marker artwork">
-            <span>Cup marker</span>
-            <div>
-              <button class="is-current" type="button" data-cup-marker="flag">Original flag</button>
-              <button type="button" data-cup-marker="umbrella">Umbrella</button>
-            </div>
-          </div>
           <div class="shot-review-controls">
-            <button class="shot-review-control" type="button" data-review-shot disabled aria-pressed="false">
-              <span>Previous stroke</span><strong data-review-label>No shot yet</strong>
-            </button>
             <button class="shot-review-control replay-shot-button" type="button" data-replay-shot disabled>
               <span>Replay stroke</span><strong>▶ Watch again</strong>
             </button>
@@ -151,20 +139,6 @@
           </div>
         </section>
 
-        <section class="rules">
-          <h2>What this proof is testing</h2>
-          <ol>
-            <li>Flip between <strong>Current</strong> and <strong>Next</strong> as often as you want before starting the swing.</li>
-            <li><strong>Green precipitation is the only playable surface.</strong> Your intended landing point is only a plan; the two meters determine where the ball actually arrives.</li>
-            <li>The shot resolves against the visible next frame. Miss the moved radar and the ball falls through: land is +1, water is +2, and yellow-or-worse radar is a +1 storm hazard.</li>
-            <li>After any penalty, the ball drops onto the nearest safe green radar on that new frame—never back onto an empty old lie.</li>
-            <li>Flight and roll are separate. Club, power, accuracy, and each green surface determine the ball's remaining momentum.</li>
-            <li>Rolling off the precipitation edge counts exactly like missing it in flight.</li>
-            <li>Disconnected green <strong>radar islands</strong> are natural bonuses when they are large enough to hold the ball, reachable, closer to the cup than the ball, and not underneath the current lie. Smaller islands pay more.</li>
-            <li>After every stroke, only a banked target's 55-degree umbrella remains on the current frame. <strong>Replay stroke</strong> temporarily restores the old targets and path; both disappear when replay ends. <strong>Previous stroke</strong> can inspect the path without restoring old targets.</li>
-            <li><strong>Replay stroke</strong> reruns the exact stored flight, roll, fall, and impact without changing the score or lie.</li>
-          </ol>
-        </section>
       </section>
 
       <aside class="score-rail">
@@ -180,28 +154,9 @@
           <button class="reset-button" type="button" data-reset>Reset hole</button>
         </section>
 
-        <section class="panel round-card">
-          <div class="section-heading compact"><div><p class="eyebrow">Rain round</p><h2>Course card</h2></div><strong data-round-total>—</strong></div>
-          <ol class="round-scorecard" data-round-scorecard></ol>
-          <button class="reset-button" type="button" data-new-round>Start new round</button>
-        </section>
-
-        <section class="panel forecast-card">
-          <p class="eyebrow">If this shot lands</p>
-          <h2 data-preview-title>Next frame · Light green</h2>
-          <p data-preview-copy>Broad, forgiving radar. Lower-value targets live here.</p>
-        </section>
-
         <section class="panel">
           <h2>Bonuses on this hole</h2>
           <ul class="target-list" data-bonus-list></ul>
-        </section>
-
-        <section class="panel rivalry-card">
-          <p class="eyebrow">Multiplayer experiment</p>
-          <h2>Weather Hold</h2>
-          <p>Bank a Storm Edge target to earn one hold. Play it before a rival aims: their weather stays on the same frame for one stroke.</p>
-          <p><strong>Comeback rule:</strong> holds never stack, and the challenged player earns +3 if they still hit a target.</p>
         </section>
 
         <section class="panel">
@@ -216,11 +171,30 @@
           <button class="next-hole-button" type="button" data-next-hole>Next hole</button>
           <button class="reset-button" type="button" data-play-again>Replay this hole</button>
         </section>
+
+        <section class="panel round-card">
+          <div class="section-heading compact"><div><p class="eyebrow">Rain round</p><h2>Course card</h2></div><strong data-round-total>—</strong></div>
+          <ol class="round-scorecard" data-round-scorecard></ol>
+          <button class="reset-button" type="button" data-new-round>Start new round</button>
+        </section>
+
+        <section class="panel forecast-card">
+          <p class="eyebrow">If this shot lands</p>
+          <h2 data-preview-title>Next frame · Light green</h2>
+          <p data-preview-copy>Broad, forgiving radar. Lower-value targets live here.</p>
+        </section>
+
+        <section class="panel rivalry-card">
+          <p class="eyebrow">Multiplayer experiment</p>
+          <h2>Weather Hold</h2>
+          <p>Bank a Storm Edge target to earn one hold. Play it before a rival aims: their weather stays on the same frame for one stroke.</p>
+          <p><strong>Comeback rule:</strong> holds never stack, and the challenged player earns +3 if they still hit a target.</p>
+        </section>
       </aside>
     </div>
 
     <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js?v=16"></script>
+  <script src="course.js?v=17"></script>
 </body>
 </html>
