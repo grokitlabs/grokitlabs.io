@@ -399,6 +399,10 @@ function centerBoard(point, behavior = "smooth") {
   boardViewport.scrollTo({ left: Math.max(0, Math.min(board.clientWidth - boardViewport.clientWidth, desired)), behavior })
 }
 
+function focusPointForView() {
+  return state.view === "next" ? state.aim : state.ball
+}
+
 function svgPoint(event) {
   const rect = overlay.getBoundingClientRect()
   return {
@@ -1037,6 +1041,7 @@ document.querySelectorAll("[data-view]").forEach(button => button.addEventListen
   if (state.phase !== "aim" || state.complete) return
   state = { ...state, view: button.dataset.view }
   render()
+  requestAnimationFrame(() => centerBoard(focusPointForView()))
 }))
 reviewButton.addEventListener("click", () => {
   if (!state.lastOutcome || state.phase !== "aim") return
@@ -1058,6 +1063,7 @@ document.querySelectorAll("[data-club]").forEach(button => button.addEventListen
 }))
 document.querySelectorAll("[data-route]").forEach(button => button.addEventListener("click", () => {
   state = ForeCastGame.selectRoute(state, button.dataset.route)
+  state = { ...state, view: "next" }
   render()
   centerBoard(state.aim)
 }))
@@ -1065,7 +1071,7 @@ boardZoomButtons.forEach(button => button.addEventListener("click", () => {
   const zoomed = button.dataset.boardZoom === "zoom"
   boardViewport.classList.toggle("is-zoomed", zoomed)
   boardZoomButtons.forEach(candidate => candidate.classList.toggle("is-current", candidate === button))
-  requestAnimationFrame(() => centerBoard(state.ball, "auto"))
+  requestAnimationFrame(() => centerBoard(focusPointForView(), "auto"))
 }))
 swingButton.addEventListener("click", swing)
 document.querySelector("[data-reset]").addEventListener("click", () => reset(true))
