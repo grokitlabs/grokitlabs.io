@@ -115,11 +115,29 @@ window.ForeCastGame = (() => {
     gawd: { name: "Storm Edge", value: 8, r: 25, color: "#fdd835" }
   }
   const targetPositions = hole.targets
-  function bonusesForFrame(frame) {
+  function bonusesForFrame(frame, fromPoint = tee) {
     const positions = targetPositions[Math.max(1, Math.min(3, frame))]
-    return Object.entries(targetTypes).map(([route, target]) => ({
-      ...target, ...positions[route], route, id: `${frame}-${route}`
-    }))
+    const towardCup = { x: cup.x - fromPoint.x, y: cup.y - fromPoint.y }
+    const courseDistance = Math.max(1, Math.hypot(towardCup.x, towardCup.y))
+    const direction = { x: towardCup.x / courseDistance, y: towardCup.y / courseDistance }
+    const normal = { x: -direction.y, y: direction.x }
+    return Object.entries(targetTypes).map(([route, target]) => {
+      const authored = positions[route]
+      const offset = { x: authored.x - fromPoint.x, y: authored.y - fromPoint.y }
+      const authoredAlong = offset.x * direction.x + offset.y * direction.y
+      const authoredAcross = offset.x * normal.x + offset.y * normal.y
+      const minimum = Math.min(courseDistance * .24, Math.max(45, courseDistance - 150))
+      const maximum = Math.max(minimum, courseDistance - 110)
+      const along = Math.max(minimum, Math.min(maximum, authoredAlong))
+      const across = Math.max(-115, Math.min(115, authoredAcross))
+      return {
+        ...target,
+        x: fromPoint.x + direction.x * along + normal.x * across,
+        y: fromPoint.y + direction.y * along + normal.y * across,
+        route,
+        id: `${frame}-${route}`
+      }
+    })
   }
   const routes = {
     safe: { color: "#b8f38d" },
@@ -159,7 +177,7 @@ window.ForeCastGame = (() => {
       lie: "Tee", collected: [], phase: "aim", power: null, accuracy: null,
       complete: false, capped: false, reviewShot: false, lastOutcome: null
     }
-    state.aim = clampAim(state, bonusesForFrame(1).find(item => item.route === "safe"))
+    state.aim = clampAim(state, bonusesForFrame(1, state.ball).find(item => item.route === "safe"))
     return state
   }
 
@@ -173,7 +191,7 @@ window.ForeCastGame = (() => {
     if (state.phase !== "aim" || state.complete) return state
     const next = { ...state, route }
     const nextFrame = Math.min(next.frame + 1, 3)
-    const target = bonusesForFrame(nextFrame).find(item => item.route === route)
+    const target = bonusesForFrame(nextFrame, next.ball).find(item => item.route === route)
     return { ...next, aim: clampAim(next, target) }
   }
 
@@ -196,7 +214,10 @@ window.ForeCastGame = (() => {
     let rollExit = surfaces[landingSurface].penalty ? landingSurface : null
     const rollPath = [{ ...landing, distance: 0 }]
     let rollDistance = 0
-    if (!rollExit) {
+    if (!rollExit && distance(landing, cup) <= cup.r) {
+      rest = { x: cup.x, y: cup.y }
+      rollPath.push({ ...rest, distance: 0 })
+    } else if (!rollExit) {
       const strikeQuality = 1 - Math.min(.28, Math.abs(accuracy) * .28)
       const initialSpeed = club.rollSpeed * Math.sqrt(Math.max(.08, power / 100)) * strikeQuality
       let energy = initialSpeed ** 2
@@ -212,6 +233,12 @@ window.ForeCastGame = (() => {
         rest = point
         const surface = readSurface(frame, rest)
         rollPath.push({ ...rest, distance: rollDistance })
+        if (distance(rest, cup) <= cup.r) {
+          rest = { x: cup.x, y: cup.y }
+          rollPath.push({ ...rest, distance: rollDistance })
+          energy = 0
+          break
+        }
         if (surfaces[surface].penalty) {
           rollExit = surface
           break
@@ -258,7 +285,7 @@ window.ForeCastGame = (() => {
     return nearest || { ...tee }
   }
 
-  function resolveShot(state, power, accuracy, readSurface, availableBonuses = bonusesForFrame(Math.min(state.frame + 1, 3)), containsBonus = (item, point) => distance(point, item) <= item.r) {
+  function resolveShot(state, power, accuracy, readSurface, availableBonuses = bonusesForFrame(Math.min(state.frame + 1, 3), state.ball), containsBonus = (item, point) => distance(point, item) <= item.r) {
     const geometry = shotGeometry(state, power, accuracy, readSurface)
     const hazard = surfaces[geometry.landingSurface].penalty ? geometry.landingSurface : geometry.rollExit
     let ball = geometry.rest
@@ -372,6 +399,8 @@ function writeRound(round) {
 function configureHole() {
   document.title = `Fore!Cast — Hole ${currentHole.id}: ${currentHole.name}`
   const timeWindow = `${currentHole.times[0]}–${currentHole.times.at(-1)}`
+  document.querySelector("[data-masthead-hole]").textContent = `Hole ${currentHole.id}`
+  document.querySelector("[data-masthead-name]").textContent = currentHole.name
   document.querySelector("[data-hole-meta]").textContent = `Hole ${currentHole.id} · ${currentHole.place} · ${currentHole.date} · ${timeWindow} · Par ${currentHole.par}`
   document.querySelector("[data-hole-name]").textContent = currentHole.name
   document.querySelector("[data-scorecard-name]").textContent = currentHole.name
@@ -416,6 +445,7 @@ function renderRoundCard() {
     const result = round[hole.id]
     return `<a class="${hole.id === currentHole.id ? "is-current" : ""}${result ? " is-complete" : ""}" href="${holeUrl(hole.id)}"><span>${hole.id}</span><strong>${hole.name}</strong><small>${result ? `${result.strokes} strokes` : `Par ${hole.par}`}</small></a>`
   }).join("")
+  document.querySelector("[data-round-summary]").textContent = `Hole ${currentHole.id} · ${currentHole.name}`
   const results = ForeCastGame.holes.map(hole => round[hole.id]).filter(Boolean)
   const total = results.reduce((sum, result) => sum + result.strokes, 0)
   const par = ForeCastGame.holes.filter(hole => round[hole.id]).reduce((sum, hole) => sum + hole.par, 0)
@@ -439,7 +469,7 @@ function centerBoard(point, behavior = "smooth") {
 
 function planningFocusPoint() {
   const nextFrame = Math.min(state.frame + 1, 3)
-  const points = [state.ball, ...ForeCastGame.bonusesForFrame(nextFrame)]
+  const points = [state.ball, ...ForeCastGame.bonusesForFrame(nextFrame, state.ball)]
   const xs = points.map(point => point.x)
   const ys = points.map(point => point.y)
   return {
@@ -628,7 +658,7 @@ function maxReach(state) {
 function availableBonusesForFrame(frame, fromState = state) {
   const reach = maxReach(fromState)
   const ballToCup = ForeCastGame.distance(fromState.ball, ForeCastGame.cup)
-  const authored = ForeCastGame.bonusesForFrame(frame).map(item => ({ ...item, kind: "authored" }))
+  const authored = ForeCastGame.bonusesForFrame(frame, fromState.ball).map(item => ({ ...item, kind: "authored" }))
   return [...authored, ...(islandCatalogs[frame] || [])].filter(item => {
     if (ForeCastGame.distance(fromState.ball, item) > reach) return false
     if (item.kind !== "island") return true
@@ -750,7 +780,7 @@ function renderBonuses() {
     const status = bonusStatus(item, nextFrame)
     return `<li><span class="target-key" style="color:${item.color}"><i class="target-dot"></i>${item.name} · +${item.value}</span><strong class="target-status target-status--${status.className}">${status.label}</strong></li>`
   }).join("")
-  ForeCastGame.bonusesForFrame(nextFrame).forEach(item => {
+  ForeCastGame.bonusesForFrame(nextFrame, state.ball).forEach(item => {
     const qualified = nextBonuses.find(bonus => bonus.id === item.id)
     document.querySelectorAll(`[data-route="${item.route}"]`).forEach(card => {
       const detail = card.querySelector("small")

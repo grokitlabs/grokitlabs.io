@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fore!Cast — Four-hole rain round</title>
-  <link rel="stylesheet" href="shared.css?v=18">
+  <link rel="stylesheet" href="shared.css?v=19">
 </head>
 <body class="course-page">
   <!-- THROWAWAY PROTOTYPE: can next-frame planning plus execution skill create several viable routes? -->
@@ -12,6 +12,7 @@
     <header class="masthead">
       <span class="shield" aria-hidden="true">ϟ</span>
       <div class="brand"><strong>Fore!Cast</strong><span>Golf only when it rains</span></div>
+      <div class="masthead-hole"><small data-masthead-hole>Hole 1</small><strong data-masthead-name>Breakwater Bend</strong></div>
       <nav class="cluster prototype-nav" aria-label="Prototype navigation">
         <a class="home-link" href="rules.html?variant=field-guide">How to play</a>
         <a class="home-link" href="index.html">All prototypes</a>
@@ -40,19 +41,15 @@
 
     <div class="game-layout">
       <section class="play-column stack">
-        <nav class="round-strip" data-round-strip aria-label="Four-hole course"></nav>
+        <details class="round-menu">
+          <summary><span>Four-hole course</span><strong data-round-summary>Hole 1 · Breakwater Bend</strong></summary>
+          <nav class="round-strip" data-round-strip aria-label="Four-hole course"></nav>
+        </details>
 
         <header class="game-heading">
           <div><p class="eyebrow" data-hole-meta>Hole 1 · Cleveland · Par 3</p><h1 data-hole-name>Breakwater Bend</h1></div>
           <div class="frame-pair"><span data-current-clock>Current 2:10</span><b>→</b><span data-next-clock>Next 2:20</span></div>
         </header>
-
-        <div class="mobile-score-strip" aria-label="Current score">
-          <span><small>Stroke</small><strong data-mobile-stroke>1</strong></span>
-          <span><small>Bonus</small><strong data-mobile-points>0</strong></span>
-          <span><small>Penalty</small><strong data-mobile-penalties>0</strong></span>
-          <span><small>Lie</small><strong data-mobile-lie>Tee</strong></span>
-        </div>
 
         <section class="board-shell" data-board-shell aria-label="Breakwater Bend course board">
           <div class="board-viewport is-zoomed" data-board-viewport>
@@ -99,6 +96,13 @@
             </button>
           </div>
         </section>
+
+        <div class="mobile-score-strip" aria-label="Current score">
+          <span><small>Stroke</small><strong data-mobile-stroke>1</strong></span>
+          <span><small>Bonus</small><strong data-mobile-points>0</strong></span>
+          <span><small>Penalty</small><strong data-mobile-penalties>0</strong></span>
+          <span><small>Lie</small><strong data-mobile-lie>Tee</strong></span>
+        </div>
 
         <section class="route-picker" aria-labelledby="route-heading">
           <div class="section-heading"><div><p class="eyebrow">1 · Reveal + choose</p><h2 id="route-heading">Pick a target on the next frame</h2></div><span>Targets move with every frame</span></div>
@@ -198,6 +202,6 @@
 
     <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js?v=19"></script>
+  <script src="course.js?v=20"></script>
 </body>
 </html>
