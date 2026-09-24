@@ -228,6 +228,8 @@ window.ForeCastGame = (() => {
 
 const frameTimes = ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"]
 const board = document.querySelector("[data-board]")
+const boardViewport = document.querySelector("[data-board-viewport]")
+const boardZoomButtons = [...document.querySelectorAll("[data-board-zoom]")]
 const overlay = board.querySelector(".board-overlay")
 const ball = document.querySelector("[data-ball]")
 const ballLabel = document.querySelector("[data-ball-label]")
@@ -241,6 +243,7 @@ const effects = document.querySelector("[data-shot-effects]")
 const swingButton = document.querySelector("[data-swing]")
 const reviewButton = document.querySelector("[data-review-shot]")
 const replayButton = document.querySelector("[data-replay-shot]")
+const shotToast = document.querySelector("[data-shot-toast]")
 const log = document.querySelector("[data-event-log]")
 const frameImages = [...document.querySelectorAll("[data-frame]")]
 const cupMarkerButtons = [...document.querySelectorAll("[data-cup-marker]")]
@@ -254,6 +257,13 @@ let meterFrame = null
 let meterStartedAt = 0
 let livePower = 0
 let liveAccuracy = 50
+
+function centerBoard(point, behavior = "smooth") {
+  if (!boardViewport.classList.contains("is-zoomed")) return
+  const scale = board.clientWidth / ForeCastGame.width
+  const desired = point.x * scale - boardViewport.clientWidth / 2
+  boardViewport.scrollTo({ left: Math.max(0, Math.min(board.clientWidth - boardViewport.clientWidth, desired)), behavior })
+}
 
 function svgPoint(event) {
   const rect = overlay.getBoundingClientRect()
@@ -547,9 +557,11 @@ function renderBonuses() {
   }).join("")
   ForeCastGame.bonusesForFrame(nextFrame).forEach(item => {
     const qualified = nextBonuses.find(bonus => bonus.id === item.id)
-    const card = document.querySelector(`[data-route="${item.route}"]`)
-    card.querySelector("small").textContent = `+${item.value} · ${ForeCastGame.surfaces[readSurface(nextFrame, item)].label}`
-    card.disabled = state.phase !== "aim" || state.complete || !qualified
+    document.querySelectorAll(`[data-route="${item.route}"]`).forEach(card => {
+      const detail = card.querySelector("small")
+      if (detail) detail.textContent = `+${item.value} · ${ForeCastGame.surfaces[readSurface(nextFrame, item)].label}`
+      card.disabled = state.phase !== "aim" || state.complete || !qualified
+    })
   })
 }
 
@@ -606,6 +618,10 @@ function render() {
   document.querySelector("[data-points]").textContent = `${state.points} pts`
   document.querySelector("[data-penalties]").textContent = state.penalties
   document.querySelector("[data-lie]").textContent = state.lie
+  document.querySelector("[data-mobile-stroke]").textContent = state.complete ? state.strokes : state.strokes + 1
+  document.querySelector("[data-mobile-points]").textContent = state.points
+  document.querySelector("[data-mobile-penalties]").textContent = state.penalties
+  document.querySelector("[data-mobile-lie]").textContent = state.lie
   document.querySelector("[data-score-meta]").textContent = state.complete ? `Final · ${state.strokes} strokes · ${state.points} bonus points` : `Stroke ${state.strokes + 1} · ${state.lie} lie`
   const reviewing = Boolean(state.lastOutcome && state.reviewShot && state.view === "current")
   const replaying = state.phase === "replay"
@@ -788,17 +804,22 @@ function strike() {
   effects.replaceChildren()
   trails.removeAttribute("hidden")
   drawTrail(resolved.geometry)
+  shotToast.hidden = true
   swingButton.disabled = true
   animateShot(resolved.geometry, () => {
     ball.getAnimations().forEach(animation => animation.cancel())
     state = resolved.state
     livePower = 0
     liveAccuracy = 50
-    addLog(outcomeMessage(previous, state, resolved.geometry))
+    const message = outcomeMessage(previous, state, resolved.geometry)
+    addLog(message)
+    shotToast.textContent = message
+    shotToast.hidden = false
     if (!state.complete) state = { ...state, aim: ForeCastGame.clampAim(state, ForeCastGame.cup) }
     render()
     drawImpact(resolved.geometry)
     drawDrop(resolved.geometry)
+    centerBoard(state.ball)
   })
 }
 
@@ -828,6 +849,7 @@ function replayLastShot() {
 function swing() {
   if (state.complete) return
   if (state.phase === "aim") {
+    shotToast.hidden = true
     state = { ...state, view: "current", power: null, accuracy: null }
     livePower = 0
     liveAccuracy = 50
@@ -848,6 +870,7 @@ function reset() {
   liveAccuracy = 50
   trails.replaceChildren()
   effects.replaceChildren()
+  shotToast.hidden = true
   log.innerHTML = "<li>On the radar tee. Reveal 2:20, choose its moving target, then execute from 2:10.</li>"
   render()
 }
@@ -883,6 +906,13 @@ document.querySelectorAll("[data-club]").forEach(button => button.addEventListen
 document.querySelectorAll("[data-route]").forEach(button => button.addEventListener("click", () => {
   state = ForeCastGame.selectRoute(state, button.dataset.route)
   render()
+  centerBoard(state.aim)
+}))
+boardZoomButtons.forEach(button => button.addEventListener("click", () => {
+  const zoomed = button.dataset.boardZoom === "zoom"
+  boardViewport.classList.toggle("is-zoomed", zoomed)
+  boardZoomButtons.forEach(candidate => candidate.classList.toggle("is-current", candidate === button))
+  requestAnimationFrame(() => centerBoard(state.ball, "auto"))
 }))
 swingButton.addEventListener("click", swing)
 document.querySelector("[data-reset]").addEventListener("click", reset)

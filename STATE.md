@@ -29,8 +29,10 @@ simple and fast. Local preview: `jekyll serve` → http://localhost:4000.
   2026-09-24): the launcher/overview, retired target-range comparison, current
   moving-radar points course, three switchable rules-page treatments, and both
   original and game-palette versions of four owner-supplied Cleveland WatchDawg
-  radar frames. Published for mobile and desktop playtesting; not integrated
-  with the GrokitLabs homepage.
+  radar frames. Its mobile course keeps the enlarged/pannable radar, score,
+  targets, clubs, swing meters, and shot payoff in one play viewport while the
+  existing two-column desktop treatment remains intact. Published for mobile
+  and desktop playtesting; not integrated with the GrokitLabs homepage.
 - `tests/` — `node --test tests/*.test.mjs` covers the game's pure logic.
 - `docs/superpowers/` — specs and plans (excluded from publish, as are
   `tools/` and `tests/`).

@@ -6,7 +6,7 @@
   <title>Fore!Cast — Breakwater Bend Prototype</title>
   <link rel="stylesheet" href="shared.css">
 </head>
-<body>
+<body class="course-page">
   <!-- THROWAWAY PROTOTYPE: can next-frame planning plus execution skill create several viable routes? -->
   <main class="shell">
     <header class="masthead">
@@ -27,7 +27,15 @@
           <div class="frame-pair"><span data-current-clock>Current 2:10</span><b>→</b><span data-next-clock>Next 2:20</span></div>
         </header>
 
+        <div class="mobile-score-strip" aria-label="Current score">
+          <span><small>Stroke</small><strong data-mobile-stroke>1</strong></span>
+          <span><small>Bonus</small><strong data-mobile-points>0</strong></span>
+          <span><small>Penalty</small><strong data-mobile-penalties>0</strong></span>
+          <span><small>Lie</small><strong data-mobile-lie>Tee</strong></span>
+        </div>
+
         <section class="board-shell" aria-label="Breakwater Bend course board">
+          <div class="board-viewport is-zoomed" data-board-viewport>
           <div class="board" data-board>
             <img class="radar-frame is-current" src="assets/forecast-radar-2110.png" alt="Cleveland radar at 2:10 PM" data-frame="0">
             <img class="radar-frame" src="assets/forecast-radar-2120.png" alt="Cleveland radar at 2:20 PM" data-frame="1">
@@ -65,6 +73,16 @@
             </svg>
 
             <div class="board-status"><strong data-view-label>CURRENT · 2:10</strong><span data-aim-weather>Aim on the course to read next-frame weather</span></div>
+            <div class="shot-toast" data-shot-toast hidden></div>
+          </div>
+          </div>
+
+          <div class="board-zoom-controls" aria-label="Course view size">
+            <span>Course view</span>
+            <div>
+              <button type="button" data-board-zoom="whole">Whole hole</button>
+              <button class="is-current" type="button" data-board-zoom="zoom">Bigger radar</button>
+            </div>
           </div>
 
           <div class="frame-compare" aria-label="Compare current and next radar">
@@ -101,6 +119,11 @@
         <section class="shot-workbench" aria-labelledby="swing-heading">
           <div class="club-panel">
             <p class="eyebrow">2 · Club + aim</p>
+            <div class="mobile-target-bank" aria-label="Target selection">
+              <button class="is-selected" type="button" data-route="safe"><span>+2</span> Open</button>
+              <button type="button" data-route="window"><span>+5</span> Deep</button>
+              <button type="button" data-route="gawd"><span>+8</span> Edge</button>
+            </div>
             <div class="club-bank" aria-label="Club selection">
               <button class="club-button is-selected" type="button" data-club="driver">Driver<span>335 yd</span></button>
               <button class="club-button" type="button" data-club="iron">Iron<span>245 yd</span></button>
@@ -189,6 +212,6 @@
 
     <p class="prototype-note">Throwaway state-model prototype · authored hole and simplified golf physics · no production data is written</p>
   </main>
-  <script src="course.js?v=13"></script>
+  <script src="course.js?v=14"></script>
 </body>
 </html>
