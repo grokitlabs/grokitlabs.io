@@ -14,6 +14,7 @@ window.ForeCastGame = (() => {
       challenges: ["Use the next frame to find the landing corridor.", "The lake and the radar edge punish a miss.", "Small storm-edge targets trade safety for points."],
       times: ["2:10 PM", "2:20 PM", "2:30 PM", "2:40 PM"],
       images: ["assets/forecast-radar-2110.png", "assets/forecast-radar-2120.png", "assets/forecast-radar-2130.png", "assets/forecast-radar-2140.png"],
+      flyover: "assets/flyover-breakwater.png",
       tee: { x: 140, y: 180 },
       cup: { x: 840, y: 230, r: 11 },
       targets: {
@@ -33,6 +34,7 @@ window.ForeCastGame = (() => {
       challenges: ["Choose a wide layup or jump to the narrow center.", "Disconnected rain makes every rollout matter.", "The final approach tightens near the shoreline."],
       times: ["6:20 PM", "6:30 PM", "6:40 PM", "6:50 PM"],
       images: ["assets/candidates/aug11-1.png", "assets/candidates/aug11-2.png", "assets/candidates/aug11-3.png", "assets/candidates/aug11-4.png"],
+      flyover: "assets/flyover-aug11.png",
       tee: { x: 280, y: 250 },
       cup: { x: 880, y: 420, r: 11 },
       targets: {
@@ -52,6 +54,7 @@ window.ForeCastGame = (() => {
       challenges: ["The course moves against the usual visual flow.", "High islands offer points but little room for roll.", "Plan two frames ahead before committing left."],
       times: ["9:10 AM", "9:20 AM", "9:30 AM", "9:40 AM"],
       images: ["assets/candidates/aug30-1.png", "assets/candidates/aug30-2.png", "assets/candidates/aug30-3.png", "assets/candidates/aug30-4.png"],
+      flyover: "assets/flyover-aug30.png",
       tee: { x: 836, y: 188 },
       cup: { x: 212, y: 192, r: 11 },
       targets: {
@@ -71,6 +74,7 @@ window.ForeCastGame = (() => {
       challenges: ["Build position before attacking the far side.", "Yellow cores turn aggressive lines into penalty drops.", "The closing corridor shifts on every frame."],
       times: ["8:30 AM", "8:40 AM", "8:50 AM", "9:00 AM"],
       images: ["assets/candidates/aug10-1.png", "assets/candidates/aug10-2.png", "assets/candidates/aug10-3.png", "assets/candidates/aug10-4.png"],
+      flyover: "assets/flyover-aug10.png",
       tee: { x: 120, y: 160 },
       cup: { x: 900, y: 160, r: 11 },
       targets: {
@@ -421,8 +425,8 @@ function configureHole() {
   document.querySelector("[data-intro-par]").textContent = currentHole.par
   document.querySelector("[data-intro-stamp]").textContent = `${currentHole.date} · ${timeWindow} · Par ${currentHole.par}`
   const introImage = document.querySelector("[data-intro-image]")
-  introImage.src = currentHole.images[0]
-  introImage.alt = `${currentHole.name} opening radar frame`
+  introImage.src = currentHole.flyover
+  introImage.alt = `${currentHole.name} regional Cleveland radar flyover`
   document.querySelector("[data-intro-copy]").textContent = currentHole.summary
   document.querySelector("[data-intro-challenges]").innerHTML = currentHole.challenges.map(challenge => `<li>${challenge}</li>`).join("")
   const skipIntro = new URLSearchParams(window.location.search).get("play") === "1"
